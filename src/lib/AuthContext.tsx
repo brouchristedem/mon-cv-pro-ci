@@ -4,7 +4,8 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 import {
   User,
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as fbSignOut,
 } from "firebase/auth";
 import {
@@ -39,34 +40,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const reset = useCVStore((s) => s.reset);
 
   useEffect(() => {
+    // Récupère le résultat d'une éventuelle redirection Google en cours,
+    // pour éviter de rester bloqué si l'utilisateur revient d'un rechargement.
+    getRedirectResult(auth).catch((err) => {
+      console.error("Erreur de redirection Google:", err);
+    });
+
     const unsub = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      if (u) {
-        const ref = doc(db, "users", u.uid);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          const data = snap.data();
-          if (data.cv) reset(data.cv as CVData);
-          setDownloadsUsed(data.downloadsUsed || 0);
-        } else {
-          const fresh = defaultCV();
-          await setDoc(ref, {
-            email: u.email,
-            displayName: u.displayName,
-            downloadsUsed: 0,
-            cv: fresh,
-            createdAt: serverTimestamp(),
-          });
-          reset(fresh);
+      try {
+        setUser(u);
+        if (u) {
+          const ref = doc(db, "users", u.uid);
+          const snap = await getDoc(ref);
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.cv) reset(data.cv as CVData);
+            setDownloadsUsed(data.downloadsUsed || 0);
+          } else {
+            const fresh = defaultCV();
+            await setDoc(ref, {
+              email: u.email,
+              displayName: u.displayName,
+              downloadsUsed: 0,
+              cv: fresh,
+              createdAt: serverTimestamp(),
+            });
+            reset(fresh);
+          }
         }
+      } catch (err) {
+        console.error("Erreur lors du chargement du profil:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsub();
   }, [reset]);
 
   const signInWithGoogle = useCallback(async () => {
-    await signInWithPopup(auth, googleProvider);
+    await signInWithRedirect(auth, googleProvider);
   }, []);
 
   const signOut = useCallback(async () => {
