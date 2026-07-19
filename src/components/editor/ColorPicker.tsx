@@ -1,6 +1,7 @@
 "use client";
 
 import { useCVStore } from "@/lib/store";
+import { UI } from "@/lib/i18n";
 
 const PALETTE = [
   "#2563eb", "#0891b2", "#059669", "#16a34a", "#65a30d",
@@ -12,6 +13,7 @@ const PALETTE = [
 export default function ColorPicker() {
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
+  const t = UI[cv.langue];
 
   const setColor = (color: string) => set((c) => ({ ...c, couleurPrimaire: color }));
 
@@ -31,7 +33,7 @@ export default function ColorPicker() {
         ))}
       </div>
       <div className="flex items-center gap-2 pt-1">
-        <label className="text-xs text-foreground/60">Couleur personnalisée :</label>
+        <label className="text-xs text-foreground/60">{t.customColor}</label>
         <input
           type="color"
           value={cv.couleurPrimaire}

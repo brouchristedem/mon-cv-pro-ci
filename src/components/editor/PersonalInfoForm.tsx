@@ -2,6 +2,7 @@
 
 import { useCVStore } from "@/lib/store";
 import { useRef } from "react";
+import { UI } from "@/lib/i18n";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/40 transition";
@@ -11,6 +12,7 @@ export default function PersonalInfoForm() {
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
   const fileRef = useRef<HTMLInputElement>(null);
+  const t = UI[cv.langue];
 
   const update = (field: keyof typeof cv.personalInfo, value: string | boolean) => {
     set((c) => ({ ...c, personalInfo: { ...c.personalInfo, [field]: value } }));
@@ -32,7 +34,7 @@ export default function PersonalInfoForm() {
           type="button"
           className="text-sm px-3 py-2 rounded-lg border border-border hover:bg-surface-muted transition"
         >
-          {cv.personalInfo.photoUrl ? "Changer la photo" : "Ajouter une photo"}
+          {cv.personalInfo.photoUrl ? t.changePhoto : t.addPhoto}
         </button>
         {cv.personalInfo.photoUrl && (
           <button
@@ -40,14 +42,14 @@ export default function PersonalInfoForm() {
             onClick={() => update("photoUrl", "")}
             className="text-xs text-red-500 hover:underline"
           >
-            Retirer
+            {t.removePhoto}
           </button>
         )}
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={handlePhoto} />
       </div>
 
       <div className="flex items-center justify-between">
-        <span className={labelClass}>Afficher la photo sur le CV</span>
+        <span className={labelClass}>{t.showPhotoOnCV}</span>
         <button
           type="button"
           onClick={() => update("showPhoto", !cv.personalInfo.showPhoto)}
@@ -65,7 +67,7 @@ export default function PersonalInfoForm() {
 
       {cv.personalInfo.photoUrl && (
         <div>
-          <span className={labelClass}>Forme de la photo</span>
+          <span className={labelClass}>{t.photoShape}</span>
           <div className="flex gap-2">
             {(["cercle", "arrondi", "carre"] as const).map((shape) => (
               <button
@@ -87,79 +89,79 @@ export default function PersonalInfoForm() {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>Prénom</label>
+          <label className={labelClass}>{t.firstName}</label>
           <input
             className={inputClass}
             value={cv.personalInfo.prenom}
             onChange={(e) => update("prenom", e.target.value)}
-            placeholder="ex : Christ"
+            placeholder={t.firstNamePlaceholder}
           />
         </div>
         <div>
-          <label className={labelClass}>Nom</label>
+          <label className={labelClass}>{t.lastName}</label>
           <input
             className={inputClass}
             value={cv.personalInfo.nom}
             onChange={(e) => update("nom", e.target.value)}
-            placeholder="ex : Edem"
+            placeholder={t.lastNamePlaceholder}
           />
         </div>
       </div>
 
       <div>
-        <label className={labelClass}>Titre professionnel</label>
+        <label className={labelClass}>{t.jobTitle}</label>
         <input
           className={inputClass}
           value={cv.personalInfo.titre}
           onChange={(e) => update("titre", e.target.value)}
-          placeholder="ex : Ingénieur logiciel"
+          placeholder={t.jobTitlePlaceholder}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>Email</label>
+          <label className={labelClass}>{t.email}</label>
           <input
             className={inputClass}
             value={cv.personalInfo.email}
             onChange={(e) => update("email", e.target.value)}
-            placeholder="ex : nom@email.com"
+            placeholder={t.emailPlaceholder}
           />
         </div>
         <div>
-          <label className={labelClass}>Téléphone</label>
+          <label className={labelClass}>{t.phone}</label>
           <input
             className={inputClass}
             value={cv.personalInfo.telephone}
             onChange={(e) => update("telephone", e.target.value)}
-            placeholder="ex : +225 XX XX XX XX XX"
+            placeholder={t.phonePlaceholder}
           />
         </div>
       </div>
 
       <div>
-        <label className={labelClass}>Adresse</label>
+        <label className={labelClass}>{t.address}</label>
         <input
           className={inputClass}
           value={cv.personalInfo.adresse}
           onChange={(e) => update("adresse", e.target.value)}
-          placeholder="ex : Abidjan, Côte d'Ivoire"
+          placeholder={t.addressPlaceholder}
         />
       </div>
 
       <div>
-        <label className={labelClass}>Permis de conduire (optionnel)</label>
+        <label className={labelClass}>{t.license}</label>
         <input
           className={inputClass}
           value={cv.personalInfo.permis || ""}
           onChange={(e) => update("permis", e.target.value)}
-          placeholder="ex : B"
+          placeholder={t.licensePlaceholder}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass}>LinkedIn (optionnel)</label>
+          <label className={labelClass}>{t.linkedin}</label>
           <input
             className={inputClass}
             value={cv.personalInfo.linkedin || ""}
@@ -168,7 +170,7 @@ export default function PersonalInfoForm() {
           />
         </div>
         <div>
-          <label className={labelClass}>Site web (optionnel)</label>
+          <label className={labelClass}>{t.website}</label>
           <input
             className={inputClass}
             value={cv.personalInfo.siteWeb || ""}
@@ -180,7 +182,7 @@ export default function PersonalInfoForm() {
 
       <div className="pt-2 border-t border-border">
         <div className="flex items-center justify-between mb-2 mt-3">
-          <span className={labelClass}>Autres informations (optionnel)</span>
+          <span className={labelClass}>{t.otherInfo}</span>
           <button
             type="button"
             onClick={() =>
@@ -197,14 +199,14 @@ export default function PersonalInfoForm() {
             }
             className="text-xs text-blue-600 hover:underline"
           >
-            + Ajouter
+            + {t.add}
           </button>
         </div>
         <div className="space-y-2">
           {cv.personalInfo.autresInfos.map((info) => (
             <div key={info.id} className="flex gap-2 items-center">
               <input
-                placeholder="Libellé (ex : Nationalité)"
+                placeholder={t.labelPlaceholder}
                 value={info.label}
                 onChange={(e) =>
                   set((c) => ({
@@ -220,7 +222,7 @@ export default function PersonalInfoForm() {
                 className="flex-1 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs outline-none"
               />
               <input
-                placeholder="Valeur (ex : Ivoirienne)"
+                placeholder={t.valuePlaceholder}
                 value={info.valeur}
                 onChange={(e) =>
                   set((c) => ({

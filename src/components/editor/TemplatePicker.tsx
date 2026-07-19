@@ -5,11 +5,13 @@ import { useCVStore } from "@/lib/store";
 import { TEMPLATE_LIST } from "@/lib/templateRegistry";
 import CVRenderer from "@/components/templates/CVRenderer";
 import { Eye, Check } from "lucide-react";
+import { UI } from "@/lib/i18n";
 
 export default function TemplatePicker() {
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
   const [previewId, setPreviewId] = useState<string | null>(null);
+  const t = UI[cv.langue];
 
   const selectTemplate = (id: string) => set((c) => ({ ...c, templateId: id }));
   const active = TEMPLATE_LIST.filter((t) => t.actif);
@@ -43,7 +45,7 @@ export default function TemplatePicker() {
       </div>
 
       <div className="hidden lg:block w-[180px] flex-shrink-0">
-        <p className="text-[10px] text-foreground/50 mb-1">Aperçu</p>
+        <p className="text-[10px] text-foreground/50 mb-1">{t.preview}</p>
         <div className="border border-border rounded-lg overflow-hidden shadow-sm" style={{ aspectRatio: "210/297" }}>
           <div className="w-[210mm] h-[297mm] origin-top-left" style={{ transform: "scale(0.155)" }}>
             <CVRenderer cv={{ ...cv, templateId: shown }} />

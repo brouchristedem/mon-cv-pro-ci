@@ -17,6 +17,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { UI } from "@/lib/i18n";
 import { GripVertical, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 
@@ -44,6 +45,7 @@ function SortableSection({ section }: { section: Section }) {
   const set = useCVStore((s) => s.set);
   const removeSection = useCVStore((s) => s.removeSection);
   const [open, setOpen] = useState(false);
+  const t = UI[cv.langue];
 
   const style = { transform: CSS.Transform.toString(transform), transition };
 
@@ -140,7 +142,7 @@ function SortableSection({ section }: { section: Section }) {
         <div className="px-3 pb-3 space-y-3 border-t border-border pt-3">
           {canToggleAffichage && (
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-foreground/50">Affichage :</span>
+              <span className="text-[11px] text-foreground/50">{t.display}</span>
               <button
                 onClick={() => setAffichage("liste")}
                 className={`text-[11px] px-2 py-1 rounded-lg border transition ${
@@ -149,7 +151,7 @@ function SortableSection({ section }: { section: Section }) {
                     : "border-border"
                 }`}
               >
-                En liste (l'un sous l'autre)
+                {t.displayList}
               </button>
               <button
                 onClick={() => setAffichage("ligne")}
@@ -159,7 +161,7 @@ function SortableSection({ section }: { section: Section }) {
                     : "border-border"
                 }`}
               >
-                Côte à côte (gain de place)
+                {t.displayInline}
               </button>
             </div>
           )}
@@ -172,14 +174,14 @@ function SortableSection({ section }: { section: Section }) {
                 <Trash2 size={14} />
               </button>
               <input
-                placeholder={isLangOrSkill ? "ex : Anglais / JavaScript" : "Titre (ex : Développeur Web)"}
+                placeholder={isLangOrSkill ? t.itemLangSkillPlaceholder : t.itemTitlePlaceholder}
                 value={item.titre}
                 onChange={(e) => updateItem(item.id, { titre: e.target.value })}
                 className="w-full bg-transparent text-sm font-medium outline-none border-b border-border pb-1 pr-5"
               />
               {isLangOrSkill ? (
                 <input
-                  placeholder="Niveau (ex : Courant, Avancé, Intermédiaire)"
+                  placeholder={t.itemLevelPlaceholder}
                   value={item.niveau || ""}
                   onChange={(e) => updateItem(item.id, { niveau: e.target.value })}
                   className="w-full bg-transparent text-xs outline-none"
@@ -187,20 +189,20 @@ function SortableSection({ section }: { section: Section }) {
               ) : (
                 <>
                   <input
-                    placeholder="Entreprise / École / Lieu"
+                    placeholder={t.itemOrgPlaceholder}
                     value={item.sousTitre || ""}
                     onChange={(e) => updateItem(item.id, { sousTitre: e.target.value })}
                     className="w-full bg-transparent text-xs outline-none"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <input
-                      placeholder="Date début (ex : Jan 2022)"
+                      placeholder={t.dateStart}
                       value={item.dateDebut || ""}
                       onChange={(e) => updateItem(item.id, { dateDebut: e.target.value })}
                       className="bg-transparent text-xs outline-none border border-border rounded px-2 py-1"
                     />
                     <input
-                      placeholder="Date fin"
+                      placeholder={t.dateEnd}
                       value={item.dateFin || ""}
                       disabled={item.enCours}
                       onChange={(e) => updateItem(item.id, { dateFin: e.target.value })}
@@ -213,10 +215,10 @@ function SortableSection({ section }: { section: Section }) {
                       checked={!!item.enCours}
                       onChange={(e) => updateItem(item.id, { enCours: e.target.checked })}
                     />
-                    En cours actuellement
+                    {t.current}
                   </label>
                   <textarea
-                    placeholder="Description (facultatif)"
+                    placeholder={t.description}
                     value={item.description || ""}
                     onChange={(e) => updateItem(item.id, { description: e.target.value })}
                     className="w-full bg-transparent text-xs outline-none resize-none"
@@ -230,7 +232,7 @@ function SortableSection({ section }: { section: Section }) {
             onClick={addItem}
             className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline"
           >
-            <Plus size={14} /> Ajouter un élément
+            <Plus size={14} /> {t.addItem}
           </button>
         </div>
       )}
@@ -246,7 +248,8 @@ export default function SectionsEditor() {
 
   const ordered = [...cv.sections].sort((a, b) => a.ordre - b.ordre);
   const labels = cv.langue === "en" ? SECTION_LABELS_EN : SECTION_LABELS_FR;
-  const missing = ALL_TYPES.filter((t) => !cv.sections.some((s) => s.type === t));
+  const t = UI[cv.langue];
+  const missing = ALL_TYPES.filter((type) => !cv.sections.some((s) => s.type === type));
 
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
@@ -272,7 +275,7 @@ export default function SectionsEditor() {
 
       {missing.length > 0 && (
         <div className="pt-2">
-          <p className="text-xs text-foreground/50 mb-2">Ajouter une rubrique :</p>
+          <p className="text-xs text-foreground/50 mb-2">{t.addSection}</p>
           <div className="flex flex-wrap gap-2">
             {missing.map((type) => (
               <button
@@ -305,7 +308,7 @@ export default function SectionsEditor() {
               }
               className="text-xs px-2.5 py-1.5 rounded-lg border border-dashed border-blue-400 text-blue-600 hover:bg-blue-500/10 transition"
             >
-              + Rubrique personnalisée
+              {t.customSection}
             </button>
           </div>
         </div>

@@ -12,6 +12,7 @@ import ColorPicker from "@/components/editor/ColorPicker";
 import DownloadPanel from "@/components/editor/DownloadPanel";
 import { useTheme } from "@/lib/ThemeContext";
 import { SECTION_LABELS_FR, SECTION_LABELS_EN } from "@/lib/types";
+import { UI } from "@/lib/i18n";
 import {
   Undo2,
   Redo2,
@@ -24,17 +25,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const STEPS = [
-  { key: "infos", label: "Informations" },
-  { key: "rubriques", label: "Rubriques" },
-  { key: "modele", label: "Modèle & couleur" },
-  { key: "mise-en-page", label: "Mise en page" },
-  { key: "telecharger", label: "Télécharger" },
-];
-
 export default function EditorPage() {
   const router = useRouter();
-  const { user, loading, isAdmin, signInWithGoogle, signOut, saveProgress } = useAuth();
+  const { user, loading, isAdmin, signOut, saveProgress } = useAuth();
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
   const undo = useCVStore((s) => s.undo);
@@ -43,6 +36,7 @@ export default function EditorPage() {
   const canRedo = useCVStore((s) => s.canRedo);
   const { dark, toggle } = useTheme();
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t = UI[cv.langue];
 
   const [step, setStep] = useState(0);
 
@@ -61,7 +55,7 @@ export default function EditorPage() {
     if (!user) return;
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
-      saveProgress({ ...cv, step });
+      saveProgress({ ...cv, step }).catch((err) => console.error("Erreur de sauvegarde:", err));
     }, 800);
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
@@ -70,17 +64,17 @@ export default function EditorPage() {
 
   const goStep = useCallback(
     (n: number) => {
-      const clamped = Math.max(0, Math.min(STEPS.length - 1, n));
+      const clamped = Math.max(0, Math.min(t.steps.length - 1, n));
       setStep(clamped);
       set((c) => ({ ...c, step: clamped }));
     },
-    [set]
+    [set, t.steps.length]
   );
 
   if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-foreground/60">
-        Chargement...
+        {t.loading}
       </div>
     );
   }
@@ -96,7 +90,7 @@ export default function EditorPage() {
             onClick={undo}
             disabled={!canUndo}
             className="p-2 rounded-lg hover:bg-surface-muted disabled:opacity-30 transition"
-            title="Annuler"
+            title={t.undo}
           >
             <Undo2 size={16} />
           </button>
@@ -104,7 +98,7 @@ export default function EditorPage() {
             onClick={redo}
             disabled={!canRedo}
             className="p-2 rounded-lg hover:bg-surface-muted disabled:opacity-30 transition"
-            title="Rétablir"
+            title={t.redo}
           >
             <Redo2 size={16} />
           </button>
@@ -126,24 +120,28 @@ export default function EditorPage() {
             <option value="fr">Français</option>
             <option value="en">English</option>
           </select>
-          <button onClick={toggle} className="p-2 rounded-lg hover:bg-surface-muted transition" title="Thème">
+          <button onClick={toggle} className="p-2 rounded-lg hover:bg-surface-muted transition" title={t.theme}>
             {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           {isAdmin && (
-            <Link href="/admin" className="p-2 rounded-lg hover:bg-surface-muted transition" title="Admin">
+            <Link href="/admin" className="p-2 rounded-lg hover:bg-surface-muted transition" title={t.admin}>
               <ShieldCheck size={16} />
             </Link>
           )}
-          <button onClick={signOut} className="p-2 rounded-lg hover:bg-surface-muted transition" title="Déconnexion">
+          <button
+            onClick={() => signOut().catch((err) => console.error(err))}
+            className="p-2 rounded-lg hover:bg-surface-muted transition"
+            title={t.logout}
+          >
             <LogOut size={16} />
           </button>
         </div>
       </header>
 
       <div className="flex items-center gap-1 px-4 lg:px-6 py-2 overflow-x-auto border-b border-border text-xs">
-        {STEPS.map((s, i) => (
+        {t.steps.map((label, i) => (
           <button
-            key={s.key}
+            key={label}
             onClick={() => goStep(i)}
             className={`px-3 py-1.5 rounded-full whitespace-nowrap transition ${
               step === i
@@ -151,7 +149,7 @@ export default function EditorPage() {
                 : "bg-surface-muted text-foreground/60 hover:text-foreground"
             }`}
           >
-            {i + 1}. {s.label}
+            {i + 1}. {label}
           </button>
         ))}
       </div>
@@ -163,11 +161,11 @@ export default function EditorPage() {
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold mb-2">Choisir un modèle</h3>
+                <h3 className="text-sm font-semibold mb-2">{t.chooseTemplate}</h3>
                 <TemplatePicker />
               </div>
               <div>
-                <h3 className="text-sm font-semibold mb-2">Couleur du CV</h3>
+                <h3 className="text-sm font-semibold mb-2">{t.cvColor}</h3>
                 <ColorPicker />
               </div>
             </div>
@@ -176,7 +174,7 @@ export default function EditorPage() {
             <div className="space-y-5">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold">Compresser sur une seule page</h3>
+                  <h3 className="text-sm font-semibold">{t.compressOnePage}</h3>
                   <button
                     type="button"
                     onClick={() => set((c) => ({ ...c, compresserUnePage: !c.compresserUnePage }))}
@@ -192,13 +190,11 @@ export default function EditorPage() {
                   </button>
                 </div>
                 <p className="text-[11px] text-foreground/50">
-                  {cv.compresserUnePage
-                    ? "Le contenu sera resserré pour tenir sur une seule page."
-                    : "Le contenu s'affiche naturellement : s'il dépasse une page, le téléchargement se fera simplement sur plusieurs pages."}
+                  {cv.compresserUnePage ? t.compressOn : t.compressOff}
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold mb-2">Taille du texte</h3>
+                <h3 className="text-sm font-semibold mb-2">{t.textSize}</h3>
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
@@ -231,23 +227,23 @@ export default function EditorPage() {
               disabled={step === 0}
               className="flex items-center gap-1 text-xs px-3 py-2 rounded-lg hover:bg-surface-muted disabled:opacity-30 transition"
             >
-              <ChevronLeft size={14} /> Précédent
+              <ChevronLeft size={14} /> {t.previous}
             </button>
-            {step < STEPS.length - 1 && (
+            {step < t.steps.length - 1 && (
               <button
                 onClick={() => goStep(step + 1)}
                 className="flex items-center gap-1 text-xs px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
               >
-                Suivant <ChevronRight size={14} />
+                {t.next} <ChevronRight size={14} />
               </button>
             )}
           </div>
-          {step < STEPS.length - 1 && (
+          {step < t.steps.length - 1 && (
             <button
-              onClick={() => goStep(STEPS.length - 1)}
+              onClick={() => goStep(t.steps.length - 1)}
               className="text-[11px] text-foreground/40 hover:text-foreground/70 mt-2 underline"
             >
-              Passer directement au téléchargement
+              {t.skipToDownload}
             </button>
           )}
         </section>
