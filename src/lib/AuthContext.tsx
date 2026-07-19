@@ -23,6 +23,7 @@ interface AuthContextValue {
   loading: boolean;
   isAdmin: boolean;
   downloadsUsed: number;
+  authError: string;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   saveProgress: (cv: CVData) => Promise<void>;
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadsUsed, setDownloadsUsed] = useState(0);
+  const [authError, setAuthError] = useState("");
   const reset = useCVStore((s) => s.reset);
 
   useEffect(() => {
@@ -44,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // pour éviter de rester bloqué si l'utilisateur revient d'un rechargement.
     getRedirectResult(auth).catch((err) => {
       console.error("Erreur de redirection Google:", err);
+      setAuthError(err?.message || String(err));
     });
 
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -112,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         isAdmin,
         downloadsUsed,
+        authError,
         signInWithGoogle,
         signOut,
         saveProgress,
