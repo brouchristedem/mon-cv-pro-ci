@@ -16,6 +16,17 @@ export default function LoginPage() {
 
   const displayError = error || authError;
 
+  useEffect(() => {
+    if (!connecting) return;
+    const t = setTimeout(() => {
+      setConnecting(false);
+      setError(
+        "La connexion prend trop de temps. Vérifiez votre connexion internet et réessayez. Si le problème persiste, essayez de fermer complètement votre navigateur puis de rouvrir le site."
+      );
+    }, 10000);
+    return () => clearTimeout(t);
+  }, [connecting]);
+
   const handleClick = async () => {
     setError("");
     setConnecting(true);

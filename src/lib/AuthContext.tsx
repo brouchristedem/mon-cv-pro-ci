@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 import {
   User,
   onAuthStateChanged,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut as fbSignOut,
@@ -81,7 +82,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [reset]);
 
   const signInWithGoogle = useCallback(async () => {
-    await signInWithRedirect(auth, googleProvider);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      const code = (err as { code?: string })?.code || "";
+      // Si la popup est bloquée, fermée, ou non supportée, on bascule sur la redirection.
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/popup-closed-by-user" ||
+        code === "auth/cancelled-popup-request" ||
+        code === "auth/operation-not-supported-in-this-environment"
+      ) {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+      throw err;
+    }
   }, []);
 
   const signOut = useCallback(async () => {
