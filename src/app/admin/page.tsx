@@ -12,22 +12,21 @@ import {
   onSnapshot,
   deleteDoc,
   query,
-  where,
   orderBy,
+  limit,
 } from "firebase/firestore";
 import { TEMPLATE_LIST } from "@/lib/templateRegistry";
-import { Trash2, CheckCircle2, Plus } from "lucide-react";
+import { Trash2, Plus, Phone } from "lucide-react";
 
 interface PromoCode {
   code: string;
   actif: boolean;
 }
 
-interface PaymentRequest {
+interface PaymentClaim {
   id: string;
   email: string;
-  montant: number;
-  statut: string;
+  createdAt?: { seconds: number };
 }
 
 export default function AdminPage() {
@@ -37,7 +36,7 @@ export default function AdminPage() {
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [newCode, setNewCode] = useState("");
   const [templateStatus, setTemplateStatus] = useState<Record<string, boolean>>({});
-  const [pending, setPending] = useState<PaymentRequest[]>([]);
+  const [claims, setClaims] = useState<PaymentClaim[]>([]);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) router.replace("/");
@@ -51,10 +50,10 @@ export default function AdminPage() {
     const unsubPromo = onSnapshot(collection(db, "promoCodes"), (snap) => {
       setPromoCodes(snap.docs.map((d) => ({ code: d.id, actif: d.data().actif })));
     });
-    const unsubPending = onSnapshot(
-      query(collection(db, "paymentRequests"), where("statut", "==", "en_attente")),
+    const unsubClaims = onSnapshot(
+      query(collection(db, "paymentClaims"), orderBy("createdAt", "desc"), limit(30)),
       (snap) => {
-        setPending(snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })));
+        setClaims(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<PaymentClaim, "id">) })));
       }
     );
     const initial: Record<string, boolean> = {};
@@ -62,7 +61,7 @@ export default function AdminPage() {
     setTemplateStatus(initial);
     return () => {
       unsubPromo();
-      unsubPending();
+      unsubClaims();
     };
   }, [isAdmin]);
 
@@ -88,10 +87,6 @@ export default function AdminPage() {
     const next = !templateStatus[id];
     setTemplateStatus((s) => ({ ...s, [id]: next }));
     await setDoc(doc(db, "templates", id), { actif: next }, { merge: true });
-  };
-
-  const validatePayment = async (id: string) => {
-    await setDoc(doc(db, "paymentRequests", id), { statut: "valide" }, { merge: true });
   };
 
   if (loading || !isAdmin) {
@@ -122,28 +117,20 @@ export default function AdminPage() {
       </section>
 
       <section>
-        <h2 className="text-sm font-semibold mb-3">
-          Paiements en attente de validation ({pending.length})
-        </h2>
-        {pending.length === 0 && (
-          <p className="text-xs text-foreground/50">Aucun paiement en attente.</p>
-        )}
-        <div className="space-y-2">
-          {pending.map((p) => (
-            <div
-              key={p.id}
-              className="flex items-center justify-between rounded-lg border border-border p-3 text-sm"
-            >
-              <div>
-                <p className="font-medium">{p.email}</p>
-                <p className="text-xs text-foreground/50">{p.montant} FCFA</p>
-              </div>
-              <button
-                onClick={() => validatePayment(p.id)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition"
-              >
-                <CheckCircle2 size={14} /> Valider
-              </button>
+        <h2 className="text-sm font-semibold mb-1">Comment fonctionne le paiement maintenant</h2>
+        <p className="text-xs text-foreground/60 mb-3">
+          La personne paie via Wave puis clique elle-même sur « J&apos;ai terminé mon paiement » —
+          le téléchargement se débloque immédiatement, sans validation de votre part. La liste
+          ci-dessous n&apos;est qu&apos;un journal indicatif pour recouper avec votre compte Wave si besoin.
+        </p>
+        <div className="space-y-1.5 max-h-64 overflow-y-auto">
+          {claims.length === 0 && <p className="text-xs text-foreground/40">Aucune déclaration de paiement pour le moment.</p>}
+          {claims.map((c) => (
+            <div key={c.id} className="flex items-center justify-between rounded-lg border border-border p-2.5 text-xs">
+              <span>{c.email}</span>
+              <span className="text-foreground/40">
+                {c.createdAt ? new Date(c.createdAt.seconds * 1000).toLocaleString("fr-FR") : ""}
+              </span>
             </div>
           ))}
         </div>
@@ -212,6 +199,10 @@ export default function AdminPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="flex items-center gap-2 text-xs text-foreground/50 pt-4 border-t border-border">
+        <Phone size={12} /> Service client affiché aux utilisateurs : +225 05 45 17 57 71
       </section>
     </div>
   );

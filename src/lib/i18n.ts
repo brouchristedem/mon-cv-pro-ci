@@ -75,6 +75,15 @@ export const UI = {
     unlockDownload: "Débloquer ce téléchargement —",
     viaWave: "via Wave",
     genericError: "Une erreur est survenue. Réessayez dans un instant.",
+    paidConfirm: "J'ai terminé mon paiement Wave",
+    customerService: "Besoin d'aide ? Contactez le service client :",
+    confirmTitle: "Confirmer le téléchargement",
+    confirmFreeText: "Ce téléchargement est votre 1er téléchargement, il est gratuit.",
+    confirmPaidText: "Ce téléchargement est payant : 500 FCFA (déjà réglé via Wave).",
+    confirmWarning:
+      "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
+    confirmCancel: "Annuler",
+    confirmProceed: "Confirmer et télécharger",
   },
   en: {
     steps: ["Information", "Sections", "Template & Color", "Layout", "Download"],
@@ -147,6 +156,15 @@ export const UI = {
     unlockDownload: "Unlock this download —",
     viaWave: "via Wave",
     genericError: "Something went wrong. Please try again shortly.",
+    paidConfirm: "I've completed my Wave payment",
+    customerService: "Need help? Contact customer service:",
+    confirmTitle: "Confirm download",
+    confirmFreeText: "This is your 1st download, it's free.",
+    confirmPaidText: "This is a paid download: 500 FCFA (already paid via Wave).",
+    confirmWarning:
+      "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
+    confirmCancel: "Cancel",
+    confirmProceed: "Confirm and download",
   },
 } as const;
 

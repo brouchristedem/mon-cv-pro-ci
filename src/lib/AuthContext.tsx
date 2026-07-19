@@ -13,6 +13,8 @@ import {
   doc,
   getDoc,
   setDoc,
+  addDoc,
+  collection,
   serverTimestamp,
 } from "firebase/firestore";
 import { auth, googleProvider, db } from "./firebase";
@@ -24,11 +26,13 @@ interface AuthContextValue {
   loading: boolean;
   isAdmin: boolean;
   downloadsUsed: number;
+  paidUnlocked: boolean;
   authError: string;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   saveProgress: (cv: CVData) => Promise<void>;
   incrementDownloads: () => Promise<void>;
+  confirmPaidDownload: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -39,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadsUsed, setDownloadsUsed] = useState(0);
+  const [paidUnlocked, setPaidUnlocked] = useState(false);
   const [authError, setAuthError] = useState("");
   const reset = useCVStore((s) => s.reset);
 
@@ -60,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = snap.data();
             if (data.cv) reset(data.cv as CVData);
             setDownloadsUsed(data.downloadsUsed || 0);
+            setPaidUnlocked(!!data.paidUnlocked);
           } else {
             const fresh = defaultCV();
             await setDoc(ref, {
@@ -119,8 +125,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const ref = doc(db, "users", user.uid);
     const next = downloadsUsed + 1;
     setDownloadsUsed(next);
-    await setDoc(ref, { downloadsUsed: next }, { merge: true });
+    setPaidUnlocked(false);
+    await setDoc(ref, { downloadsUsed: next, paidUnlocked: false }, { merge: true });
   }, [user, downloadsUsed]);
+
+  const confirmPaidDownload = useCallback(async () => {
+    if (!user) return;
+    setPaidUnlocked(true);
+    const ref = doc(db, "users", user.uid);
+    await setDoc(ref, { paidUnlocked: true }, { merge: true });
+    // Journal (facultatif) pour que l'admin puisse recouper avec son compte Wave.
+    try {
+      await addDoc(collection(db, "paymentClaims"), {
+        userId: user.uid,
+        email: user.email,
+        createdAt: serverTimestamp(),
+      });
+    } catch {
+      // non bloquant
+    }
+  }, [user]);
 
   const isAdmin = !!user?.email && user.email === ADMIN_EMAIL;
 
@@ -131,11 +155,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         isAdmin,
         downloadsUsed,
+        paidUnlocked,
         authError,
         signInWithGoogle,
         signOut,
         saveProgress,
         incrementDownloads,
+        confirmPaidDownload,
       }}
     >
       {children}

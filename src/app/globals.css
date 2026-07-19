@@ -60,6 +60,13 @@ body {
   body * {
     visibility: hidden;
   }
+  .fit-outer {
+    height: auto !important;
+  }
+  .preview-fit-inner {
+    transform: none !important;
+    width: auto !important;
+  }
   #cv-print-area,
   #cv-print-area * {
     visibility: visible;

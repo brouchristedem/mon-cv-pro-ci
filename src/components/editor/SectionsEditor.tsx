@@ -106,6 +106,7 @@ function SortableSection({ section }: { section: Section }) {
     }));
 
   const isLangOrSkill = section.type === "langues" || section.type === "competences";
+  const isSimpleText = section.type === "profil" || section.type === "interets";
 
   return (
     <div
@@ -185,6 +186,14 @@ function SortableSection({ section }: { section: Section }) {
                   value={item.niveau || ""}
                   onChange={(e) => updateItem(item.id, { niveau: e.target.value })}
                   className="w-full bg-transparent text-xs outline-none"
+                />
+              ) : isSimpleText ? (
+                <textarea
+                  placeholder={t.description}
+                  value={item.description || ""}
+                  onChange={(e) => updateItem(item.id, { description: e.target.value })}
+                  className="w-full bg-transparent text-xs outline-none resize-none"
+                  rows={2}
                 />
               ) : (
                 <>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { useCVStore } from "@/lib/store";
-import CVRenderer from "@/components/templates/CVRenderer";
+import CVPreviewFit from "@/components/templates/CVPreviewFit";
 import PersonalInfoForm from "@/components/editor/PersonalInfoForm";
 import SectionsEditor from "@/components/editor/SectionsEditor";
 import TemplatePicker from "@/components/editor/TemplatePicker";
@@ -251,13 +251,8 @@ export default function EditorPage() {
         <section
           className="flex-1 flex items-start justify-center p-4 lg:p-10 overflow-auto bg-surface-muted"
         >
-          <div
-            id="cv-print-area"
-            className={`shadow-xl bg-white cv-protected ${cv.compresserUnePage ? "compresser" : ""}`}
-            style={{ width: "210mm", zoom: cv.tailleTexte / 13 }}
-            onContextMenu={(e) => e.preventDefault()}
-          >
-            <CVRenderer cv={cv} />
+          <div className="w-full max-w-[210mm]">
+            <CVPreviewFit cv={cv} printMode />
           </div>
         </section>
       </main>

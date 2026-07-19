@@ -6,26 +6,23 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-6 py-4 max-w-5xl w-full mx-auto">
         <span className="font-bold">Mon CV Pro CI</span>
-        <Link
-          href="/login"
-          className="text-sm px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-        >
-          Commencer
-        </Link>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16 max-w-2xl mx-auto">
         <h1 className="text-3xl sm:text-4xl font-bold mb-4 leading-tight">
           Créez un CV professionnel qui retient l&apos;attention des recruteurs
         </h1>
-        <p className="text-foreground/60 mb-8">
-          15 modèles élégants, personnalisables en temps réel. Premier téléchargement gratuit.
+        <p className="text-foreground/60 mb-3">
+          15 modèles élégants, personnalisables en temps réel.
+        </p>
+        <p className="text-sm font-medium mb-8 px-4 py-2 rounded-full bg-blue-600/10 text-blue-700 dark:text-blue-400">
+          1er CV téléchargé gratuitement — les suivants à 500 FCFA via Wave
         </p>
         <Link
           href="/login"
           className="flex items-center gap-2 rounded-xl bg-blue-600 text-white px-6 py-3 font-medium hover:bg-blue-700 transition"
         >
-          Créer mon CV gratuitement <ArrowRight size={16} />
+          Créer mon CV <ArrowRight size={16} />
         </Link>
 
         <div className="grid sm:grid-cols-3 gap-6 mt-16 text-left">

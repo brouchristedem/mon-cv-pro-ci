@@ -29,14 +29,10 @@ service cloud.firestore {
         request.auth.token.email == "brouchristedem@gmail.com";
     }
 
-    // Demandes de paiement : l'utilisateur crée sa propre demande et peut la lire,
-    // seul l'admin peut la valider (changer son statut)
-    match /paymentRequests/{requestId} {
+    // Journal des déclarations de paiement (facultatif, pour recoupement admin)
+    match /paymentClaims/{claimId} {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
       allow read: if request.auth != null &&
-        (request.auth.uid == resource.data.userId ||
-         request.auth.token.email == "brouchristedem@gmail.com");
-      allow update: if request.auth != null &&
         request.auth.token.email == "brouchristedem@gmail.com";
     }
   }
