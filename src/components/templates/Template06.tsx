@@ -1,0 +1,102 @@
+import { CVData } from "@/lib/types";
+
+function photoClass(shape: string) {
+  if (shape === "cercle") return "rounded-full";
+  if (shape === "arrondi") return "rounded-xl";
+  if (shape === "carre") return "rounded-none";
+  return "";
+}
+
+function sortedVisible(cv: CVData) {
+  return [...cv.sections].filter((s) => s.visible).sort((a, b) => a.ordre - b.ordre);
+}
+
+const SIDEBAR_TYPES = new Set(["langues", "competences", "certifications", "interets"]);
+
+export default function Template06({ cv }: { cv: CVData }) {
+  const { personalInfo: p, couleurPrimaire: color } = cv;
+  const sections = sortedVisible(cv);
+  const sidebar = sections.filter((s) => SIDEBAR_TYPES.has(s.type));
+  const main = sections.filter((s) => !SIDEBAR_TYPES.has(s.type));
+
+  return (
+    <div className="w-full h-full bg-white text-slate-800 font-sans text-[13px] leading-relaxed flex">
+      <main className="flex-[1.7] p-7">
+        <div className="flex items-center gap-4 mb-6 pb-4 border-b-2" style={{ borderColor: color }}>
+          {p.showPhoto && p.photoUrl && (
+            <img
+              src={p.photoUrl}
+              alt=""
+              className={`w-16 h-16 object-cover flex-shrink-0 ${photoClass(p.photoShape)}`}
+            />
+          )}
+          <div>
+            <h1 className="text-xl font-bold font-mono" style={{ color }}>
+              {p.prenom || "Prénom"} {p.nom || "Nom"}
+            </h1>
+            <p className="text-[12px] text-slate-500 font-mono">// {p.titre || "Titre du poste"}</p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          {main.map((section) => (
+            <div key={section.id}>
+              <h2 className="text-[12px] font-bold uppercase tracking-wide mb-2 font-mono" style={{ color }}>
+                {section.titre}
+              </h2>
+              {section.items.length === 0 && (
+                <p className="text-slate-300 italic text-[12px]">Aucune information ajoutée</p>
+              )}
+              {section.items.map((item) => (
+                <div key={item.id} className="mb-2 pl-3 border-l-2 border-slate-100">
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-semibold">{item.titre}</span>
+                    {(item.dateDebut || item.dateFin) && (
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        {item.dateDebut} - {item.enCours ? "présent" : item.dateFin}
+                      </span>
+                    )}
+                  </div>
+                  {item.sousTitre && <p className="text-[12px] text-slate-500">{item.sousTitre}</p>}
+                  {item.description && (
+                    <p className="text-[12px] text-slate-500 mt-0.5 whitespace-pre-line">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </main>
+
+      <aside className="flex-1 p-7 bg-slate-900 text-white">
+        <div className="text-[11px] space-y-1 mb-6 opacity-80">
+          {p.email && <p>{p.email}</p>}
+          {p.telephone && <p>{p.telephone}</p>}
+          {p.adresse && <p>{p.adresse}</p>}
+          {p.permis && <p>Permis {p.permis}</p>}
+        </div>
+        {sidebar.map((section) => (
+          <div key={section.id} className="mb-6">
+            <h2 className="text-[11px] font-bold uppercase tracking-wide mb-2" style={{ color }}>
+              {section.titre}
+            </h2>
+            <div className="flex flex-wrap gap-1.5">
+              {section.items.length === 0 && <p className="text-[11px] opacity-40 italic">—</p>}
+              {section.items.map((item) => (
+                <span
+                  key={item.id}
+                  className="text-[10px] px-2 py-1 rounded bg-white/10"
+                  title={item.niveau}
+                >
+                  {item.titre}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </aside>
+    </div>
+  );
+}
