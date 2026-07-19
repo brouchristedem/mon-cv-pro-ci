@@ -35,12 +35,12 @@ export default function Template05({ cv }: { cv: CVData }) {
               {p.prenom || "Prénom"}
             </h1>
             <h1 className="text-3xl font-extrabold text-slate-800 -mt-1">{p.nom || "Nom"}</h1>
-            <p className="text-sm text-slate-500 mt-1">{p.titre || "Titre du poste"}</p>
+            <p className="text-sm text-slate-500 mt-1">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {[p.email, p.telephone, p.adresse, p.permis && `Permis ${p.permis}`]
+          {[p.email, p.telephone, p.adresse, p.permis && `${cv.langue === "en" ? "Driving licence" : "Permis"} ${p.permis}`]
             .filter(Boolean)
             .map((v, i) => (
               <span
@@ -62,7 +62,7 @@ export default function Template05({ cv }: { cv: CVData }) {
               </h2>
               <div className="space-y-2 pl-4">
                 {section.items.length === 0 && (
-                  <p className="text-slate-300 italic text-[12px]">Aucune information ajoutée</p>
+                  <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
                 )}
                 {section.items.map((item) => (
                   <div key={item.id}>
@@ -70,7 +70,7 @@ export default function Template05({ cv }: { cv: CVData }) {
                       <span className="font-semibold">{item.titre}</span>
                       {(item.dateDebut || item.dateFin) && (
                         <span className="text-[11px] text-slate-400">
-                          {item.dateDebut} — {item.enCours ? "Aujourd'hui" : item.dateFin}
+                          {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                         </span>
                       )}
                     </div>

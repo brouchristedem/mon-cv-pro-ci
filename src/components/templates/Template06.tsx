@@ -34,7 +34,7 @@ export default function Template06({ cv }: { cv: CVData }) {
             <h1 className="text-xl font-bold font-mono" style={{ color }}>
               {p.prenom || "Prénom"} {p.nom || "Nom"}
             </h1>
-            <p className="text-[12px] text-slate-500 font-mono">// {p.titre || "Titre du poste"}</p>
+            <p className="text-[12px] text-slate-500 font-mono">// {p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
           </div>
         </div>
 
@@ -45,7 +45,7 @@ export default function Template06({ cv }: { cv: CVData }) {
                 {section.titre}
               </h2>
               {section.items.length === 0 && (
-                <p className="text-slate-300 italic text-[12px]">Aucune information ajoutée</p>
+                <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
                 <div key={item.id} className="mb-2 pl-3 border-l-2 border-slate-100">
@@ -53,7 +53,7 @@ export default function Template06({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[10px] text-slate-400 font-mono">
-                        {item.dateDebut} - {item.enCours ? "présent" : item.dateFin}
+                        {item.dateDebut} - {item.enCours ? (cv.langue === "en" ? "present" : "présent") : item.dateFin}
                       </span>
                     )}
                   </div>
@@ -75,7 +75,9 @@ export default function Template06({ cv }: { cv: CVData }) {
           {p.email && <p>{p.email}</p>}
           {p.telephone && <p>{p.telephone}</p>}
           {p.adresse && <p>{p.adresse}</p>}
-          {p.permis && <p>Permis {p.permis}</p>}
+          {p.permis && <p>{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</p>}
+          {p.linkedin && <p>{p.linkedin}</p>}
+          {p.siteWeb && <p>{p.siteWeb}</p>}
         </div>
         {sidebar.map((section) => (
           <div key={section.id} className="mb-6">

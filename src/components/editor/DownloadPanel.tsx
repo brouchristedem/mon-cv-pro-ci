@@ -1,15 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useCVStore } from "@/lib/store";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/lib/firebase";
 import {
   addDoc,
   collection,
   onSnapshot,
-  query,
-  where,
   serverTimestamp,
   doc,
   getDoc,
@@ -18,9 +15,8 @@ import { Download, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 
 const WAVE_LINK = process.env.NEXT_PUBLIC_WAVE_LINK || "#";
 
-export default function DownloadPanel({ previewRef }: { previewRef: React.RefObject<HTMLDivElement | null> }) {
+export default function DownloadPanel() {
   const { user, downloadsUsed, incrementDownloads } = useAuth();
-  const cv = useCVStore((s) => s.cv);
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState("");
   const [price, setPrice] = useState(500);
@@ -48,18 +44,9 @@ export default function DownloadPanel({ previewRef }: { previewRef: React.RefObj
   }, [pendingId]);
 
   const generatePDF = async () => {
-    if (!previewRef.current) return;
     setGenerating(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const { jsPDF } = await import("jspdf");
-      const canvas = await html2canvas(previewRef.current, { scale: 3, useCORS: true });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = (canvas.height * pageWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
-      pdf.save(`CV-${cv.personalInfo.nom || "mon-cv-pro-ci"}.pdf`);
+      window.print();
       await incrementDownloads();
       setPendingId(null);
       setPendingStatus(null);

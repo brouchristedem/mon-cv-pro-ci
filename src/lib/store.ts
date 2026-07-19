@@ -11,8 +11,8 @@ export function defaultCV(): CVData {
     langue: "fr",
     templateId: "template-01",
     couleurPrimaire: "#2563eb",
-    disposition: "une-page",
-    taillePolice: "normale",
+    compresserUnePage: false,
+    tailleTexte: 13,
     step: 0,
     updatedAt: Date.now(),
     personalInfo: {
@@ -25,16 +25,19 @@ export function defaultCV(): CVData {
       telephone: "",
       adresse: "",
       permis: "",
+      linkedin: "",
+      siteWeb: "",
+      autresInfos: [],
     },
     sections: [
       { id: uid(), type: "profil", titre: "Profil", visible: true, ordre: 0, items: [] },
       { id: uid(), type: "experience", titre: "Expérience professionnelle", visible: true, ordre: 1, items: [] },
       { id: uid(), type: "formation", titre: "Formation", visible: true, ordre: 2, items: [] },
-      { id: uid(), type: "competences", titre: "Compétences", visible: true, ordre: 3, items: [] },
-      { id: uid(), type: "langues", titre: "Langues", visible: true, ordre: 4, items: [] },
+      { id: uid(), type: "competences", titre: "Compétences", visible: true, ordre: 3, items: [], affichage: "ligne" },
+      { id: uid(), type: "langues", titre: "Langues", visible: true, ordre: 4, items: [], affichage: "ligne" },
       { id: uid(), type: "certifications", titre: "Certifications", visible: false, ordre: 5, items: [] },
       { id: uid(), type: "projets", titre: "Projet académique", visible: false, ordre: 6, items: [] },
-      { id: uid(), type: "interets", titre: "Centres d'intérêt", visible: false, ordre: 7, items: [] },
+      { id: uid(), type: "interets", titre: "Centres d'intérêt", visible: false, ordre: 7, items: [], affichage: "ligne" },
     ],
   };
 }

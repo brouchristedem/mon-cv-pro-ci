@@ -11,6 +11,7 @@ import TemplatePicker from "@/components/editor/TemplatePicker";
 import ColorPicker from "@/components/editor/ColorPicker";
 import DownloadPanel from "@/components/editor/DownloadPanel";
 import { useTheme } from "@/lib/ThemeContext";
+import { SECTION_LABELS_FR, SECTION_LABELS_EN } from "@/lib/types";
 import {
   Undo2,
   Redo2,
@@ -41,7 +42,6 @@ export default function EditorPage() {
   const canUndo = useCVStore((s) => s.canUndo);
   const canRedo = useCVStore((s) => s.canRedo);
   const { dark, toggle } = useTheme();
-  const previewRef = useRef<HTMLDivElement>(null);
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [step, setStep] = useState(0);
@@ -110,7 +110,17 @@ export default function EditorPage() {
           </button>
           <select
             value={cv.langue}
-            onChange={(e) => set((c) => ({ ...c, langue: e.target.value as "fr" | "en" }))}
+            onChange={(e) => {
+              const langue = e.target.value as "fr" | "en";
+              const labels = langue === "en" ? SECTION_LABELS_EN : SECTION_LABELS_FR;
+              set((c) => ({
+                ...c,
+                langue,
+                sections: c.sections.map((s) =>
+                  s.type === "custom" ? s : { ...s, titre: labels[s.type] }
+                ),
+              }));
+            }}
             className="text-xs bg-transparent border border-border rounded-lg px-2 py-1.5"
           >
             <option value="fr">Français</option>
@@ -165,44 +175,55 @@ export default function EditorPage() {
           {step === 3 && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-semibold mb-2">Disposition</h3>
-                <div className="flex gap-2">
-                  {(["une-page", "plusieurs-pages"] as const).map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => set((c) => ({ ...c, disposition: d }))}
-                      className={`px-3 py-2 text-xs rounded-lg border transition ${
-                        cv.disposition === d
-                          ? "border-blue-600 bg-blue-600/10 text-blue-600"
-                          : "border-border hover:bg-surface-muted"
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-semibold">Compresser sur une seule page</h3>
+                  <button
+                    type="button"
+                    onClick={() => set((c) => ({ ...c, compresserUnePage: !c.compresserUnePage }))}
+                    className={`w-10 h-6 rounded-full transition relative ${
+                      cv.compresserUnePage ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-600"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
+                        cv.compresserUnePage ? "left-4.5" : "left-0.5"
                       }`}
-                    >
-                      {d === "une-page" ? "Une page" : "Plusieurs pages"}
-                    </button>
-                  ))}
+                    />
+                  </button>
                 </div>
+                <p className="text-[11px] text-foreground/50">
+                  {cv.compresserUnePage
+                    ? "Le contenu sera resserré pour tenir sur une seule page."
+                    : "Le contenu s'affiche naturellement : s'il dépasse une page, le téléchargement se fera simplement sur plusieurs pages."}
+                </p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold mb-2">Taille des informations</h3>
-                <div className="flex gap-2">
-                  {(["normale", "grande"] as const).map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => set((c) => ({ ...c, taillePolice: t }))}
-                      className={`px-3 py-2 text-xs rounded-lg border transition capitalize ${
-                        cv.taillePolice === t
-                          ? "border-blue-600 bg-blue-600/10 text-blue-600"
-                          : "border-border hover:bg-surface-muted"
-                      }`}
-                    >
-                      {t}
-                    </button>
-                  ))}
+                <h3 className="text-sm font-semibold mb-2">Taille du texte</h3>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={10}
+                    max={24}
+                    value={cv.tailleTexte}
+                    onChange={(e) => set((c) => ({ ...c, tailleTexte: Number(e.target.value) }))}
+                    className="flex-1"
+                  />
+                  <select
+                    value={cv.tailleTexte}
+                    onChange={(e) => set((c) => ({ ...c, tailleTexte: Number(e.target.value) }))}
+                    className="text-xs border border-border rounded-lg px-2 py-1.5 bg-surface"
+                  >
+                    {[10, 11, 12, 13, 14, 16, 18, 20, 22, 24].map((v) => (
+                      <option key={v} value={v}>
+                        {v} pt
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
           )}
-          {step === 4 && <DownloadPanel previewRef={previewRef} />}
+          {step === 4 && <DownloadPanel />}
 
           <div className="flex justify-between pt-6">
             <button
@@ -232,18 +253,15 @@ export default function EditorPage() {
         </section>
 
         <section
-          className={`flex-1 flex items-start justify-center p-4 lg:p-10 overflow-auto bg-surface-muted ${
-            cv.taillePolice === "grande" ? "text-[15px]" : ""
-          }`}
+          className="flex-1 flex items-start justify-center p-4 lg:p-10 overflow-auto bg-surface-muted"
         >
           <div
-            className="shadow-xl bg-white cv-protected"
-            style={{ width: "210mm", minHeight: cv.disposition === "une-page" ? "297mm" : undefined }}
+            id="cv-print-area"
+            className={`shadow-xl bg-white cv-protected ${cv.compresserUnePage ? "compresser" : ""}`}
+            style={{ width: "210mm", zoom: cv.tailleTexte / 13 }}
             onContextMenu={(e) => e.preventDefault()}
           >
-            <div ref={previewRef}>
-              <CVRenderer cv={cv} />
-            </div>
+            <CVRenderer cv={cv} />
           </div>
         </section>
       </main>

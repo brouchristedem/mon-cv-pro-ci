@@ -156,6 +156,104 @@ export default function PersonalInfoForm() {
           placeholder="ex : B"
         />
       </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>LinkedIn (optionnel)</label>
+          <input
+            className={inputClass}
+            value={cv.personalInfo.linkedin || ""}
+            onChange={(e) => update("linkedin", e.target.value)}
+            placeholder="linkedin.com/in/..."
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Site web (optionnel)</label>
+          <input
+            className={inputClass}
+            value={cv.personalInfo.siteWeb || ""}
+            onChange={(e) => update("siteWeb", e.target.value)}
+            placeholder="monsite.com"
+          />
+        </div>
+      </div>
+
+      <div className="pt-2 border-t border-border">
+        <div className="flex items-center justify-between mb-2 mt-3">
+          <span className={labelClass}>Autres informations (optionnel)</span>
+          <button
+            type="button"
+            onClick={() =>
+              set((c) => ({
+                ...c,
+                personalInfo: {
+                  ...c.personalInfo,
+                  autresInfos: [
+                    ...c.personalInfo.autresInfos,
+                    { id: Math.random().toString(36).slice(2, 9), label: "", valeur: "" },
+                  ],
+                },
+              }))
+            }
+            className="text-xs text-blue-600 hover:underline"
+          >
+            + Ajouter
+          </button>
+        </div>
+        <div className="space-y-2">
+          {cv.personalInfo.autresInfos.map((info) => (
+            <div key={info.id} className="flex gap-2 items-center">
+              <input
+                placeholder="Libellé (ex : Nationalité)"
+                value={info.label}
+                onChange={(e) =>
+                  set((c) => ({
+                    ...c,
+                    personalInfo: {
+                      ...c.personalInfo,
+                      autresInfos: c.personalInfo.autresInfos.map((i) =>
+                        i.id === info.id ? { ...i, label: e.target.value } : i
+                      ),
+                    },
+                  }))
+                }
+                className="flex-1 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs outline-none"
+              />
+              <input
+                placeholder="Valeur (ex : Ivoirienne)"
+                value={info.valeur}
+                onChange={(e) =>
+                  set((c) => ({
+                    ...c,
+                    personalInfo: {
+                      ...c.personalInfo,
+                      autresInfos: c.personalInfo.autresInfos.map((i) =>
+                        i.id === info.id ? { ...i, valeur: e.target.value } : i
+                      ),
+                    },
+                  }))
+                }
+                className="flex-1 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs outline-none"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  set((c) => ({
+                    ...c,
+                    personalInfo: {
+                      ...c.personalInfo,
+                      autresInfos: c.personalInfo.autresInfos.filter((i) => i.id !== info.id),
+                    },
+                  }))
+                }
+                className="text-red-400 hover:text-red-500 text-xs px-1"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

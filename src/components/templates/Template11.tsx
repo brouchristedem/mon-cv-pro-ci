@@ -30,7 +30,7 @@ export default function Template11({ cv }: { cv: CVData }) {
             {p.prenom || "Prénom"} {p.nom || "Nom"}
           </h1>
           <p className="text-sm" style={{ color }}>
-            {p.titre || "Titre du poste"}
+            {p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}
           </p>
         </div>
       </div>
@@ -39,7 +39,7 @@ export default function Template11({ cv }: { cv: CVData }) {
         {p.email && <div><p className="text-[9px] uppercase text-slate-400">Email</p>{p.email}</div>}
         {p.telephone && <div><p className="text-[9px] uppercase text-slate-400">Téléphone</p>{p.telephone}</div>}
         {p.adresse && <div><p className="text-[9px] uppercase text-slate-400">Adresse</p>{p.adresse}</div>}
-        {p.permis && <div><p className="text-[9px] uppercase text-slate-400">Permis</p>{p.permis}</div>}
+        {p.permis && <div><p className="text-[9px] uppercase text-slate-400">{cv.langue === "en" ? "Licence" : "Permis"}</p>{p.permis}</div>}
       </div>
 
       <div className="space-y-6">
@@ -52,7 +52,7 @@ export default function Template11({ cv }: { cv: CVData }) {
               <h2 className="text-[12px] font-bold uppercase tracking-wide mb-2">{section.titre}</h2>
               <div className="space-y-2">
                 {section.items.length === 0 && (
-                  <p className="text-slate-300 italic text-[12px]">Aucune information ajoutée</p>
+                  <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
                 )}
                 {section.items.map((item) => (
                   <div key={item.id}>
@@ -60,7 +60,7 @@ export default function Template11({ cv }: { cv: CVData }) {
                       <span className="font-semibold">{item.titre}</span>
                       {(item.dateDebut || item.dateFin) && (
                         <span className="text-[11px] text-slate-400">
-                          {item.dateDebut} — {item.enCours ? "Aujourd'hui" : item.dateFin}
+                          {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                         </span>
                       )}
                     </div>

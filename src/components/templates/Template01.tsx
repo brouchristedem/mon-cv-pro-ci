@@ -28,12 +28,14 @@ export default function Template01({ cv }: { cv: CVData }) {
           <h1 className="text-2xl font-bold" style={{ color }}>
             {p.prenom || "Prénom"} {p.nom || "Nom"}
           </h1>
-          <p className="text-base text-slate-600 mt-1">{p.titre || "Titre du poste"}</p>
+          <p className="text-base text-slate-600 mt-1">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px] text-slate-500">
             {p.email && <span>{p.email}</span>}
             {p.telephone && <span>{p.telephone}</span>}
             {p.adresse && <span>{p.adresse}</span>}
-            {p.permis && <span>Permis {p.permis}</span>}
+            {p.permis && <span>{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
+            {p.linkedin && <span>{p.linkedin}</span>}
+            {p.siteWeb && <span>{p.siteWeb}</span>}
           </div>
         </div>
       </div>
@@ -49,7 +51,7 @@ export default function Template01({ cv }: { cv: CVData }) {
             </h2>
             <div className="space-y-2">
               {section.items.length === 0 && (
-                <p className="text-slate-400 italic text-[12px]">Aucune information ajoutée</p>
+                <p className="text-slate-400 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
                 <div key={item.id}>
@@ -57,7 +59,7 @@ export default function Template01({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[11px] text-slate-500">
-                        {item.dateDebut} — {item.enCours ? "Aujourd'hui" : item.dateFin}
+                        {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                       </span>
                     )}
                   </div>

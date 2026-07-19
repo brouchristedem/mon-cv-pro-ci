@@ -34,14 +34,14 @@ export default function Template12({ cv }: { cv: CVData }) {
             <h1 className="text-xl font-bold uppercase">
               {p.nom || "NOM"}, {p.prenom || "Prénom"}
             </h1>
-            <p className="text-[12px] text-slate-500">{p.titre || "Job Title"}</p>
+            <p className="text-[12px] text-slate-500">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
           </div>
         </div>
         <div className="text-right text-[10.5px] text-slate-500">
           {p.email && <p>{p.email}</p>}
           {p.telephone && <p>{p.telephone}</p>}
           {p.adresse && <p>{p.adresse}</p>}
-          {p.permis && <p>Driving licence: {p.permis}</p>}
+          {p.permis && <p>{cv.langue === "en" ? "Driving licence" : "Permis"}: {p.permis}</p>}
         </div>
       </div>
 
@@ -55,7 +55,7 @@ export default function Template12({ cv }: { cv: CVData }) {
                 {section.titre}
               </h2>
               {section.items.length === 0 && (
-                <p className="text-slate-300 italic text-[11.5px]">No information added</p>
+                <p className="text-slate-300 italic text-[11.5px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
                 <div key={item.id} className="mb-2 grid grid-cols-[1fr_auto] gap-2">

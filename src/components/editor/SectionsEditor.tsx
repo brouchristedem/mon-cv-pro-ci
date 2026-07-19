@@ -61,6 +61,14 @@ function SortableSection({ section }: { section: Section }) {
       sections: c.sections.map((s) => (s.id === section.id ? { ...s, titre } : s)),
     }));
 
+  const setAffichage = (affichage: "liste" | "ligne") =>
+    set((c) => ({
+      ...c,
+      sections: c.sections.map((s) => (s.id === section.id ? { ...s, affichage } : s)),
+    }));
+
+  const canToggleAffichage = ["langues", "competences", "interets"].includes(section.type);
+
   const addItem = () =>
     set((c) => ({
       ...c,
@@ -130,6 +138,31 @@ function SortableSection({ section }: { section: Section }) {
 
       {open && (
         <div className="px-3 pb-3 space-y-3 border-t border-border pt-3">
+          {canToggleAffichage && (
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-foreground/50">Affichage :</span>
+              <button
+                onClick={() => setAffichage("liste")}
+                className={`text-[11px] px-2 py-1 rounded-lg border transition ${
+                  (section.affichage || "liste") === "liste"
+                    ? "border-blue-600 text-blue-600 bg-blue-600/10"
+                    : "border-border"
+                }`}
+              >
+                En liste (l'un sous l'autre)
+              </button>
+              <button
+                onClick={() => setAffichage("ligne")}
+                className={`text-[11px] px-2 py-1 rounded-lg border transition ${
+                  section.affichage === "ligne"
+                    ? "border-blue-600 text-blue-600 bg-blue-600/10"
+                    : "border-border"
+                }`}
+              >
+                Côte à côte (gain de place)
+              </button>
+            </div>
+          )}
           {section.items.map((item) => (
             <div key={item.id} className="rounded-lg bg-surface-muted p-3 space-y-2 relative">
               <button

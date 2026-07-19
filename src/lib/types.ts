@@ -10,6 +10,12 @@ export type SectionType =
   | "references"
   | "custom";
 
+export interface InfoComplementaire {
+  id: string;
+  label: string;
+  valeur: string;
+}
+
 export interface PersonalInfo {
   photoUrl?: string;
   photoShape: "cercle" | "carre" | "arrondi" | "aucune";
@@ -23,6 +29,7 @@ export interface PersonalInfo {
   permis?: string;
   linkedin?: string;
   siteWeb?: string;
+  autresInfos: InfoComplementaire[];
 }
 
 export interface EntryItem {
@@ -44,6 +51,7 @@ export interface Section {
   visible: boolean;
   ordre: number;
   items: EntryItem[];
+  affichage?: "liste" | "ligne"; // pour langues, compétences, centres d'intérêt
 }
 
 export interface CVData {
@@ -51,8 +59,8 @@ export interface CVData {
   langue: "fr" | "en";
   templateId: string;
   couleurPrimaire: string;
-  disposition: "une-page" | "plusieurs-pages";
-  taillePolice: "normale" | "grande";
+  compresserUnePage: boolean;
+  tailleTexte: number; // en pt, ex: 10 à 24, comme Word/Excel
   personalInfo: PersonalInfo;
   sections: Section[];
   updatedAt: number;

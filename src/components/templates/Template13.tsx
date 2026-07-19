@@ -32,14 +32,16 @@ export default function Template13({ cv }: { cv: CVData }) {
             <h1 className="text-2xl font-extrabold text-white">
               {p.prenom || "Prénom"} {p.nom || "Nom"}
             </h1>
-            <p className="text-white/85 text-sm">{p.titre || "Titre du poste"}</p>
+            <p className="text-white/85 text-sm">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-3 mt-4 text-[11px] text-white/80">
           {p.email && <span>{p.email}</span>}
           {p.telephone && <span>{p.telephone}</span>}
           {p.adresse && <span>{p.adresse}</span>}
-          {p.permis && <span>Permis {p.permis}</span>}
+          {p.permis && <span>{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
+            {p.linkedin && <span>{p.linkedin}</span>}
+            {p.siteWeb && <span>{p.siteWeb}</span>}
         </div>
       </div>
 
@@ -51,7 +53,7 @@ export default function Template13({ cv }: { cv: CVData }) {
             </h2>
             <div className="space-y-2">
               {section.items.length === 0 && (
-                <p className="text-slate-300 italic text-[12px]">Aucune information ajoutée</p>
+                <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
                 <div key={item.id}>
@@ -59,7 +61,7 @@ export default function Template13({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[10.5px] text-slate-400">
-                        {item.dateDebut} — {item.enCours ? "Aujourd'hui" : item.dateFin}
+                        {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                       </span>
                     )}
                   </div>

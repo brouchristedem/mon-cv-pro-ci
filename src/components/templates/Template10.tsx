@@ -36,14 +36,16 @@ export default function Template10({ cv }: { cv: CVData }) {
           {p.prenom || "Prénom"} {p.nom || "Nom"}
         </h1>
         <p className="text-[11px] mt-1" style={{ color }}>
-          {p.titre || "Titre du poste"}
+          {p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}
         </p>
 
         <div className="mt-5 text-[10.5px] opacity-75 space-y-1 break-words">
           {p.email && <p>{p.email}</p>}
           {p.telephone && <p>{p.telephone}</p>}
           {p.adresse && <p>{p.adresse}</p>}
-          {p.permis && <p>Permis {p.permis}</p>}
+          {p.permis && <p>{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</p>}
+          {p.linkedin && <p>{p.linkedin}</p>}
+          {p.siteWeb && <p>{p.siteWeb}</p>}
         </div>
 
         {sidebar.map((section) => (
@@ -68,7 +70,7 @@ export default function Template10({ cv }: { cv: CVData }) {
               {section.titre}
             </h2>
             {section.items.length === 0 && (
-              <p className="text-slate-400 italic text-[12px]">Aucune information ajoutée</p>
+              <p className="text-slate-400 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
             )}
             {section.items.map((item) => (
               <div key={item.id} className="mb-3 relative">
@@ -80,7 +82,7 @@ export default function Template10({ cv }: { cv: CVData }) {
                   <span className="font-semibold">{item.titre}</span>
                   {(item.dateDebut || item.dateFin) && (
                     <span className="text-[11px] text-slate-500">
-                      {item.dateDebut} — {item.enCours ? "Aujourd'hui" : item.dateFin}
+                      {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                     </span>
                   )}
                 </div>

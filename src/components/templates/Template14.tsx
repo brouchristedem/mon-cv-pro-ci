@@ -34,7 +34,7 @@ export default function Template14({ cv }: { cv: CVData }) {
           <h1 className="text-xl font-bold" style={{ color }}>
             {p.prenom || "Prénom"} {p.nom || "Nom"}
           </h1>
-          <p className="text-[12px] text-slate-500">{p.titre || "Titre du poste"}</p>
+          <p className="text-[12px] text-slate-500">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
         </div>
         <div className="text-right text-[10.5px] text-slate-500">
           {p.email && <p>{p.email}</p>}
@@ -43,7 +43,7 @@ export default function Template14({ cv }: { cv: CVData }) {
       </div>
       {(p.adresse || p.permis) && (
         <p className="text-[10.5px] text-slate-400 mb-5">
-          {p.adresse} {p.permis ? `· Permis ${p.permis}` : ""}
+          {p.adresse} {p.permis ? `· ${cv.langue === "en" ? "Driving licence" : "Permis"} ${p.permis}` : ""}
         </p>
       )}
 
@@ -55,7 +55,7 @@ export default function Template14({ cv }: { cv: CVData }) {
                 {section.titre}
               </h2>
               {section.items.length === 0 && (
-                <p className="text-slate-300 italic text-[11.5px]">Aucune information ajoutée</p>
+                <p className="text-slate-300 italic text-[11.5px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
                 <div key={item.id} className="mb-2">
@@ -63,7 +63,7 @@ export default function Template14({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[10px] text-slate-400">
-                        {item.dateDebut} — {item.enCours ? "Aujourd'hui" : item.dateFin}
+                        {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                       </span>
                     )}
                   </div>

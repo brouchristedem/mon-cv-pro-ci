@@ -28,13 +28,15 @@ export default function Template03({ cv }: { cv: CVData }) {
           {p.prenom || "Prénom"} <span className="font-bold">{p.nom || "Nom"}</span>
         </h1>
         <p className="text-sm text-slate-500 mt-1 uppercase tracking-widest" style={{ color }}>
-          {p.titre || "Titre du poste"}
+          {p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}
         </p>
         <div className="flex justify-center flex-wrap gap-x-4 gap-y-1 mt-3 text-[11px] text-slate-400">
           {p.email && <span>{p.email}</span>}
           {p.telephone && <span>{p.telephone}</span>}
           {p.adresse && <span>{p.adresse}</span>}
-          {p.permis && <span>Permis {p.permis}</span>}
+          {p.permis && <span>{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
+            {p.linkedin && <span>{p.linkedin}</span>}
+            {p.siteWeb && <span>{p.siteWeb}</span>}
         </div>
       </div>
 
@@ -49,7 +51,7 @@ export default function Template03({ cv }: { cv: CVData }) {
             </div>
             <div className="space-y-3">
               {section.items.length === 0 && (
-                <p className="text-slate-300 italic text-[12px]">Aucune information ajoutée</p>
+                <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
                 <div key={item.id}>
@@ -57,7 +59,7 @@ export default function Template03({ cv }: { cv: CVData }) {
                     <span className="font-medium">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[10px] text-slate-400">
-                        {item.dateDebut} — {item.enCours ? "Aujourd'hui" : item.dateFin}
+                        {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                       </span>
                     )}
                   </div>
