@@ -1,0 +1,84 @@
+import { CVData } from "@/lib/types";
+
+function photoClass(shape: string) {
+  if (shape === "cercle") return "rounded-full";
+  if (shape === "arrondi") return "rounded-xl";
+  if (shape === "carre") return "rounded-none";
+  return "";
+}
+
+function sortedVisible(cv: CVData) {
+  return [...cv.sections].filter((s) => s.visible).sort((a, b) => a.ordre - b.ordre);
+}
+
+export default function Template01({ cv }: { cv: CVData }) {
+  const { personalInfo: p, couleurPrimaire: color } = cv;
+
+  return (
+    <div className="w-full h-full bg-white text-slate-800 p-10 font-sans text-[13px] leading-relaxed">
+      <div className="flex items-center gap-6 mb-6 pb-6" style={{ borderBottom: `3px solid ${color}` }}>
+        {p.showPhoto && p.photoUrl && (
+          <img
+            src={p.photoUrl}
+            alt=""
+            className={`w-24 h-24 object-cover flex-shrink-0 ${photoClass(p.photoShape)}`}
+          />
+        )}
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold" style={{ color }}>
+            {p.prenom || "Prénom"} {p.nom || "Nom"}
+          </h1>
+          <p className="text-base text-slate-600 mt-1">{p.titre || "Titre du poste"}</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px] text-slate-500">
+            {p.email && <span>{p.email}</span>}
+            {p.telephone && <span>{p.telephone}</span>}
+            {p.adresse && <span>{p.adresse}</span>}
+            {p.permis && <span>Permis {p.permis}</span>}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-5">
+        {sortedVisible(cv).map((section) => (
+          <div key={section.id}>
+            <h2
+              className="text-[13px] font-bold uppercase tracking-wide mb-2 pb-1"
+              style={{ color, borderBottom: `1px solid ${color}33` }}
+            >
+              {section.titre}
+            </h2>
+            <div className="space-y-2">
+              {section.items.length === 0 && (
+                <p className="text-slate-400 italic text-[12px]">Aucune information ajoutée</p>
+              )}
+              {section.items.map((item) => (
+                <div key={item.id}>
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-semibold">{item.titre}</span>
+                    {(item.dateDebut || item.dateFin) && (
+                      <span className="text-[11px] text-slate-500">
+                        {item.dateDebut} — {item.enCours ? "Aujourd'hui" : item.dateFin}
+                      </span>
+                    )}
+                  </div>
+                  {item.sousTitre && (
+                    <p className="text-[12px] text-slate-600">
+                      {item.sousTitre}
+                      {item.lieu ? ` · ${item.lieu}` : ""}
+                    </p>
+                  )}
+                  {item.niveau && <p className="text-[12px] text-slate-500">{item.niveau}</p>}
+                  {item.description && (
+                    <p className="text-[12px] text-slate-600 mt-0.5 whitespace-pre-line">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

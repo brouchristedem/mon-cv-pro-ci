@@ -1,0 +1,43 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Chaque utilisateur ne peut lire/écrire que son propre document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Codes promo : lecture publique (pour vérifier un code), écriture réservée à l'admin
+    match /promoCodes/{code} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        request.auth.token.email == "brouchristedem@gmail.com";
+    }
+
+    // Réglages généraux (prix, etc.) : lecture publique, écriture admin uniquement
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        request.auth.token.email == "brouchristedem@gmail.com";
+    }
+
+    // Statut actif/inactif des templates : lecture publique, écriture admin uniquement
+    match /templates/{templateId} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        request.auth.token.email == "brouchristedem@gmail.com";
+    }
+
+    // Demandes de paiement : l'utilisateur crée sa propre demande et peut la lire,
+    // seul l'admin peut la valider (changer son statut)
+    match /paymentRequests/{requestId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read: if request.auth != null &&
+        (request.auth.uid == resource.data.userId ||
+         request.auth.token.email == "brouchristedem@gmail.com");
+      allow update: if request.auth != null &&
+        request.auth.token.email == "brouchristedem@gmail.com";
+    }
+  }
+}
