@@ -40,6 +40,7 @@ export default function EditorPage() {
 
   const [step, setStep] = useState(0);
   const [saveError, setSaveError] = useState("");
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -57,7 +58,10 @@ export default function EditorPage() {
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
       saveProgress({ ...cv, step })
-        .then(() => setSaveError(""))
+        .then(() => {
+          setSaveError("");
+          setLastSaved(new Date());
+        })
         .catch((err) => {
           console.error("Erreur de sauvegarde:", err);
           setSaveError(err instanceof Error ? err.message : String(err));
@@ -75,7 +79,9 @@ export default function EditorPage() {
     if (!user) return;
     const flush = () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
-      saveProgress({ ...cv, step }).catch((err) => console.error("Erreur de sauvegarde:", err));
+      saveProgress({ ...cv, step })
+        .then(() => setLastSaved(new Date()))
+        .catch((err) => console.error("Erreur de sauvegarde:", err));
     };
     const onVisibility = () => {
       if (document.visibilityState === "hidden") flush();
@@ -83,10 +89,12 @@ export default function EditorPage() {
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pagehide", flush);
     window.addEventListener("beforeunload", flush);
+    document.addEventListener("focusout", flush);
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pagehide", flush);
       window.removeEventListener("beforeunload", flush);
+      document.removeEventListener("focusout", flush);
     };
   }, [cv, step, user, saveProgress]);
 
@@ -181,6 +189,7 @@ export default function EditorPage() {
       {debugInfo && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-1.5 text-[10px] text-amber-800 break-words font-mono">
           {debugInfo}
+          {lastSaved && ` | dernière sauvegarde réussie à ${lastSaved.toLocaleTimeString("fr-FR")}`}
         </div>
       )}
 
