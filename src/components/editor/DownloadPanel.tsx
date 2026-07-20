@@ -10,7 +10,7 @@ import { UI } from "@/lib/i18n";
 
 const WAVE_LINK = process.env.NEXT_PUBLIC_WAVE_LINK || "#";
 const PRICE = Number(process.env.NEXT_PUBLIC_PRICE || 505);
-const SUPPORT_PHONE = "+225 05 45 17 57 71";
+const SUPPORT_PHONE = "+225 05 45 17 75 71";
 
 export default function DownloadPanel() {
   const { user, downloadsUsed, paidUnlocked, incrementDownloads, confirmPaidDownload } = useAuth();
