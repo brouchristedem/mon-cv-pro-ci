@@ -1,21 +1,50 @@
 "use client";
 
 import { useCVStore } from "@/lib/store";
-import { useAuth } from "@/lib/AuthContext";
 import { useRef, useState } from "react";
 import { UI } from "@/lib/i18n";
-import { storage } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Loader2 } from "lucide-react";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/40 transition";
 const labelClass = "text-xs font-medium text-foreground/70 mb-1 block";
 
+// Redimensionne et compresse l'image côté navigateur avant de la stocker,
+// pour rester largement sous la limite de taille de Firestore (aucun coût,
+// aucun besoin de Firebase Storage).
+function compressImage(file: File, maxSize = 500, quality = 0.75): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = () => {
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > maxSize) {
+          height = Math.round((height * maxSize) / width);
+          width = maxSize;
+        } else if (height > maxSize) {
+          width = Math.round((width * maxSize) / height);
+          height = maxSize;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas non supporté"));
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function PersonalInfoForm() {
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
-  const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -27,17 +56,14 @@ export default function PersonalInfoForm() {
 
   const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
     setUploadError("");
     setUploading(true);
     try {
-      const path = `photos/${user.uid}/${Date.now()}-${file.name}`;
-      const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      update("photoUrl", url);
+      const compressed = await compressImage(file);
+      update("photoUrl", compressed);
     } catch (err) {
-      console.error("Erreur d'envoi de la photo:", err);
+      console.error("Erreur de traitement de la photo:", err);
       setUploadError(err instanceof Error ? err.message : String(err));
     } finally {
       setUploading(false);
