@@ -17,7 +17,7 @@ export default function Template05({ cv }: { cv: CVData }) {
   const { personalInfo: p, couleurPrimaire: color } = cv;
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 font-sans text-[13px] leading-relaxed relative overflow-hidden">
+    <div className="w-full h-full text-slate-800 font-sans text-[13px] leading-relaxed relative overflow-hidden" style={{ background: cv.couleurFond }}>
       <div
         className="absolute top-0 left-0 w-3 h-full"
         style={{ background: color }}

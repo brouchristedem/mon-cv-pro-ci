@@ -22,7 +22,7 @@ export default function Template06({ cv }: { cv: CVData }) {
   const main = sections.filter((s) => !SIDEBAR_TYPES.has(s.type));
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 font-sans text-[13px] leading-relaxed">
+    <div className="w-full h-full text-slate-800 font-sans text-[13px] leading-relaxed" style={{ background: cv.couleurFond }}>
       <div className="flex items-center gap-2 px-6 pt-5">
         <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
         <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />

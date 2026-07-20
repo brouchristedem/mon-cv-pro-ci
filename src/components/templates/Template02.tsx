@@ -22,7 +22,7 @@ export default function Template02({ cv }: { cv: CVData }) {
   const main = sections.filter((s) => !SIDEBAR_TYPES.has(s.type));
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 font-sans text-[13px] leading-relaxed flex">
+    <div className="w-full h-full text-slate-800 font-sans text-[13px] leading-relaxed flex" style={{ background: cv.couleurFond }}>
       <aside className="w-[34%] p-6 text-white flex-shrink-0" style={{ background: color }}>
         {p.showPhoto && p.photoUrl && (
           <img

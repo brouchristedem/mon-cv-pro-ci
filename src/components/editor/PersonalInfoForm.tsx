@@ -1,8 +1,12 @@
 "use client";
 
 import { useCVStore } from "@/lib/store";
-import { useRef } from "react";
+import { useAuth } from "@/lib/AuthContext";
+import { useRef, useState } from "react";
 import { UI } from "@/lib/i18n";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Loader2 } from "lucide-react";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/40 transition";
@@ -11,19 +15,34 @@ const labelClass = "text-xs font-medium text-foreground/70 mb-1 block";
 export default function PersonalInfoForm() {
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
+  const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const t = UI[cv.langue];
 
   const update = (field: keyof typeof cv.personalInfo, value: string | boolean) => {
     set((c) => ({ ...c, personalInfo: { ...c.personalInfo, [field]: value } }));
   };
 
-  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => update("photoUrl", reader.result as string);
-    reader.readAsDataURL(file);
+    if (!file || !user) return;
+    setUploadError("");
+    setUploading(true);
+    try {
+      const path = `photos/${user.uid}/${Date.now()}-${file.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      update("photoUrl", url);
+    } catch (err) {
+      console.error("Erreur d'envoi de la photo:", err);
+      setUploadError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
   };
 
   return (
@@ -32,11 +51,13 @@ export default function PersonalInfoForm() {
         <button
           onClick={() => fileRef.current?.click()}
           type="button"
-          className="text-sm px-3 py-2 rounded-lg border border-border hover:bg-surface-muted transition"
+          disabled={uploading}
+          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-border hover:bg-surface-muted transition disabled:opacity-60"
         >
+          {uploading && <Loader2 size={14} className="animate-spin" />}
           {cv.personalInfo.photoUrl ? t.changePhoto : t.addPhoto}
         </button>
-        {cv.personalInfo.photoUrl && (
+        {cv.personalInfo.photoUrl && !uploading && (
           <button
             type="button"
             onClick={() => update("photoUrl", "")}
@@ -47,6 +68,7 @@ export default function PersonalInfoForm() {
         )}
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={handlePhoto} />
       </div>
+      {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
 
       <div className="flex items-center justify-between">
         <span className={labelClass}>{t.showPhotoOnCV}</span>

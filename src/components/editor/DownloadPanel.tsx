@@ -64,11 +64,10 @@ export default function DownloadPanel() {
   };
 
   const isPlausibleWaveReference = (value: string) => {
-    const v = value.trim();
-    // Une vraie référence Wave est un identifiant alphanumérique, sans espace,
-    // mêlant lettres et chiffres. Ceci élimine les noms ou numéros de téléphone
-    // saisis à la place, mais ne peut pas garantir l'authenticité sans l'API Wave.
-    return /^[A-Za-z0-9]{8,}$/.test(v) && /[A-Za-z]/.test(v) && /[0-9]/.test(v);
+    const v = value.trim().toUpperCase();
+    // Format observé des références de transaction Wave : T_ suivi de 16
+    // caractères alphanumériques (ex : T_2SKTWTSDZMCN24YV).
+    return /^T_[A-Z0-9]{16}$/.test(v);
   };
 
   const handlePaidConfirmClick = async () => {

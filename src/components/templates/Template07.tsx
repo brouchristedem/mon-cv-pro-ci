@@ -17,7 +17,7 @@ export default function Template07({ cv }: { cv: CVData }) {
   const { personalInfo: p, couleurPrimaire: color } = cv;
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 p-12 font-sans text-[13px] leading-relaxed">
+    <div className="w-full h-full text-slate-800 p-12 font-sans text-[13px] leading-relaxed" style={{ background: cv.couleurFond }}>
       <div className="flex items-start justify-between mb-2">
         <div>
           <h1 className="text-4xl font-serif tracking-tight">

@@ -17,7 +17,7 @@ export default function Template13({ cv }: { cv: CVData }) {
   const { personalInfo: p, couleurPrimaire: color } = cv;
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 font-sans text-[13px] leading-relaxed">
+    <div className="w-full h-full text-slate-800 font-sans text-[13px] leading-relaxed" style={{ background: cv.couleurFond }}>
       <div
         className="px-8 py-8 rounded-b-[2.5rem]"
         style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}

@@ -41,6 +41,21 @@ export default function ColorPicker() {
           className="w-8 h-8 rounded cursor-pointer bg-transparent border border-border"
         />
       </div>
+      <div className="flex items-center gap-2 pt-2 border-t border-border">
+        <label className="text-xs text-foreground/60">{t.backgroundColor}</label>
+        <input
+          type="color"
+          value={cv.couleurFond}
+          onChange={(e) => set((c) => ({ ...c, couleurFond: e.target.value }))}
+          className="w-8 h-8 rounded cursor-pointer bg-transparent border border-border"
+        />
+        <button
+          onClick={() => set((c) => ({ ...c, couleurFond: "#ffffff" }))}
+          className="text-[11px] text-foreground/40 hover:text-foreground/70 underline"
+        >
+          {t.resetWhite}
+        </button>
+      </div>
     </div>
   );
 }

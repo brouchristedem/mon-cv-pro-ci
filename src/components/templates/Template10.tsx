@@ -22,7 +22,7 @@ export default function Template10({ cv }: { cv: CVData }) {
   const main = sections.filter((s) => !SIDEBAR_TYPES.has(s.type));
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 font-sans text-[13px] leading-relaxed flex">
+    <div className="w-full h-full text-slate-800 font-sans text-[13px] leading-relaxed flex" style={{ background: cv.couleurFond }}>
       <aside className="w-[32%] p-6 bg-slate-50 border-r border-slate-200 flex-shrink-0 flex flex-col items-center text-center">
         {p.showPhoto && p.photoUrl ? (
           <img

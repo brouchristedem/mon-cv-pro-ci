@@ -17,7 +17,7 @@ export default function Template09({ cv }: { cv: CVData }) {
   const { personalInfo: p, couleurPrimaire: color } = cv;
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 p-10 font-sans text-[13px] leading-relaxed">
+    <div className="w-full h-full text-slate-800 p-10 font-sans text-[13px] leading-relaxed" style={{ background: cv.couleurFond }}>
       <div className="text-center pb-5 mb-6 border-b-4 double" style={{ borderColor: color }}>
         <h1 className="text-2xl font-bold uppercase tracking-wide">
           {p.prenom || "Prénom"} {p.nom || "Nom"}

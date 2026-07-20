@@ -22,7 +22,7 @@ export default function Template08({ cv }: { cv: CVData }) {
   const main = sections.filter((s) => !SIDEBAR_TYPES.has(s.type));
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 font-sans text-[11.5px] leading-snug p-6 flex gap-5">
+    <div className="w-full h-full text-slate-800 font-sans text-[11.5px] leading-snug p-6 flex gap-5" style={{ background: cv.couleurFond }}>
       <div className="flex-1 space-y-4">
         <div className="flex items-center gap-3 mb-1">
           {p.showPhoto && p.photoUrl && (

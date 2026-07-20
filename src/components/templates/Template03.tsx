@@ -17,7 +17,7 @@ export default function Template03({ cv }: { cv: CVData }) {
   const { personalInfo: p, couleurPrimaire: color } = cv;
 
   return (
-    <div className="w-full h-full bg-white text-slate-700 p-12 font-sans text-[13px] leading-relaxed">
+    <div className="w-full h-full text-slate-700 p-12 font-sans text-[13px] leading-relaxed" style={{ background: cv.couleurFond }}>
       <div className="text-center mb-8">
         {p.showPhoto && p.photoUrl && (
           <img

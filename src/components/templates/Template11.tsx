@@ -18,7 +18,7 @@ export default function Template11({ cv }: { cv: CVData }) {
   const sections = sortedVisible(cv);
 
   return (
-    <div className="w-full h-full bg-white text-slate-800 p-10 font-sans text-[13px] leading-relaxed">
+    <div className="w-full h-full text-slate-800 p-10 font-sans text-[13px] leading-relaxed" style={{ background: cv.couleurFond }}>
       <div className="grid grid-cols-[auto_1fr] gap-6 items-center mb-8">
         {p.showPhoto && p.photoUrl && (
           <img
