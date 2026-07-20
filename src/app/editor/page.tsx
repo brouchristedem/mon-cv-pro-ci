@@ -27,7 +27,7 @@ import Link from "next/link";
 
 export default function EditorPage() {
   const router = useRouter();
-  const { user, loading, isAdmin, signOut, saveProgress, loadError } = useAuth();
+  const { user, loading, isAdmin, signOut, saveProgress, loadError, debugInfo } = useAuth();
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
   const undo = useCVStore((s) => s.undo);
@@ -110,8 +110,8 @@ export default function EditorPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-border">
-        <Link href="/" className="font-bold text-sm">
-          Mon CV Pro CI
+        <Link href="/" className="font-extrabold text-sm tracking-wide uppercase">
+          CV Pro CI
         </Link>
         <div className="flex items-center gap-1.5">
           <button
@@ -175,6 +175,12 @@ export default function EditorPage() {
             </p>
           )}
           {saveError && <p>Erreur de sauvegarde : {saveError}</p>}
+        </div>
+      )}
+
+      {debugInfo && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-1.5 text-[10px] text-amber-800 break-words font-mono">
+          {debugInfo}
         </div>
       )}
 

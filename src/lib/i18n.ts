@@ -70,7 +70,7 @@ export const UI = {
     promoCode: "Code promo",
     apply: "Appliquer",
     promoInvalid: "Code promo invalide ou expiré.",
-    paymentValidated: "Paiement validé — Télécharger le PDF",
+    paymentValidated: "Télécharger le CV",
     paymentPending:
       "Paiement en attente de validation. Après votre paiement Wave, cela peut prendre quelques minutes le temps que ce soit vérifié.",
     payWithWave: "Payer",
@@ -82,6 +82,7 @@ export const UI = {
     waveReferenceLabel: "Numéro de référence Wave (affiché après paiement)",
     waveReferencePlaceholder: "ex : TF7X9K2M1P",
     waveReferenceRequired: "Merci de renseigner le numéro de référence affiché par Wave après votre paiement.",
+    waveReferenceInvalid: "Ce numéro ne ressemble pas à une référence Wave valide (lettres et chiffres, sans espace). Vérifiez le reçu affiché par Wave.",
     customerService: "Besoin d'aide ? Contactez le service client :",
     confirmTitle: "Confirmer le téléchargement",
     confirmFreeText: "Ce téléchargement est votre 1er téléchargement, il est gratuit.",
@@ -157,7 +158,7 @@ export const UI = {
     promoCode: "Promo code",
     apply: "Apply",
     promoInvalid: "Invalid or expired promo code.",
-    paymentValidated: "Payment validated — Download the PDF",
+    paymentValidated: "Download the CV",
     paymentPending:
       "Payment awaiting validation. After your Wave payment, this may take a few minutes to be verified.",
     payWithWave: "Pay",
@@ -169,6 +170,7 @@ export const UI = {
     waveReferenceLabel: "Wave reference number (shown after payment)",
     waveReferencePlaceholder: "e.g. TF7X9K2M1P",
     waveReferenceRequired: "Please enter the reference number shown by Wave after your payment.",
+    waveReferenceInvalid: "This doesn't look like a valid Wave reference (letters and numbers, no spaces). Check the receipt shown by Wave.",
     customerService: "Need help? Contact customer service:",
     confirmTitle: "Confirm download",
     confirmFreeText: "This is your 1st download, it's free.",

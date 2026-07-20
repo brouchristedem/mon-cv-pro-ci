@@ -41,7 +41,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <h1 className="text-2xl font-bold mb-2">Mon CV Pro CI</h1>
+      <h1 className="text-2xl font-extrabold mb-2 uppercase tracking-wide">CV Pro CI</h1>
       <p className="text-sm text-foreground/60 mb-8 max-w-sm">
         Connectez-vous avec Google pour créer votre CV et retrouver votre progression à chaque
         visite.

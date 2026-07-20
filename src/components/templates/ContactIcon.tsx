@@ -23,12 +23,14 @@ export function ContactIcon({
 }) {
   if (cv.iconStyle === "aucune") return null;
   const Icon = ICONS[type];
+  const filled = cv.iconStyle === "remplie";
   return (
     <Icon
       size={size}
       className={`inline-block mr-1 -mt-0.5 ${className}`}
-      strokeWidth={cv.iconStyle === "remplie" ? 0 : 1.8}
-      fill={cv.iconStyle === "remplie" ? "currentColor" : "none"}
+      strokeWidth={filled ? 2.2 : 1.6}
+      fill={filled ? "currentColor" : "none"}
+      fillOpacity={filled ? 0.25 : undefined}
     />
   );
 }

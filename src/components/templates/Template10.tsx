@@ -23,7 +23,7 @@ export default function Template10({ cv }: { cv: CVData }) {
 
   return (
     <div className="w-full h-full bg-white text-slate-800 font-sans text-[13px] leading-relaxed flex">
-      <aside className="w-[32%] p-6 bg-slate-950 text-white flex-shrink-0 flex flex-col items-center text-center">
+      <aside className="w-[32%] p-6 bg-slate-50 border-r border-slate-200 flex-shrink-0 flex flex-col items-center text-center">
         {p.showPhoto && p.photoUrl ? (
           <img
             src={p.photoUrl}
@@ -37,11 +37,11 @@ export default function Template10({ cv }: { cv: CVData }) {
         <h1 className="text-base font-bold">
           {p.prenom || "Prénom"} {p.nom || "Nom"}
         </h1>
-        <p className="text-[11px] mt-1" style={{ color }}>
+        <p className="text-[11px] mt-1 font-semibold" style={{ color }}>
           {p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}
         </p>
 
-        <div className="mt-5 text-[10.5px] opacity-75 space-y-1 break-words">
+        <div className="mt-5 text-[10.5px] text-slate-500 space-y-1 break-words">
           {p.email && <p><ContactIcon type="email" cv={cv} />{p.email}</p>}
           {p.telephone && <p><ContactIcon type="telephone" cv={cv} />{p.telephone}</p>}
           {p.adresse && <p><ContactIcon type="adresse" cv={cv} />{p.adresse}</p>}
@@ -52,13 +52,16 @@ export default function Template10({ cv }: { cv: CVData }) {
 
         {sidebar.map((section) => (
           <div key={section.id} className="mt-6 w-full text-left">
-            <h2 className="text-[10px] font-bold uppercase tracking-wide mb-2 text-center" style={{ color }}>
+            <h2
+              className="text-[10px] font-bold uppercase tracking-wide mb-2 text-center pb-1 border-b"
+              style={{ color, borderColor: `${color}40` }}
+            >
               {section.titre}
             </h2>
             {section.items.map((item) => (
               <div key={item.id} className="mb-1.5">
                 <p className="text-[11px] text-center">{item.titre}</p>
-                {item.niveau && <p className="text-[9.5px] opacity-60 text-center">{item.niveau}</p>}
+                {item.niveau && <p className="text-[9.5px] text-slate-400 text-center">{item.niveau}</p>}
               </div>
             ))}
           </div>
@@ -84,7 +87,7 @@ export default function Template10({ cv }: { cv: CVData }) {
                   <span className="font-semibold">{item.titre}</span>
                   {(item.dateDebut || item.dateFin) && (
                     <span className="text-[11px] text-slate-500">
-                      {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                      {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : formatDate(item.dateFin, cv.dateFormat, cv.langue)}
                     </span>
                   )}
                 </div>

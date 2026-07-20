@@ -32,6 +32,7 @@ interface AuthContextValue {
   paidUnlocked: boolean;
   authError: string;
   loadError: string;
+  debugInfo: string;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   saveProgress: (cv: CVData) => Promise<void>;
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [paidUnlocked, setPaidUnlocked] = useState(false);
   const [authError, setAuthError] = useState("");
   const [loadError, setLoadError] = useState("");
+  const [debugInfo, setDebugInfo] = useState("");
   const reset = useCVStore((s) => s.reset);
 
   useEffect(() => {
@@ -65,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(u);
         setLoadError("");
         if (u) {
+          setDebugInfo(`uid=${u.uid.slice(0, 8)}... | lecture en cours...`);
           const ref = doc(db, "users", u.uid);
           const snap = await getDoc(ref);
           if (snap.exists()) {
@@ -72,6 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (data.cv) reset(data.cv as CVData);
             setDownloadsUsed(data.downloadsUsed || 0);
             setPaidUnlocked(!!data.paidUnlocked);
+            setDebugInfo(
+              `uid=${u.uid.slice(0, 8)}... | document trouvé | téléchargements=${data.downloadsUsed || 0} | prénom sauvegardé="${data.cv?.personalInfo?.prenom || ""}"`
+            );
           } else {
             const fresh = defaultCV();
             await setDoc(ref, {
@@ -82,7 +88,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               createdAt: serverTimestamp(),
             });
             reset(fresh);
+            setDebugInfo(`uid=${u.uid.slice(0, 8)}... | AUCUN document trouvé, nouveau profil créé`);
           }
+        } else {
+          setDebugInfo("Aucun utilisateur connecté");
         }
       } catch (err: unknown) {
         console.error("Erreur lors du chargement du profil:", err);
@@ -177,6 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         paidUnlocked,
         authError,
         loadError,
+        debugInfo,
         signInWithGoogle,
         signOut,
         saveProgress,

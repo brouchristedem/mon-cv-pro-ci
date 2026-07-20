@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-6 py-4 max-w-5xl w-full mx-auto">
-        <span className="font-bold">Mon CV Pro CI</span>
+        <span className="font-extrabold text-xl tracking-wide uppercase">CV Pro CI</span>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16 max-w-2xl mx-auto">
@@ -43,10 +43,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      <footer className="text-center text-xs text-foreground/40 py-6">
-        Mon CV Pro CI — Abidjan, Côte d&apos;Ivoire
-      </footer>
     </div>
   );
 }

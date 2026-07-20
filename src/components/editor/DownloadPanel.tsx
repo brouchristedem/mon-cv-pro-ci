@@ -25,6 +25,7 @@ export default function DownloadPanel() {
   const [unlockError, setUnlockError] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [waveReference, setWaveReference] = useState("");
+  const [waveClicked, setWaveClicked] = useState(false);
 
   const isFree = downloadsUsed === 0;
   const canDownload = isFree || paidUnlocked || promoApplied;
@@ -62,11 +63,23 @@ export default function DownloadPanel() {
     }
   };
 
+  const isPlausibleWaveReference = (value: string) => {
+    const v = value.trim();
+    // Une vraie référence Wave est un identifiant alphanumérique, sans espace,
+    // mêlant lettres et chiffres. Ceci élimine les noms ou numéros de téléphone
+    // saisis à la place, mais ne peut pas garantir l'authenticité sans l'API Wave.
+    return /^[A-Za-z0-9]{8,}$/.test(v) && /[A-Za-z]/.test(v) && /[0-9]/.test(v);
+  };
+
   const handlePaidConfirmClick = async () => {
     if (!user) return;
     setUnlockError("");
     if (!waveReference.trim()) {
       setUnlockError(t.waveReferenceRequired);
+      return;
+    }
+    if (!isPlausibleWaveReference(waveReference)) {
+      setUnlockError(t.waveReferenceInvalid);
       return;
     }
     setConfirming(true);
@@ -109,32 +122,38 @@ export default function DownloadPanel() {
           </div>
           {promoError && <p className="text-xs text-red-500">{promoError}</p>}
 
-          <div className="rounded-xl border border-border p-3 text-xs space-y-2">
+          <div className="rounded-xl border border-border p-3 text-xs space-y-3">
             <a
               href={WAVE_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-blue-600 font-medium hover:underline"
+              onClick={() => setWaveClicked(true)}
+              className="flex items-center justify-center gap-2 w-full rounded-lg bg-[#1DC8CD] hover:opacity-90 text-white font-semibold py-3 text-sm transition"
             >
-              {t.payWithWave} {PRICE} FCFA {t.payWithWaveSuffix} <ExternalLink size={12} />
+              {t.payWithWave} {PRICE} FCFA {t.payWithWaveSuffix} <ExternalLink size={14} />
             </a>
-            <div>
-              <label className="text-[11px] text-foreground/60 block mb-1">{t.waveReferenceLabel}</label>
-              <input
-                value={waveReference}
-                onChange={(e) => setWaveReference(e.target.value)}
-                placeholder={t.waveReferencePlaceholder}
-                className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs outline-none"
-              />
-            </div>
-            <button
-              onClick={handlePaidConfirmClick}
-              disabled={confirming}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-medium py-2.5 transition disabled:opacity-60"
-            >
-              {confirming ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-              {t.paidConfirm}
-            </button>
+
+            {waveClicked && (
+              <div className="space-y-2 pt-1 border-t border-border">
+                <div>
+                  <label className="text-[11px] text-foreground/60 block mb-1">{t.waveReferenceLabel}</label>
+                  <input
+                    value={waveReference}
+                    onChange={(e) => setWaveReference(e.target.value)}
+                    placeholder={t.waveReferencePlaceholder}
+                    className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs outline-none"
+                  />
+                </div>
+                <button
+                  onClick={handlePaidConfirmClick}
+                  disabled={confirming}
+                  className="w-full flex items-center justify-center gap-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-medium py-2.5 transition disabled:opacity-60"
+                >
+                  {confirming ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
+                  {t.paidConfirm}
+                </button>
+              </div>
+            )}
           </div>
 
           <p className="text-[11px] text-foreground/50 flex items-center gap-1.5">
