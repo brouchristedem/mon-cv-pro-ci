@@ -24,6 +24,7 @@ export default function DownloadPanel() {
   const [confirmContext, setConfirmContext] = useState<"free" | "paid">("free");
   const [unlockError, setUnlockError] = useState("");
   const [confirming, setConfirming] = useState(false);
+  const [waveReference, setWaveReference] = useState("");
 
   const isFree = downloadsUsed === 0;
   const canDownload = isFree || paidUnlocked || promoApplied;
@@ -72,9 +73,13 @@ export default function DownloadPanel() {
   const handlePaidConfirmClick = async () => {
     if (!user) return;
     setUnlockError("");
+    if (!waveReference.trim()) {
+      setUnlockError(t.waveReferenceRequired);
+      return;
+    }
     setConfirming(true);
     try {
-      await confirmPaidDownload();
+      await confirmPaidDownload(waveReference.trim());
     } catch (err: unknown) {
       console.error("Erreur de confirmation de paiement:", err);
       const message = err instanceof Error ? err.message : String(err);
@@ -121,6 +126,15 @@ export default function DownloadPanel() {
             >
               {t.payWithWave} {price} FCFA {t.payWithWaveSuffix} <ExternalLink size={12} />
             </a>
+            <div>
+              <label className="text-[11px] text-foreground/60 block mb-1">{t.waveReferenceLabel}</label>
+              <input
+                value={waveReference}
+                onChange={(e) => setWaveReference(e.target.value)}
+                placeholder={t.waveReferencePlaceholder}
+                className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs outline-none"
+              />
+            </div>
             <button
               onClick={handlePaidConfirmClick}
               disabled={confirming}

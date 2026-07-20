@@ -32,7 +32,7 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   saveProgress: (cv: CVData) => Promise<void>;
   incrementDownloads: () => Promise<void>;
-  confirmPaidDownload: () => Promise<void>;
+  confirmPaidDownload: (waveReference: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -129,22 +129,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await setDoc(ref, { downloadsUsed: next, paidUnlocked: false }, { merge: true });
   }, [user, downloadsUsed]);
 
-  const confirmPaidDownload = useCallback(async () => {
-    if (!user) return;
-    setPaidUnlocked(true);
-    const ref = doc(db, "users", user.uid);
-    await setDoc(ref, { paidUnlocked: true }, { merge: true });
-    // Journal (facultatif) pour que l'admin puisse recouper avec son compte Wave.
-    try {
-      await addDoc(collection(db, "paymentClaims"), {
-        userId: user.uid,
-        email: user.email,
-        createdAt: serverTimestamp(),
-      });
-    } catch {
-      // non bloquant
-    }
-  }, [user]);
+  const confirmPaidDownload = useCallback(
+    async (waveReference: string) => {
+      if (!user) return;
+      setPaidUnlocked(true);
+      const ref = doc(db, "users", user.uid);
+      await setDoc(ref, { paidUnlocked: true, lastWaveReference: waveReference }, { merge: true });
+      // Journal (facultatif) pour que l'admin puisse recouper avec son compte Wave.
+      try {
+        await addDoc(collection(db, "paymentClaims"), {
+          userId: user.uid,
+          email: user.email,
+          waveReference,
+          createdAt: serverTimestamp(),
+        });
+      } catch {
+        // non bloquant
+      }
+    },
+    [user]
+  );
 
   const isAdmin = !!user?.email && user.email === ADMIN_EMAIL;
 

@@ -26,6 +26,7 @@ interface PromoCode {
 interface PaymentClaim {
   id: string;
   email: string;
+  waveReference?: string;
   createdAt?: { seconds: number };
 }
 
@@ -127,7 +128,10 @@ export default function AdminPage() {
           {claims.length === 0 && <p className="text-xs text-foreground/40">Aucune déclaration de paiement pour le moment.</p>}
           {claims.map((c) => (
             <div key={c.id} className="flex items-center justify-between rounded-lg border border-border p-2.5 text-xs">
-              <span>{c.email}</span>
+              <div>
+                <p>{c.email}</p>
+                {c.waveReference && <p className="text-foreground/40 font-mono text-[10px]">Réf : {c.waveReference}</p>}
+              </div>
               <span className="text-foreground/40">
                 {c.createdAt ? new Date(c.createdAt.seconds * 1000).toLocaleString("fr-FR") : ""}
               </span>
