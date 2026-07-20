@@ -6,6 +6,7 @@ import {
   DndContext,
   closestCenter,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -18,7 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { UI } from "@/lib/i18n";
-import { GripVertical, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { GripVertical, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { useState } from "react";
 
 function uid() {
@@ -45,6 +46,7 @@ function SortableSection({ section }: { section: Section }) {
   const set = useCVStore((s) => s.set);
   const removeSection = useCVStore((s) => s.removeSection);
   const [open, setOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
   const t = UI[cv.langue];
 
   const style = { transform: CSS.Transform.toString(transform), transition };
@@ -122,17 +124,35 @@ function SortableSection({ section }: { section: Section }) {
           {...attributes}
           {...listeners}
           onClick={(e) => e.stopPropagation()}
-          className="cursor-grab active:cursor-grabbing text-foreground/40 hover:text-foreground/70"
+          style={{ touchAction: "none" }}
+          className="cursor-grab active:cursor-grabbing text-foreground/40 hover:text-foreground/70 p-1.5 -m-1.5"
           aria-label="Déplacer"
         >
-          <GripVertical size={16} />
+          <GripVertical size={18} />
         </button>
-        <input
-          value={section.titre}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => renameSection(e.target.value)}
-          className="flex-1 bg-transparent text-sm font-medium outline-none min-w-0"
-        />
+        {renaming ? (
+          <input
+            autoFocus
+            value={section.titre}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => renameSection(e.target.value)}
+            onBlur={() => setRenaming(false)}
+            onKeyDown={(e) => e.key === "Enter" && setRenaming(false)}
+            className="flex-1 bg-transparent text-sm font-medium outline-none min-w-0 border-b border-blue-500"
+          />
+        ) : (
+          <span className="flex-1 text-sm font-medium truncate">{section.titre}</span>
+        )}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setRenaming((r) => !r);
+          }}
+          className="text-foreground/40 hover:text-foreground/70 p-1"
+          title="Renommer"
+        >
+          <Pencil size={14} />
+        </button>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -289,7 +309,10 @@ export default function SectionsEditor() {
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
   const addSection = useCVStore((s) => s.addSection);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } })
+  );
 
   const ordered = [...cv.sections].sort((a, b) => a.ordre - b.ordre);
   const labels = cv.langue === "en" ? SECTION_LABELS_EN : SECTION_LABELS_FR;
