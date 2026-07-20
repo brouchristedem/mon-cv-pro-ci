@@ -1,4 +1,6 @@
 import { CVData } from "@/lib/types";
+import { ContactIcon } from "./ContactIcon";
+import { formatDate } from "@/lib/formatDate";
 
 function photoClass(shape: string) {
   if (shape === "cercle") return "rounded-full";
@@ -60,7 +62,7 @@ export default function Template11({ cv }: { cv: CVData }) {
                       <span className="font-semibold">{item.titre}</span>
                       {(item.dateDebut || item.dateFin) && (
                         <span className="text-[11px] text-slate-400">
-                          {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                          {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                         </span>
                       )}
                     </div>

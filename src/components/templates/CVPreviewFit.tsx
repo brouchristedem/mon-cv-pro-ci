@@ -29,7 +29,6 @@ export default function CVPreviewFit({
       >
         <div
           id={printMode ? "cv-print-area" : undefined}
-          className={printMode && cv.compresserUnePage ? "compresser" : undefined}
           style={printMode ? { zoom: cv.tailleTexte / 13 } : undefined}
         >
           <CVRenderer cv={cv} />

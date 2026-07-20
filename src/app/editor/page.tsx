@@ -62,9 +62,31 @@ export default function EditorPage() {
           console.error("Erreur de sauvegarde:", err);
           setSaveError(err instanceof Error ? err.message : String(err));
         });
-    }, 800);
+    }, 400);
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    };
+  }, [cv, step, user, saveProgress]);
+
+  // Sauvegarde immédiate (sans attendre le délai) dès que la page se cache,
+  // se ferme, ou passe en arrière-plan — pour ne rien perdre lors d'une
+  // actualisation ou d'un changement d'onglet.
+  useEffect(() => {
+    if (!user) return;
+    const flush = () => {
+      if (saveTimeout.current) clearTimeout(saveTimeout.current);
+      saveProgress({ ...cv, step }).catch((err) => console.error("Erreur de sauvegarde:", err));
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flush);
+    window.addEventListener("beforeunload", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flush);
+      window.removeEventListener("beforeunload", flush);
     };
   }, [cv, step, user, saveProgress]);
 
@@ -191,27 +213,6 @@ export default function EditorPage() {
           {step === 3 && (
             <div className="space-y-5">
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold">{t.compressOnePage}</h3>
-                  <button
-                    type="button"
-                    onClick={() => set((c) => ({ ...c, compresserUnePage: !c.compresserUnePage }))}
-                    className={`w-10 h-6 rounded-full transition relative ${
-                      cv.compresserUnePage ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-600"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
-                        cv.compresserUnePage ? "left-4.5" : "left-0.5"
-                      }`}
-                    />
-                  </button>
-                </div>
-                <p className="text-[11px] text-foreground/50">
-                  {cv.compresserUnePage ? t.compressOn : t.compressOff}
-                </p>
-              </div>
-              <div>
                 <h3 className="text-sm font-semibold mb-2">{t.textSize}</h3>
                 <div className="flex items-center gap-3">
                   <input
@@ -233,6 +234,48 @@ export default function EditorPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold mb-2">{t.dateFormatLabel}</h3>
+                <div className="flex gap-2">
+                  {(["texte", "numerique"] as const).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => set((c) => ({ ...c, dateFormat: f }))}
+                      className={`px-3 py-2 text-xs rounded-lg border transition ${
+                        cv.dateFormat === f
+                          ? "border-blue-600 bg-blue-600/10 text-blue-600"
+                          : "border-border hover:bg-surface-muted"
+                      }`}
+                    >
+                      {f === "texte" ? t.dateFormatText : t.dateFormatNumeric}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold mb-2">{t.iconStyleLabel}</h3>
+                <div className="flex gap-2">
+                  {([
+                    ["aucune", t.iconNone],
+                    ["contour", t.iconOutline],
+                    ["remplie", t.iconFilled],
+                  ] as const).map(([val, label]) => (
+                    <button
+                      key={val}
+                      onClick={() => set((c) => ({ ...c, iconStyle: val }))}
+                      className={`px-3 py-2 text-xs rounded-lg border transition ${
+                        cv.iconStyle === val
+                          ? "border-blue-600 bg-blue-600/10 text-blue-600"
+                          : "border-border hover:bg-surface-muted"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

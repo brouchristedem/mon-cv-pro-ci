@@ -11,8 +11,9 @@ export function defaultCV(): CVData {
     langue: "fr",
     templateId: "template-01",
     couleurPrimaire: "#2563eb",
-    compresserUnePage: false,
     tailleTexte: 13,
+    dateFormat: "texte",
+    iconStyle: "aucune",
     step: 0,
     updatedAt: Date.now(),
     personalInfo: {

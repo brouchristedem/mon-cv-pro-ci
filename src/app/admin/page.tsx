@@ -64,12 +64,16 @@ export default function AdminPage() {
 
   const addPromo = async () => {
     if (!newCode.trim()) return;
-    await setDoc(doc(db, "promoCodes", newCode.trim().toUpperCase()), { actif: true });
+    await setDoc(doc(db, "promoCodes", newCode.trim()), { actif: true });
     setNewCode("");
   };
 
   const togglePromo = async (code: string, actif: boolean) => {
     await setDoc(doc(db, "promoCodes", code), { actif: !actif }, { merge: true });
+  };
+
+  const removeClaim = async (id: string) => {
+    await deleteDoc(doc(db, "paymentClaims", id));
   };
 
   const removePromo = async (code: string) => {
@@ -91,21 +95,7 @@ export default function AdminPage() {
       <h1 className="text-xl font-bold">Administration — Mon CV Pro CI</h1>
 
       <section>
-        <h2 className="text-sm font-semibold mb-1">Prix du téléchargement payant</h2>
-        <p className="text-xs text-foreground/60">
-          Le prix (505 FCFA) est fixé directement dans le lien de paiement Wave. Pour le changer,
-          modifiez le montant dans le lien Wave utilisé par le site (variable
-          NEXT_PUBLIC_WAVE_LINK sur Vercel), pas ici.
-        </p>
-      </section>
-
-      <section>
-        <h2 className="text-sm font-semibold mb-1">Comment fonctionne le paiement maintenant</h2>
-        <p className="text-xs text-foreground/60 mb-3">
-          La personne paie via Wave puis clique elle-même sur « J&apos;ai terminé mon paiement » —
-          le téléchargement se débloque immédiatement, sans validation de votre part. La liste
-          ci-dessous n&apos;est qu&apos;un journal indicatif pour recouper avec votre compte Wave si besoin.
-        </p>
+        <h2 className="text-sm font-semibold mb-1">Journal des paiements déclarés</h2>
         <div className="space-y-1.5 max-h-64 overflow-y-auto">
           {claims.length === 0 && <p className="text-xs text-foreground/40">Aucune déclaration de paiement pour le moment.</p>}
           {claims.map((c) => (
@@ -114,9 +104,14 @@ export default function AdminPage() {
                 <p>{c.email}</p>
                 {c.waveReference && <p className="text-foreground/40 font-mono text-[10px]">Réf : {c.waveReference}</p>}
               </div>
-              <span className="text-foreground/40">
-                {c.createdAt ? new Date(c.createdAt.seconds * 1000).toLocaleString("fr-FR") : ""}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-foreground/40">
+                  {c.createdAt ? new Date(c.createdAt.seconds * 1000).toLocaleString("fr-FR") : ""}
+                </span>
+                <button onClick={() => removeClaim(c.id)} className="text-red-400 hover:text-red-500">
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

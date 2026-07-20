@@ -1,4 +1,6 @@
 import { CVData } from "@/lib/types";
+import { ContactIcon } from "./ContactIcon";
+import { formatDate } from "@/lib/formatDate";
 
 function sortedVisible(cv: CVData) {
   return [...cv.sections].filter((s) => s.visible).sort((a, b) => a.ordre - b.ordre);
@@ -22,12 +24,12 @@ export default function Template09({ cv }: { cv: CVData }) {
         </h1>
         <p className="text-sm text-slate-500 mt-1">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
         <div className="flex justify-center flex-wrap gap-x-4 gap-y-0.5 mt-2 text-[11px] text-slate-500">
-          {p.email && <span>{p.email}</span>}
-          {p.telephone && <span>{p.telephone}</span>}
-          {p.adresse && <span>{p.adresse}</span>}
-          {p.permis && <span>{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
-            {p.linkedin && <span>{p.linkedin}</span>}
-            {p.siteWeb && <span>{p.siteWeb}</span>}
+          {p.email && <span><ContactIcon type="email" cv={cv} />{p.email}</span>}
+          {p.telephone && <span><ContactIcon type="telephone" cv={cv} />{p.telephone}</span>}
+          {p.adresse && <span><ContactIcon type="adresse" cv={cv} />{p.adresse}</span>}
+          {p.permis && <span><ContactIcon type="permis" cv={cv} />{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
+            {p.linkedin && <span><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</span>}
+            {p.siteWeb && <span><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</span>}
         </div>
       </div>
 
@@ -50,7 +52,7 @@ export default function Template09({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[11px] text-slate-500 italic">
-                        {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                       </span>
                     )}
                   </div>

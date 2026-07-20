@@ -59,8 +59,9 @@ export interface CVData {
   langue: "fr" | "en";
   templateId: string;
   couleurPrimaire: string;
-  compresserUnePage: boolean;
   tailleTexte: number; // en pt, ex: 10 à 24, comme Word/Excel
+  dateFormat: "texte" | "numerique"; // "Jan 2024" ou "01/2024"
+  iconStyle: "aucune" | "contour" | "remplie";
   personalInfo: PersonalInfo;
   sections: Section[];
   updatedAt: number;

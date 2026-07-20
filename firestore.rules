@@ -34,6 +34,8 @@ service cloud.firestore {
     match /paymentClaims/{claimId} {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
       allow read: if request.auth != null;
+      allow delete: if request.auth != null &&
+        request.auth.token.email == "brouchristedem@gmail.com";
     }
   }
 }

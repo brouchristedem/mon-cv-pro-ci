@@ -1,4 +1,6 @@
 import { CVData } from "@/lib/types";
+import { ContactIcon } from "./ContactIcon";
+import { formatDate } from "@/lib/formatDate";
 
 function photoClass(shape: string) {
   if (shape === "cercle") return "rounded-full";
@@ -35,12 +37,12 @@ export default function Template02({ cv }: { cv: CVData }) {
         <p className="text-[12px] opacity-90 mt-1">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
 
         <div className="mt-5 space-y-1 text-[11px] opacity-90 break-words">
-          {p.email && <p>{p.email}</p>}
-          {p.telephone && <p>{p.telephone}</p>}
-          {p.adresse && <p>{p.adresse}</p>}
-          {p.permis && <p>{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</p>}
-          {p.linkedin && <p>{p.linkedin}</p>}
-          {p.siteWeb && <p>{p.siteWeb}</p>}
+          {p.email && <p><ContactIcon type="email" cv={cv} />{p.email}</p>}
+          {p.telephone && <p><ContactIcon type="telephone" cv={cv} />{p.telephone}</p>}
+          {p.adresse && <p><ContactIcon type="adresse" cv={cv} />{p.adresse}</p>}
+          {p.permis && <p><ContactIcon type="permis" cv={cv} />{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</p>}
+          {p.linkedin && <p><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</p>}
+          {p.siteWeb && <p><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</p>}
         </div>
 
         {sidebar.map((section) => (
@@ -77,7 +79,7 @@ export default function Template02({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[11px] text-slate-500">
-                        {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                       </span>
                     )}
                   </div>

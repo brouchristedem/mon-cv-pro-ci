@@ -260,19 +260,25 @@ function SortableSection({ section }: { section: Section }) {
                     className="w-full bg-transparent text-xs outline-none"
                   />
                   <div className="grid grid-cols-2 gap-2">
-                    <input
-                      placeholder={t.dateStart}
-                      value={item.dateDebut || ""}
-                      onChange={(e) => updateItem(item.id, { dateDebut: e.target.value })}
-                      className="bg-transparent text-xs outline-none border border-border rounded px-2 py-1"
-                    />
-                    <input
-                      placeholder={t.dateEnd}
-                      value={item.dateFin || ""}
-                      disabled={item.enCours}
-                      onChange={(e) => updateItem(item.id, { dateFin: e.target.value })}
-                      className="bg-transparent text-xs outline-none border border-border rounded px-2 py-1 disabled:opacity-40"
-                    />
+                    <div>
+                      <label className="text-[10px] text-foreground/40 block mb-0.5">{t.dateStart}</label>
+                      <input
+                        type="month"
+                        value={item.dateDebut || ""}
+                        onChange={(e) => updateItem(item.id, { dateDebut: e.target.value })}
+                        className="w-full bg-transparent text-xs outline-none border border-border rounded px-2 py-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-foreground/40 block mb-0.5">{t.dateEnd}</label>
+                      <input
+                        type="month"
+                        value={item.dateFin || ""}
+                        disabled={item.enCours}
+                        onChange={(e) => updateItem(item.id, { dateFin: e.target.value })}
+                        className="w-full bg-transparent text-xs outline-none border border-border rounded px-2 py-1 disabled:opacity-40"
+                      />
+                    </div>
                   </div>
                   <label className="flex items-center gap-1.5 text-xs text-foreground/60">
                     <input

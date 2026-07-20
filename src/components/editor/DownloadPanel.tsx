@@ -37,8 +37,8 @@ export default function DownloadPanel() {
   const proceedDownload = async () => {
     setGenerating(true);
     try {
-      window.print();
       await incrementDownloads();
+      window.print();
       setPromoApplied(false);
       setConfirmOpen(false);
     } finally {
@@ -50,7 +50,7 @@ export default function DownloadPanel() {
     setPromoError("");
     if (!promoCode.trim()) return;
     try {
-      const snap = await getDoc(doc(db, "promoCodes", promoCode.trim().toUpperCase()));
+      const snap = await getDoc(doc(db, "promoCodes", promoCode.trim()));
       if (snap.exists() && snap.data().actif) {
         setPromoApplied(true);
       } else {

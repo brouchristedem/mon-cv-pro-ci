@@ -1,4 +1,6 @@
 import { CVData } from "@/lib/types";
+import { ContactIcon } from "./ContactIcon";
+import { formatDate } from "@/lib/formatDate";
 
 function photoClass(shape: string) {
   if (shape === "cercle") return "rounded-full";
@@ -39,12 +41,12 @@ export default function Template04({ cv }: { cv: CVData }) {
         </div>
       </div>
       <div className="flex justify-end gap-4 px-8 py-2 text-[11px] text-slate-500 border-b border-slate-100">
-        {p.email && <span>{p.email}</span>}
-        {p.telephone && <span>{p.telephone}</span>}
-        {p.adresse && <span>{p.adresse}</span>}
-        {p.permis && <span>{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
-            {p.linkedin && <span>{p.linkedin}</span>}
-            {p.siteWeb && <span>{p.siteWeb}</span>}
+        {p.email && <span><ContactIcon type="email" cv={cv} />{p.email}</span>}
+        {p.telephone && <span><ContactIcon type="telephone" cv={cv} />{p.telephone}</span>}
+        {p.adresse && <span><ContactIcon type="adresse" cv={cv} />{p.adresse}</span>}
+        {p.permis && <span><ContactIcon type="permis" cv={cv} />{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
+            {p.linkedin && <span><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</span>}
+            {p.siteWeb && <span><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</span>}
       </div>
 
       <div className="flex">
@@ -63,7 +65,7 @@ export default function Template04({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[11px] text-slate-500">
-                        {item.dateDebut} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
                       </span>
                     )}
                   </div>
