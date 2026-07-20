@@ -29,11 +29,11 @@ service cloud.firestore {
         request.auth.token.email == "brouchristedem@gmail.com";
     }
 
-    // Journal des déclarations de paiement (facultatif, pour recoupement admin)
+    // Journal des déclarations de paiement (lecture nécessaire pour vérifier qu'une
+    // référence Wave n'est pas réutilisée deux fois)
     match /paymentClaims/{claimId} {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow read: if request.auth != null &&
-        request.auth.token.email == "brouchristedem@gmail.com";
+      allow read: if request.auth != null;
     }
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useCVStore } from "@/lib/store";
 import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/lib/firebase";
@@ -9,6 +9,7 @@ import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, Phone } fro
 import { UI } from "@/lib/i18n";
 
 const WAVE_LINK = process.env.NEXT_PUBLIC_WAVE_LINK || "#";
+const PRICE = Number(process.env.NEXT_PUBLIC_PRICE || 505);
 const SUPPORT_PHONE = "+225 05 45 17 57 71";
 
 export default function DownloadPanel() {
@@ -18,7 +19,6 @@ export default function DownloadPanel() {
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
-  const [price, setPrice] = useState(500);
   const [generating, setGenerating] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmContext, setConfirmContext] = useState<"free" | "paid">("free");
@@ -28,14 +28,6 @@ export default function DownloadPanel() {
 
   const isFree = downloadsUsed === 0;
   const canDownload = isFree || paidUnlocked || promoApplied;
-
-  useEffect(() => {
-    getDoc(doc(db, "settings", "general"))
-      .then((snap) => {
-        if (snap.exists() && snap.data().prix) setPrice(snap.data().prix);
-      })
-      .catch((err) => console.error("Erreur de lecture du prix:", err));
-  }, []);
 
   const openConfirm = (context: "free" | "paid") => {
     setConfirmContext(context);
@@ -124,7 +116,7 @@ export default function DownloadPanel() {
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-blue-600 font-medium hover:underline"
             >
-              {t.payWithWave} {price} FCFA {t.payWithWaveSuffix} <ExternalLink size={12} />
+              {t.payWithWave} {PRICE} FCFA {t.payWithWaveSuffix} <ExternalLink size={12} />
             </a>
             <div>
               <label className="text-[11px] text-foreground/60 block mb-1">{t.waveReferenceLabel}</label>

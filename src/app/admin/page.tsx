@@ -33,7 +33,6 @@ interface PaymentClaim {
 export default function AdminPage() {
   const { user, loading, isAdmin } = useAuth();
   const router = useRouter();
-  const [price, setPrice] = useState(500);
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [newCode, setNewCode] = useState("");
   const [templateStatus, setTemplateStatus] = useState<Record<string, boolean>>({});
@@ -45,9 +44,6 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!isAdmin) return;
-    getDoc(doc(db, "settings", "general")).then((snap) => {
-      if (snap.exists() && snap.data().prix) setPrice(snap.data().prix);
-    });
     const unsubPromo = onSnapshot(collection(db, "promoCodes"), (snap) => {
       setPromoCodes(snap.docs.map((d) => ({ code: d.id, actif: d.data().actif })));
     });
@@ -65,10 +61,6 @@ export default function AdminPage() {
       unsubClaims();
     };
   }, [isAdmin]);
-
-  const savePrice = async () => {
-    await setDoc(doc(db, "settings", "general"), { prix: price }, { merge: true });
-  };
 
   const addPromo = async () => {
     if (!newCode.trim()) return;
@@ -99,22 +91,12 @@ export default function AdminPage() {
       <h1 className="text-xl font-bold">Administration — Mon CV Pro CI</h1>
 
       <section>
-        <h2 className="text-sm font-semibold mb-3">Prix du téléchargement (hors 1er gratuit)</h2>
-        <div className="flex gap-2 items-center">
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
-            className="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-          />
-          <span className="text-sm text-foreground/60">FCFA</span>
-          <button
-            onClick={savePrice}
-            className="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-          >
-            Enregistrer
-          </button>
-        </div>
+        <h2 className="text-sm font-semibold mb-1">Prix du téléchargement payant</h2>
+        <p className="text-xs text-foreground/60">
+          Le prix (505 FCFA) est fixé directement dans le lien de paiement Wave. Pour le changer,
+          modifiez le montant dans le lien Wave utilisé par le site (variable
+          NEXT_PUBLIC_WAVE_LINK sur Vercel), pas ici.
+        </p>
       </section>
 
       <section>

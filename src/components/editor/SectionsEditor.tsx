@@ -114,10 +114,14 @@ function SortableSection({ section }: { section: Section }) {
       style={style}
       className="rounded-xl border border-border bg-surface overflow-hidden"
     >
-      <div className="flex items-center gap-2 px-3 py-2.5">
+      <div
+        className="flex items-center gap-2 px-3 py-2.5 cursor-pointer select-none"
+        onClick={() => setOpen((o) => !o)}
+      >
         <button
           {...attributes}
           {...listeners}
+          onClick={(e) => e.stopPropagation()}
           className="cursor-grab active:cursor-grabbing text-foreground/40 hover:text-foreground/70"
           aria-label="Déplacer"
         >
@@ -125,17 +129,49 @@ function SortableSection({ section }: { section: Section }) {
         </button>
         <input
           value={section.titre}
+          onClick={(e) => e.stopPropagation()}
           onChange={(e) => renameSection(e.target.value)}
           className="flex-1 bg-transparent text-sm font-medium outline-none min-w-0"
         />
-        <button onClick={toggleVisible} className="text-foreground/50 hover:text-foreground" title="Afficher/masquer">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleVisible();
+          }}
+          className="text-foreground/50 hover:text-foreground"
+          title="Afficher/masquer"
+        >
           {section.visible ? <Eye size={16} /> : <EyeOff size={16} />}
         </button>
-        <button onClick={() => setOpen((o) => !o)} className="text-foreground/50 hover:text-foreground">
-          {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        <button onClick={() => removeSection(section.id)} className="text-red-400 hover:text-red-500">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            removeSection(section.id);
+          }}
+          className="text-red-400 hover:text-red-500"
+        >
           <Trash2 size={16} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((o) => !o);
+          }}
+          className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg transition ${
+            open
+              ? "bg-blue-600 text-white"
+              : "bg-blue-600/10 text-blue-600 hover:bg-blue-600/20"
+          }`}
+        >
+          {open ? (
+            <>
+              Fermer <ChevronUp size={14} />
+            </>
+          ) : (
+            <>
+              Modifier <ChevronDown size={14} />
+            </>
+          )}
         </button>
       </div>
 
@@ -272,6 +308,9 @@ export default function SectionsEditor() {
 
   return (
     <div className="space-y-3">
+      <p className="text-[11px] text-foreground/50">
+        Touchez « Modifier » sur une rubrique pour ajouter ou modifier son contenu.
+      </p>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={ordered.map((s) => s.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">

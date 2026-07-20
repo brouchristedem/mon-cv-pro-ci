@@ -15,6 +15,9 @@ import {
   setDoc,
   addDoc,
   collection,
+  getDocs,
+  query,
+  where,
   serverTimestamp,
 } from "firebase/firestore";
 import { auth, googleProvider, db } from "./firebase";
@@ -28,6 +31,7 @@ interface AuthContextValue {
   downloadsUsed: number;
   paidUnlocked: boolean;
   authError: string;
+  loadError: string;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   saveProgress: (cv: CVData) => Promise<void>;
@@ -45,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [downloadsUsed, setDownloadsUsed] = useState(0);
   const [paidUnlocked, setPaidUnlocked] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const reset = useCVStore((s) => s.reset);
 
   useEffect(() => {
@@ -58,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsub = onAuthStateChanged(auth, async (u) => {
       try {
         setUser(u);
+        setLoadError("");
         if (u) {
           const ref = doc(db, "users", u.uid);
           const snap = await getDoc(ref);
@@ -78,8 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             reset(fresh);
           }
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Erreur lors du chargement du profil:", err);
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
       } finally {
         setLoading(false);
       }
@@ -132,10 +140,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const confirmPaidDownload = useCallback(
     async (waveReference: string) => {
       if (!user) return;
+      const existing = await getDocs(
+        query(collection(db, "paymentClaims"), where("waveReference", "==", waveReference))
+      );
+      if (!existing.empty) {
+        throw new Error(
+          "Cette référence a déjà été utilisée pour un autre téléchargement. Vérifiez le numéro affiché par Wave après votre paiement."
+        );
+      }
       setPaidUnlocked(true);
       const ref = doc(db, "users", user.uid);
       await setDoc(ref, { paidUnlocked: true, lastWaveReference: waveReference }, { merge: true });
-      // Journal (facultatif) pour que l'admin puisse recouper avec son compte Wave.
       try {
         await addDoc(collection(db, "paymentClaims"), {
           userId: user.uid,
@@ -161,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         downloadsUsed,
         paidUnlocked,
         authError,
+        loadError,
         signInWithGoogle,
         signOut,
         saveProgress,

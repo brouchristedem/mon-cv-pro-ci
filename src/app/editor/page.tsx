@@ -27,7 +27,7 @@ import Link from "next/link";
 
 export default function EditorPage() {
   const router = useRouter();
-  const { user, loading, isAdmin, signOut, saveProgress } = useAuth();
+  const { user, loading, isAdmin, signOut, saveProgress, loadError } = useAuth();
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
   const undo = useCVStore((s) => s.undo);
@@ -39,6 +39,7 @@ export default function EditorPage() {
   const t = UI[cv.langue];
 
   const [step, setStep] = useState(0);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -55,7 +56,12 @@ export default function EditorPage() {
     if (!user) return;
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
-      saveProgress({ ...cv, step }).catch((err) => console.error("Erreur de sauvegarde:", err));
+      saveProgress({ ...cv, step })
+        .then(() => setSaveError(""))
+        .catch((err) => {
+          console.error("Erreur de sauvegarde:", err);
+          setSaveError(err instanceof Error ? err.message : String(err));
+        });
     }, 800);
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
@@ -137,6 +143,18 @@ export default function EditorPage() {
           </button>
         </div>
       </header>
+
+      {(loadError || saveError) && (
+        <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-[11px] text-red-700 break-words">
+          {loadError && (
+            <p>
+              Erreur de chargement de votre profil : {loadError} — votre progression risque de ne
+              pas être sauvegardée tant que ceci n&apos;est pas résolu.
+            </p>
+          )}
+          {saveError && <p>Erreur de sauvegarde : {saveError}</p>}
+        </div>
+      )}
 
       <div className="flex items-center gap-1 px-4 lg:px-6 py-2 overflow-x-auto border-b border-border text-xs">
         {t.steps.map((label, i) => (
