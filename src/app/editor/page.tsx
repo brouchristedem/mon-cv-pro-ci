@@ -27,7 +27,7 @@ import Link from "next/link";
 
 export default function EditorPage() {
   const router = useRouter();
-  const { user, loading, isAdmin, signOut, saveProgress, loadError, debugInfo } = useAuth();
+  const { user, loading, isAdmin, signOut, saveProgress, loadError, debugInfo, dataLoaded } = useAuth();
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
   const undo = useCVStore((s) => s.undo);
@@ -55,7 +55,7 @@ export default function EditorPage() {
   }, [user?.uid]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !dataLoaded) return;
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
       saveProgress({ ...cv, step })
@@ -71,13 +71,13 @@ export default function EditorPage() {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [cv, step, user, saveProgress]);
+  }, [cv, step, user, dataLoaded, saveProgress]);
 
   // Sauvegarde immédiate (sans attendre le délai) dès que la page se cache,
   // se ferme, ou passe en arrière-plan — pour ne rien perdre lors d'une
   // actualisation ou d'un changement d'onglet.
   useEffect(() => {
-    if (!user) return;
+    if (!user || !dataLoaded) return;
     const flush = () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
       saveProgress({ ...cv, step })
@@ -97,7 +97,7 @@ export default function EditorPage() {
       window.removeEventListener("beforeunload", flush);
       document.removeEventListener("focusout", flush);
     };
-  }, [cv, step, user, saveProgress]);
+  }, [cv, step, user, dataLoaded, saveProgress]);
 
   const goStep = useCallback(
     (n: number) => {
@@ -108,7 +108,7 @@ export default function EditorPage() {
     [set, t.steps.length]
   );
 
-  if (loading || !user) {
+  if (loading || !user || !dataLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-foreground/60">
         {t.loading}

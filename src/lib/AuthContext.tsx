@@ -33,6 +33,7 @@ interface AuthContextValue {
   authError: string;
   loadError: string;
   debugInfo: string;
+  dataLoaded: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   saveProgress: (cv: CVData) => Promise<void>;
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authError, setAuthError] = useState("");
   const [loadError, setLoadError] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
+  const [dataLoaded, setDataLoaded] = useState(false);
   const reset = useCVStore((s) => s.reset);
 
   useEffect(() => {
@@ -66,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         setUser(u);
         setLoadError("");
+        setDataLoaded(false);
         if (u) {
           setDebugInfo(`uid=${u.uid.slice(0, 8)}... | lecture en cours...`);
           const ref = doc(db, "users", u.uid);
@@ -90,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             reset(fresh);
             setDebugInfo(`uid=${u.uid.slice(0, 8)}... | AUCUN document trouvé, nouveau profil créé`);
           }
+          setDataLoaded(true);
         } else {
           setDebugInfo("Aucun utilisateur connecté");
         }
@@ -196,6 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authError,
         loadError,
         debugInfo,
+        dataLoaded,
         signInWithGoogle,
         signOut,
         saveProgress,
