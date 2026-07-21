@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
 
@@ -51,7 +52,7 @@ export default function Template11({ cv }: { cv: CVData }) {
               {String(idx + 1).padStart(2, "0")}
             </span>
             <div>
-              <h2 className="text-[12px] font-bold uppercase tracking-wide mb-2">{section.titre}</h2>
+              <h2 className="text-[12px] font-bold uppercase tracking-wide mb-2"><SectionIcon type={section.type} cv={cv} />{section.titre}</h2>
               <div className={["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne" ? "flex flex-wrap gap-x-3 gap-y-1 items-baseline" : "space-y-2"}>
                 {section.items.length === 0 && (
                   <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>

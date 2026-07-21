@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
 
@@ -56,7 +57,7 @@ export default function Template10({ cv }: { cv: CVData }) {
               className="text-[10px] font-bold uppercase tracking-wide mb-2 text-center pb-1 border-b"
               style={{ color, borderColor: `${color}40` }}
             >
-              {section.titre}
+              <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
             <div
               className={
@@ -80,7 +81,7 @@ export default function Template10({ cv }: { cv: CVData }) {
         {main.map((section) => (
           <div key={section.id} className="relative pl-4 border-l-2" style={{ borderColor: `${color}40` }}>
             <h2 className="text-[13px] font-bold uppercase tracking-wide mb-2" style={{ color }}>
-              {section.titre}
+              <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
             {section.items.length === 0 && (
               <p className="text-slate-400 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>

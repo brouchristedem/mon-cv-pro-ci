@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
 
@@ -48,7 +49,7 @@ export default function Template02({ cv }: { cv: CVData }) {
         {sidebar.map((section) => (
           <div key={section.id} className="mt-6">
             <h2 className="text-[11px] font-bold uppercase tracking-wide border-b border-white/30 pb-1 mb-2">
-              {section.titre}
+              <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
             {section.items.length === 0 && (
               <p className="text-[11px] opacity-60 italic">—</p>
@@ -67,7 +68,7 @@ export default function Template02({ cv }: { cv: CVData }) {
         {main.map((section) => (
           <div key={section.id}>
             <h2 className="text-[13px] font-bold uppercase tracking-wide mb-2" style={{ color }}>
-              {section.titre}
+              <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
             <div className={["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne" ? "flex flex-wrap gap-x-3 gap-y-1 items-baseline" : "space-y-2"}>
               {section.items.length === 0 && (

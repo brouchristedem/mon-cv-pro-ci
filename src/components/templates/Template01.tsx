@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
 
@@ -49,7 +50,7 @@ export default function Template01({ cv }: { cv: CVData }) {
               className="text-[13px] font-bold uppercase tracking-wide mb-2 pb-1"
               style={{ color, borderBottom: `1px solid ${color}33` }}
             >
-              {section.titre}
+              <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
             <div className={["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne" ? "flex flex-wrap gap-x-3 gap-y-1 items-baseline" : "space-y-2"}>
               {section.items.length === 0 && (

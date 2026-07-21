@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
 
@@ -47,7 +48,7 @@ export default function Template03({ cv }: { cv: CVData }) {
           <div key={section.id}>
             <div className="flex items-center gap-3 mb-3">
               <span className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color }}>
-                {section.titre}
+                <SectionIcon type={section.type} cv={cv} />{section.titre}
               </span>
               <div className="flex-1 h-px bg-slate-200" />
             </div>

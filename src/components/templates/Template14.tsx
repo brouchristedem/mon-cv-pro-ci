@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
 
@@ -54,7 +55,7 @@ export default function Template14({ cv }: { cv: CVData }) {
           {main.map((section) => (
             <div key={section.id} className="border border-slate-200 rounded-lg p-3">
               <h2 className="text-[11px] font-bold uppercase mb-2" style={{ color }}>
-                {section.titre}
+                <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
               {section.items.length === 0 && (
                 <p className="text-slate-300 italic text-[11.5px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
@@ -89,7 +90,7 @@ export default function Template14({ cv }: { cv: CVData }) {
           {sidebar.map((section) => (
             <div key={section.id} className="border border-slate-200 rounded-lg p-3">
               <h2 className="text-[11px] font-bold uppercase mb-2" style={{ color }}>
-                {section.titre}
+                <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
               <div
                 className={

@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
 
@@ -52,7 +53,7 @@ export default function Template07({ cv }: { cv: CVData }) {
         {sortedVisible(cv).map((section) => (
           <div key={section.id}>
             <h2 className="text-[12px] font-serif italic mb-3" style={{ color }}>
-              {section.titre}
+              <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
             <div className={["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne" ? "flex flex-wrap gap-x-3 gap-y-1 items-baseline" : "space-y-3"}>
               {section.items.length === 0 && (

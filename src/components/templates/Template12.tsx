@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
 
@@ -54,7 +55,7 @@ export default function Template12({ cv }: { cv: CVData }) {
               <h2
                 className="text-[11px] font-bold uppercase tracking-widest mb-2 pb-1 border-b border-slate-200"
               >
-                {section.titre}
+                <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
               {section.items.length === 0 && (
                 <p className="text-slate-300 italic text-[11.5px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
@@ -92,7 +93,7 @@ export default function Template12({ cv }: { cv: CVData }) {
                 className="text-[11px] font-bold uppercase tracking-widest mb-2 pb-1 border-b border-slate-200"
                 style={{ color }}
               >
-                {section.titre}
+                <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
               <div
                 className={
