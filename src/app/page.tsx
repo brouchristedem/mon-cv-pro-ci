@@ -1,7 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Sparkles, Palette, Download } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const ctaHref = !loading && user ? "/editor" : "/login";
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-6 py-4 max-w-5xl w-full mx-auto">
@@ -16,10 +22,10 @@ export default function Home() {
           15 modèles élégants, personnalisables en temps réel.
         </p>
         <p className="text-sm font-medium mb-8 px-4 py-2 rounded-full bg-blue-600/10 text-blue-700 dark:text-blue-400">
-          1er CV téléchargé gratuitement — les suivants à 500 FCFA via Wave
+          1er CV téléchargé gratuitement — les suivants à 505 FCFA via Wave
         </p>
         <Link
-          href="/login"
+          href={ctaHref}
           className="flex items-center gap-2 rounded-xl bg-blue-600 text-white px-6 py-3 font-medium hover:bg-blue-700 transition"
         >
           Créer mon CV <ArrowRight size={16} />

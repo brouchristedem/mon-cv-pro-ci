@@ -69,7 +69,7 @@ export default function Template02({ cv }: { cv: CVData }) {
             <h2 className="text-[13px] font-bold uppercase tracking-wide mb-2" style={{ color }}>
               {section.titre}
             </h2>
-            <div className="space-y-2">
+            <div className={["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne" ? "flex flex-wrap gap-x-3 gap-y-1 items-baseline" : "space-y-2"}>
               {section.items.length === 0 && (
                 <p className="text-slate-400 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
@@ -79,14 +79,14 @@ export default function Template02({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[11px] text-slate-500">
-                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : formatDate(item.dateFin, cv.dateFormat, cv.langue)}
                       </span>
                     )}
                   </div>
                   {item.sousTitre && (
                     <p className="text-[12px] text-slate-600">
-                      {item.sousTitre}
-                      {item.lieu ? ` · ${item.lieu}` : ""}
+                      <span className="font-medium">{item.sousTitre}</span>
+                      {item.lieu && <span className="italic text-slate-400"> · {item.lieu}</span>}
                     </p>
                   )}
                   {item.description && (

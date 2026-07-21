@@ -4,6 +4,8 @@ export const UI = {
     previous: "Précédent",
     next: "Suivant",
     skipToDownload: "Passer directement au téléchargement",
+    saveCV: "Enregistrer mon CV (sans télécharger)",
+    savedConfirm: "✓ CV enregistré",
     undo: "Annuler",
     redo: "Rétablir",
     theme: "Thème",
@@ -93,12 +95,21 @@ export const UI = {
       "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
     confirmCancel: "Annuler",
     confirmProceed: "Confirmer et télécharger",
+    statusFree: "Ce téléchargement est votre 1er téléchargement, il est gratuit.",
+    statusPromo: "Ce téléchargement est gratuit grâce au code promo.",
+    statusPaid: "Paiement effectué — vous pouvez télécharger votre CV.",
+    downloadWarning:
+      "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
+    paidFlowWarning:
+      "Une fois votre référence renseignée et validée, vous devrez obligatoirement télécharger votre CV : aucun retour en arrière ne sera possible ensuite.",
   },
   en: {
     steps: ["Information", "Sections", "Template & Color", "Layout", "Download"],
     previous: "Previous",
     next: "Next",
     skipToDownload: "Skip directly to download",
+    saveCV: "Save my CV (without downloading)",
+    savedConfirm: "✓ CV saved",
     undo: "Undo",
     redo: "Redo",
     theme: "Theme",
@@ -183,6 +194,13 @@ export const UI = {
       "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
     confirmCancel: "Cancel",
     confirmProceed: "Confirm and download",
+    statusFree: "This is your 1st download, it's free.",
+    statusPromo: "This download is free thanks to the promo code.",
+    statusPaid: "Payment completed — you can download your CV.",
+    downloadWarning:
+      "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
+    paidFlowWarning:
+      "Once your reference is entered and validated, you must download your CV: there is no going back after that.",
   },
 } as const;
 

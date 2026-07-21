@@ -53,7 +53,7 @@ export default function Template13({ cv }: { cv: CVData }) {
             <h2 className="text-[12.5px] font-bold uppercase mb-2" style={{ color }}>
               {section.titre}
             </h2>
-            <div className="space-y-2">
+            <div className={["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne" ? "flex flex-wrap gap-x-3 gap-y-1 items-baseline" : "space-y-2"}>
               {section.items.length === 0 && (
                 <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
@@ -63,11 +63,16 @@ export default function Template13({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[10.5px] text-slate-400">
-                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : formatDate(item.dateFin, cv.dateFormat, cv.langue)}
                       </span>
                     )}
                   </div>
-                  {item.sousTitre && <p className="text-[12px] text-slate-500">{item.sousTitre}</p>}
+                  {(item.sousTitre || item.lieu) && (
+                  <p className="text-[12px] text-slate-500">
+                    {item.sousTitre && <span className="font-medium">{item.sousTitre}</span>}
+                    {item.lieu && <span className="italic text-slate-400">{item.sousTitre ? " · " : ""}{item.lieu}</span>}
+                  </p>
+                )}
                   {item.niveau && <p className="text-[12px] text-slate-400">{item.niveau}</p>}
                   {item.description && (
                     <p className="text-[12px] text-slate-500 mt-0.5 whitespace-pre-line">

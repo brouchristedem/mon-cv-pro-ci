@@ -65,11 +65,16 @@ export default function Template14({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[10px] text-slate-400">
-                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : formatDate(item.dateFin, cv.dateFormat, cv.langue)}
                       </span>
                     )}
                   </div>
-                  {item.sousTitre && <p className="text-[11.5px] text-slate-500">{item.sousTitre}</p>}
+                  {(item.sousTitre || item.lieu) && (
+                  <p className="text-[11.5px] text-slate-500">
+                    {item.sousTitre && <span className="font-medium">{item.sousTitre}</span>}
+                    {item.lieu && <span className="italic text-slate-400">{item.sousTitre ? " · " : ""}{item.lieu}</span>}
+                  </p>
+                )}
                   {item.description && (
                     <p className="text-[11.5px] text-slate-500 mt-0.5 whitespace-pre-line">
                       {item.description}
@@ -86,12 +91,20 @@ export default function Template14({ cv }: { cv: CVData }) {
               <h2 className="text-[11px] font-bold uppercase mb-2" style={{ color }}>
                 {section.titre}
               </h2>
-              {section.items.map((item) => (
-                <div key={item.id} className="mb-1">
-                  <p className="text-[11px] font-medium">{item.titre}</p>
-                  {item.niveau && <p className="text-[10px] text-slate-400">{item.niveau}</p>}
-                </div>
-              ))}
+              <div
+                className={
+                  ["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne"
+                    ? "flex flex-wrap gap-x-2.5 gap-y-1"
+                    : ""
+                }
+              >
+                {section.items.map((item) => (
+                  <div key={item.id} className="mb-1">
+                    <p className="text-[11px] font-medium">{item.titre}</p>
+                    {item.niveau && <p className="text-[10px] text-slate-400">{item.niveau}</p>}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

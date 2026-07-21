@@ -68,7 +68,12 @@ export default function Template06({ cv }: { cv: CVData }) {
                       </span>
                     )}
                   </div>
-                  {item.sousTitre && <p className="text-[12px] text-slate-500">{item.sousTitre}</p>}
+                  {(item.sousTitre || item.lieu) && (
+                  <p className="text-[12px] text-slate-500">
+                    {item.sousTitre && <span className="font-medium">{item.sousTitre}</span>}
+                    {item.lieu && <span className="italic text-slate-400">{item.sousTitre ? " · " : ""}{item.lieu}</span>}
+                  </p>
+                )}
                   {item.description && (
                     <p className="text-[12px] text-slate-500 mt-0.5 whitespace-pre-line">
                       {item.description}

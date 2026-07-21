@@ -42,7 +42,7 @@ export default function Template09({ cv }: { cv: CVData }) {
             >
               {section.titre}
             </h2>
-            <div className="space-y-2.5">
+            <div className={["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne" ? "flex flex-wrap gap-x-3 gap-y-1 items-baseline" : "space-y-2.5"}>
               {section.items.length === 0 && (
                 <p className="text-slate-300 italic text-[12px] text-center">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
@@ -52,14 +52,14 @@ export default function Template09({ cv }: { cv: CVData }) {
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[11px] text-slate-500 italic">
-                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                        {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : formatDate(item.dateFin, cv.dateFormat, cv.langue)}
                       </span>
                     )}
                   </div>
                   {item.sousTitre && (
                     <p className="text-[12px] text-slate-600">
-                      {item.sousTitre}
-                      {item.lieu ? `, ${item.lieu}` : ""}
+                      <span className="font-medium">{item.sousTitre}</span>
+                      {item.lieu && <span className="italic text-slate-400">, {item.lieu}</span>}
                     </p>
                   )}
                   {item.niveau && <p className="text-[12px] text-slate-500">{item.niveau}</p>}

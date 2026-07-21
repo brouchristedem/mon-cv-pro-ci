@@ -5,7 +5,7 @@ import { useCVStore } from "@/lib/store";
 import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, Phone } from "lucide-react";
+import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, Phone, Info } from "lucide-react";
 import { UI } from "@/lib/i18n";
 
 const WAVE_LINK = process.env.NEXT_PUBLIC_WAVE_LINK || "#";
@@ -20,8 +20,6 @@ export default function DownloadPanel() {
   const [promoError, setPromoError] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmContext, setConfirmContext] = useState<"free" | "paid">("free");
   const [unlockError, setUnlockError] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [waveReference, setWaveReference] = useState("");
@@ -30,18 +28,12 @@ export default function DownloadPanel() {
   const isFree = downloadsUsed === 0;
   const canDownload = isFree || paidUnlocked || promoApplied;
 
-  const openConfirm = (context: "free" | "paid") => {
-    setConfirmContext(context);
-    setConfirmOpen(true);
-  };
-
   const proceedDownload = async () => {
     setGenerating(true);
     try {
       await incrementDownloads();
       window.print();
       setPromoApplied(false);
-      setConfirmOpen(false);
     } finally {
       setGenerating(false);
     }
@@ -65,8 +57,6 @@ export default function DownloadPanel() {
 
   const isPlausibleWaveReference = (value: string) => {
     const v = value.trim().toUpperCase();
-    // Format observé des références de transaction Wave : T_ suivi de 16
-    // caractères alphanumériques (ex : T_2SKTWTSDZMCN24YV).
     return /^T_[A-Z0-9]{16}$/.test(v);
   };
 
@@ -93,16 +83,35 @@ export default function DownloadPanel() {
     }
   };
 
+  const statusMessage = isFree
+    ? t.statusFree
+    : promoApplied
+    ? t.statusPromo
+    : paidUnlocked
+    ? t.statusPaid
+    : null;
+
   return (
     <div className="space-y-3">
+      {statusMessage && (
+        <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-2.5 text-xs text-blue-700">
+          <Info size={14} className="flex-shrink-0 mt-0.5" />
+          <span>{statusMessage}</span>
+        </div>
+      )}
+
       {canDownload ? (
-        <button
-          onClick={() => openConfirm(isFree ? "free" : "paid")}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition"
-        >
-          <Download size={18} />
-          {isFree ? t.downloadFree : t.paymentValidated}
-        </button>
+        <>
+          <p className="text-[11px] text-amber-600 font-medium">{t.downloadWarning}</p>
+          <button
+            onClick={proceedDownload}
+            disabled={generating}
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition disabled:opacity-60"
+          >
+            {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
+            {isFree || promoApplied ? t.downloadFree : t.paymentValidated}
+          </button>
+        </>
       ) : (
         <>
           <div className="flex gap-2">
@@ -143,6 +152,7 @@ export default function DownloadPanel() {
                     className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs outline-none"
                   />
                 </div>
+                <p className="text-[11px] text-amber-600">{t.paidFlowWarning}</p>
                 <button
                   onClick={handlePaidConfirmClick}
                   disabled={confirming}
@@ -165,41 +175,6 @@ export default function DownloadPanel() {
         <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 p-2.5 text-xs text-red-700">
           <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
           <span className="break-words">{unlockError}</span>
-        </div>
-      )}
-
-      {confirmOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
-          onClick={() => !generating && setConfirmOpen(false)}
-        >
-          <div
-            className="bg-surface rounded-xl max-w-sm w-full p-5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-sm font-semibold mb-2">{t.confirmTitle}</h3>
-            <p className="text-xs text-foreground/70 mb-2">
-              {confirmContext === "free" ? t.confirmFreeText : t.confirmPaidText}
-            </p>
-            <p className="text-xs text-amber-600 font-medium mb-4">{t.confirmWarning}</p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setConfirmOpen(false)}
-                disabled={generating}
-                className="flex-1 py-2 rounded-lg border border-border text-sm hover:bg-surface-muted transition disabled:opacity-50"
-              >
-                {t.confirmCancel}
-              </button>
-              <button
-                onClick={proceedDownload}
-                disabled={generating}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60"
-              >
-                {generating && <Loader2 className="animate-spin" size={14} />}
-                {t.confirmProceed}
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

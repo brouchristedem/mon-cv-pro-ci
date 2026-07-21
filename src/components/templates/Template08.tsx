@@ -56,12 +56,20 @@ export default function Template08({ cv }: { cv: CVData }) {
               {section.titre}
             </h2>
             {section.items.length === 0 && <p className="text-slate-300 italic text-[10px]">—</p>}
-            {section.items.map((item) => (
-              <div key={item.id} className="mb-1">
-                <p className="font-medium">{item.titre}</p>
-                {item.niveau && <p className="text-[9.5px] text-slate-400">{item.niveau}</p>}
-              </div>
-            ))}
+            <div
+              className={
+                ["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne"
+                  ? "flex flex-wrap gap-x-2.5 gap-y-1"
+                  : ""
+              }
+            >
+              {section.items.map((item) => (
+                <div key={item.id} className="mb-1">
+                  <p className="font-medium">{item.titre}</p>
+                  {item.niveau && <p className="text-[9.5px] text-slate-400">{item.niveau}</p>}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -81,11 +89,16 @@ export default function Template08({ cv }: { cv: CVData }) {
                   <span className="font-semibold">{item.titre}</span>
                   {(item.dateDebut || item.dateFin) && (
                     <span className="text-[9.5px] text-slate-400">
-                      {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : item.dateFin}
+                      {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} — {item.enCours ? (cv.langue === "en" ? "Present" : "Aujourd'hui") : formatDate(item.dateFin, cv.dateFormat, cv.langue)}
                     </span>
                   )}
                 </div>
-                {item.sousTitre && <p className="text-[10.5px] text-slate-500">{item.sousTitre}</p>}
+                {(item.sousTitre || item.lieu) && (
+                  <p className="text-[10.5px] text-slate-500">
+                    {item.sousTitre && <span className="font-medium">{item.sousTitre}</span>}
+                    {item.lieu && <span className="italic text-slate-400">{item.sousTitre ? " · " : ""}{item.lieu}</span>}
+                  </p>
+                )}
                 {item.description && (
                   <p className="text-[10.5px] text-slate-500 whitespace-pre-line">{item.description}</p>
                 )}

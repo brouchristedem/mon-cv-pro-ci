@@ -10,6 +10,11 @@ const PALETTE = [
   "#0f172a", "#334155", "#78716c", "#1e293b", "#0d9488",
 ];
 
+const BG_PALETTE = [
+  "#ffffff", "#f8fafc", "#f1f5f9", "#fef9f5", "#fefce8",
+  "#f0fdf4", "#eff6ff", "#faf5ff", "#fdf2f8", "#fef2f2",
+];
+
 export default function ColorPicker() {
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
@@ -41,20 +46,35 @@ export default function ColorPicker() {
           className="w-8 h-8 rounded cursor-pointer bg-transparent border border-border"
         />
       </div>
-      <div className="flex items-center gap-2 pt-2 border-t border-border">
-        <label className="text-xs text-foreground/60">{t.backgroundColor}</label>
-        <input
-          type="color"
-          value={cv.couleurFond}
-          onChange={(e) => set((c) => ({ ...c, couleurFond: e.target.value }))}
-          className="w-8 h-8 rounded cursor-pointer bg-transparent border border-border"
-        />
-        <button
-          onClick={() => set((c) => ({ ...c, couleurFond: "#ffffff" }))}
-          className="text-[11px] text-foreground/40 hover:text-foreground/70 underline"
-        >
-          {t.resetWhite}
-        </button>
+      <div className="pt-2 border-t border-border">
+        <label className="text-xs text-foreground/60 block mb-2">{t.backgroundColor}</label>
+        <div className="grid grid-cols-8 gap-2 mb-2">
+          {BG_PALETTE.map((bg) => (
+            <button
+              key={bg}
+              onClick={() => set((c) => ({ ...c, couleurFond: bg }))}
+              className={`w-8 h-8 rounded-full border-2 transition ${
+                cv.couleurFond === bg ? "border-foreground scale-110" : "border-border"
+              }`}
+              style={{ background: bg }}
+              aria-label={bg}
+            />
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            value={cv.couleurFond}
+            onChange={(e) => set((c) => ({ ...c, couleurFond: e.target.value }))}
+            className="w-8 h-8 rounded cursor-pointer bg-transparent border border-border"
+          />
+          <button
+            onClick={() => set((c) => ({ ...c, couleurFond: "#ffffff" }))}
+            className="text-[11px] text-foreground/40 hover:text-foreground/70 underline"
+          >
+            {t.resetWhite}
+          </button>
+        </div>
       </div>
     </div>
   );

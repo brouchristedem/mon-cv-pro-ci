@@ -63,7 +63,12 @@ export default function Template12({ cv }: { cv: CVData }) {
                 <div key={item.id} className="mb-2 grid grid-cols-[1fr_auto] gap-2">
                   <div>
                     <p className="font-semibold">{item.titre}</p>
-                    {item.sousTitre && <p className="text-[11.5px] text-slate-500">{item.sousTitre}</p>}
+                    {(item.sousTitre || item.lieu) && (
+                  <p className="text-[11.5px] text-slate-500">
+                    {item.sousTitre && <span className="font-medium">{item.sousTitre}</span>}
+                    {item.lieu && <span className="italic text-slate-400">{item.sousTitre ? " · " : ""}{item.lieu}</span>}
+                  </p>
+                )}
                     {item.description && (
                       <p className="text-[11.5px] text-slate-500 mt-0.5 whitespace-pre-line">
                         {item.description}
@@ -72,7 +77,7 @@ export default function Template12({ cv }: { cv: CVData }) {
                   </div>
                   {(item.dateDebut || item.dateFin) && (
                     <span className="text-[10.5px] text-slate-400 whitespace-nowrap">
-                      {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} - {item.enCours ? "Present" : item.dateFin}
+                      {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} - {item.enCours ? "Present" : formatDate(item.dateFin, cv.dateFormat, cv.langue)}
                     </span>
                   )}
                 </div>
@@ -89,12 +94,20 @@ export default function Template12({ cv }: { cv: CVData }) {
               >
                 {section.titre}
               </h2>
-              {section.items.map((item) => (
-                <div key={item.id} className="mb-1">
-                  <p className="font-medium text-[11.5px]">{item.titre}</p>
-                  {item.niveau && <p className="text-[10.5px] text-slate-400">{item.niveau}</p>}
-                </div>
-              ))}
+              <div
+                className={
+                  ["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne"
+                    ? "flex flex-wrap gap-x-2.5 gap-y-1"
+                    : ""
+                }
+              >
+                {section.items.map((item) => (
+                  <div key={item.id} className="mb-1">
+                    <p className="font-medium text-[11.5px]">{item.titre}</p>
+                    {item.niveau && <p className="text-[10.5px] text-slate-400">{item.niveau}</p>}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

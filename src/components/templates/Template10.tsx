@@ -58,12 +58,20 @@ export default function Template10({ cv }: { cv: CVData }) {
             >
               {section.titre}
             </h2>
-            {section.items.map((item) => (
-              <div key={item.id} className="mb-1.5">
-                <p className="text-[11px] text-center">{item.titre}</p>
-                {item.niveau && <p className="text-[9.5px] text-slate-400 text-center">{item.niveau}</p>}
-              </div>
-            ))}
+            <div
+              className={
+                ["langues", "competences", "interets"].includes(section.type) && section.affichage === "ligne"
+                  ? "flex flex-wrap gap-x-2.5 gap-y-1 justify-center"
+                  : ""
+              }
+            >
+              {section.items.map((item) => (
+                <div key={item.id} className="mb-1.5">
+                  <p className="text-[11px] text-center">{item.titre}</p>
+                  {item.niveau && <p className="text-[9.5px] text-slate-400 text-center">{item.niveau}</p>}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </aside>
@@ -91,7 +99,12 @@ export default function Template10({ cv }: { cv: CVData }) {
                     </span>
                   )}
                 </div>
-                {item.sousTitre && <p className="text-[12px] text-slate-600">{item.sousTitre}</p>}
+                {(item.sousTitre || item.lieu) && (
+                  <p className="text-[12px] text-slate-600">
+                    {item.sousTitre && <span className="font-medium">{item.sousTitre}</span>}
+                    {item.lieu && <span className="italic text-slate-400">{item.sousTitre ? " · " : ""}{item.lieu}</span>}
+                  </p>
+                )}
                 {item.description && (
                   <p className="text-[12px] text-slate-600 mt-0.5 whitespace-pre-line">
                     {item.description}

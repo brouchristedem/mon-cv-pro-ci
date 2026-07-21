@@ -41,6 +41,7 @@ export default function EditorPage() {
   const [step, setStep] = useState(0);
   const [saveError, setSaveError] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [manualSaveConfirm, setManualSaveConfirm] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -186,7 +187,7 @@ export default function EditorPage() {
         </div>
       )}
 
-      {debugInfo && (
+      {isAdmin && debugInfo && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-1.5 text-[10px] text-amber-800 break-words font-mono">
           {debugInfo}
           {lastSaved && ` | dernière sauvegarde réussie à ${lastSaved.toLocaleTimeString("fr-FR")}`}
@@ -296,6 +297,26 @@ export default function EditorPage() {
             </div>
           )}
           {step === 4 && <DownloadPanel />}
+
+          {step === 3 && (
+            <button
+              onClick={() => {
+                saveProgress({ ...cv, step })
+                  .then(() => {
+                    setLastSaved(new Date());
+                    setManualSaveConfirm(true);
+                    setTimeout(() => setManualSaveConfirm(false), 2500);
+                  })
+                  .catch((err) => {
+                    console.error("Erreur de sauvegarde:", err);
+                    setSaveError(err instanceof Error ? err.message : String(err));
+                  });
+              }}
+              className="w-full mt-4 flex items-center justify-center gap-2 rounded-xl border border-blue-600 text-blue-600 font-medium py-2.5 hover:bg-blue-600/10 transition"
+            >
+              {manualSaveConfirm ? t.savedConfirm : t.saveCV}
+            </button>
+          )}
 
           <div className="flex justify-between pt-6">
             <button

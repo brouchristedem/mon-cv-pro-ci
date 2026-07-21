@@ -108,7 +108,32 @@ function SortableSection({ section }: { section: Section }) {
     }));
 
   const isLangOrSkill = section.type === "langues" || section.type === "competences";
-  const isSimpleText = section.type === "profil" || section.type === "interets";
+  const isJustTitle = section.type === "interets";
+  const isSimpleText = section.type === "profil";
+
+  const TITLE_LABEL: Partial<Record<SectionType, { fr: string; en: string }>> = {
+    experience: { fr: "Poste occupé (ex : Développeur Web)", en: "Job title (e.g. Web Developer)" },
+    formation: { fr: "Diplôme / Formation", en: "Degree / Program" },
+    projets: { fr: "Titre du projet", en: "Project title" },
+    certifications: { fr: "Titre de la certification", en: "Certification title" },
+  };
+  const ORG_LABEL: Partial<Record<SectionType, { fr: string; en: string }>> = {
+    experience: { fr: "Entreprise", en: "Company" },
+    formation: { fr: "École / Établissement", en: "School / Institution" },
+    projets: { fr: "École / Cadre du projet", en: "School / Project context" },
+    certifications: { fr: "Organisme émetteur", en: "Issuing organization" },
+    references: { fr: "Entreprise / Contact", en: "Company / Contact" },
+  };
+  const SHOW_LIEU = section.type !== "certifications";
+
+  const titlePlaceholder = isLangOrSkill
+    ? t.itemLangSkillPlaceholder
+    : TITLE_LABEL[section.type]
+    ? TITLE_LABEL[section.type]![cv.langue]
+    : t.itemTitlePlaceholder;
+  const orgPlaceholder = ORG_LABEL[section.type]
+    ? ORG_LABEL[section.type]![cv.langue]
+    : t.itemOrgPlaceholder;
 
   return (
     <div
@@ -231,12 +256,12 @@ function SortableSection({ section }: { section: Section }) {
                 <Trash2 size={14} />
               </button>
               <input
-                placeholder={isLangOrSkill ? t.itemLangSkillPlaceholder : t.itemTitlePlaceholder}
+                placeholder={titlePlaceholder}
                 value={item.titre}
                 onChange={(e) => updateItem(item.id, { titre: e.target.value })}
                 className="w-full bg-transparent text-sm font-medium outline-none border-b border-border pb-1 pr-5"
               />
-              {isLangOrSkill ? (
+              {isJustTitle ? null : isLangOrSkill ? (
                 <input
                   placeholder={t.itemLevelPlaceholder}
                   value={item.niveau || ""}
@@ -254,11 +279,19 @@ function SortableSection({ section }: { section: Section }) {
               ) : (
                 <>
                   <input
-                    placeholder={t.itemOrgPlaceholder}
+                    placeholder={orgPlaceholder}
                     value={item.sousTitre || ""}
                     onChange={(e) => updateItem(item.id, { sousTitre: e.target.value })}
                     className="w-full bg-transparent text-xs outline-none"
                   />
+                  {SHOW_LIEU && (
+                    <input
+                      placeholder={cv.langue === "en" ? "Location" : "Lieu"}
+                      value={item.lieu || ""}
+                      onChange={(e) => updateItem(item.id, { lieu: e.target.value })}
+                      className="w-full bg-transparent text-xs outline-none"
+                    />
+                  )}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-[10px] text-foreground/40 block mb-0.5">{t.dateStart}</label>
