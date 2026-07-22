@@ -8,8 +8,10 @@ import { doc, getDoc } from "firebase/firestore";
 import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, Phone, Info } from "lucide-react";
 import { UI } from "@/lib/i18n";
 
-const WAVE_LINK = process.env.NEXT_PUBLIC_WAVE_LINK || "#";
-const PRICE = Number(process.env.NEXT_PUBLIC_PRICE || 505);
+const WAVE_LINK_FIRST = process.env.NEXT_PUBLIC_WAVE_LINK_FIRST || "#";
+const PRICE_FIRST = Number(process.env.NEXT_PUBLIC_PRICE_FIRST || 500);
+const WAVE_LINK_NEXT = process.env.NEXT_PUBLIC_WAVE_LINK_NEXT || "#";
+const PRICE_NEXT = Number(process.env.NEXT_PUBLIC_PRICE_NEXT || 1000);
 const SUPPORT_PHONE = "+225 05 45 17 75 71";
 
 export default function DownloadPanel() {
@@ -25,8 +27,10 @@ export default function DownloadPanel() {
   const [waveReference, setWaveReference] = useState("");
   const [waveClicked, setWaveClicked] = useState(false);
 
-  const isFree = downloadsUsed === 0;
-  const canDownload = isFree || paidUnlocked || promoApplied;
+  const isFirstDownload = downloadsUsed === 0;
+  const price = isFirstDownload ? PRICE_FIRST : PRICE_NEXT;
+  const waveLink = isFirstDownload ? WAVE_LINK_FIRST : WAVE_LINK_NEXT;
+  const canDownload = paidUnlocked || promoApplied;
 
   const proceedDownload = async () => {
     setGenerating(true);
@@ -34,6 +38,8 @@ export default function DownloadPanel() {
       await incrementDownloads();
       window.print();
       setPromoApplied(false);
+      setWaveClicked(false);
+      setWaveReference("");
     } finally {
       setGenerating(false);
     }
@@ -83,13 +89,7 @@ export default function DownloadPanel() {
     }
   };
 
-  const statusMessage = isFree
-    ? t.statusFree
-    : promoApplied
-    ? t.statusPromo
-    : paidUnlocked
-    ? t.statusPaid
-    : null;
+  const statusMessage = promoApplied ? t.statusPromo : paidUnlocked ? t.statusPaid : null;
 
   return (
     <div className="space-y-3">
@@ -109,11 +109,15 @@ export default function DownloadPanel() {
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition disabled:opacity-60"
           >
             {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-            {isFree || promoApplied ? t.downloadFree : t.paymentValidated}
+            {t.downloadCta}
           </button>
         </>
       ) : (
         <>
+          <p className="text-xs text-foreground/60">
+            {isFirstDownload ? t.firstDownloadInfo : t.nextDownloadInfo}
+          </p>
+
           <div className="flex gap-2">
             <input
               value={promoCode}
@@ -132,13 +136,13 @@ export default function DownloadPanel() {
 
           <div className="rounded-xl border border-border p-3 text-xs space-y-3">
             <a
-              href={WAVE_LINK}
+              href={waveLink}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setWaveClicked(true)}
               className="flex items-center justify-center gap-2 w-full rounded-lg bg-[#1DC8CD] hover:opacity-90 text-white font-semibold py-3 text-sm transition"
             >
-              {t.payWithWave} {PRICE} FCFA {t.payWithWaveSuffix} <ExternalLink size={14} />
+              {t.payWithWave} {price} FCFA {t.payWithWaveSuffix} <ExternalLink size={14} />
             </a>
 
             {waveClicked && (

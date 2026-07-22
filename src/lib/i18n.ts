@@ -95,9 +95,11 @@ export const UI = {
       "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
     confirmCancel: "Annuler",
     confirmProceed: "Confirmer et télécharger",
-    statusFree: "Ce téléchargement est votre 1er téléchargement, il est gratuit.",
     statusPromo: "Ce téléchargement est gratuit grâce au code promo.",
     statusPaid: "Paiement effectué — vous pouvez télécharger votre CV.",
+    downloadCta: "Télécharger le CV",
+    firstDownloadInfo: "Votre 1er téléchargement est à 500 FCFA.",
+    nextDownloadInfo: "Les téléchargements suivants sont à 1000 FCFA.",
     downloadWarning:
       "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
     paidFlowWarning:
@@ -194,9 +196,11 @@ export const UI = {
       "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
     confirmCancel: "Cancel",
     confirmProceed: "Confirm and download",
-    statusFree: "This is your 1st download, it's free.",
     statusPromo: "This download is free thanks to the promo code.",
     statusPaid: "Payment completed — you can download your CV.",
+    downloadCta: "Download the CV",
+    firstDownloadInfo: "Your 1st download costs 500 FCFA.",
+    nextDownloadInfo: "Further downloads cost 1000 FCFA.",
     downloadWarning:
       "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
     paidFlowWarning:

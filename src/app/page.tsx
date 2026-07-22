@@ -22,7 +22,7 @@ export default function Home() {
           15 modèles élégants, personnalisables en temps réel.
         </p>
         <p className="text-sm font-medium mb-8 px-4 py-2 rounded-full bg-blue-600/10 text-blue-700 dark:text-blue-400">
-          1er CV téléchargé gratuitement — les suivants à 505 FCFA via Wave
+          1er téléchargement à 500 FCFA — les suivants à 1000 FCFA, via Wave
         </p>
         <Link
           href={ctaHref}
