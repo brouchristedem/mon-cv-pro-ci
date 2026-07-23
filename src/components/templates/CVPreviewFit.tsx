@@ -43,7 +43,15 @@ export default function CVPreviewFit({
           l'aperçu écran, pour éviter tout conflit d'échelle. */}
       {printMode && (
         <div className="hidden print:block">
-          <div id="cv-print-area" style={{ width: "210mm", zoom: cv.tailleTexte / 13 }}>
+          <div
+            id="cv-print-area"
+            style={{
+              width: "210mm",
+              minHeight: "297mm",
+              boxSizing: "border-box",
+              zoom: cv.tailleTexte / 13,
+            }}
+          >
             <CVRenderer cv={cv} />
           </div>
         </div>

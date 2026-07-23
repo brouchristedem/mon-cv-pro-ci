@@ -74,7 +74,16 @@ body {
     top: 0;
     left: 0;
     width: 210mm;
+    min-height: 297mm;
     margin: 0;
     box-shadow: none !important;
+    box-sizing: border-box;
+    overflow: hidden;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+  #cv-print-area > div {
+    min-height: 297mm;
+    box-sizing: border-box;
   }
 }
