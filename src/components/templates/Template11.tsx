@@ -43,6 +43,11 @@ export default function Template11({ cv }: { cv: CVData }) {
         {p.telephone && <div><p className="text-[9px] uppercase text-slate-400">Téléphone</p>{p.telephone}</div>}
         {p.adresse && <div><p className="text-[9px] uppercase text-slate-400">Adresse</p>{p.adresse}</div>}
         {p.permis && <div><p className="text-[9px] uppercase text-slate-400">{cv.langue === "en" ? "Licence" : "Permis"}</p>{p.permis}</div>}
+        {p.linkedin && <div><p className="text-[9px] uppercase text-slate-400">LinkedIn</p>{p.linkedin}</div>}
+        {p.siteWeb && <div><p className="text-[9px] uppercase text-slate-400">Web</p>{p.siteWeb}</div>}
+        {cv.personalInfo.autresInfos.map((info) => (
+          <div key={info.id}><p className="text-[9px] uppercase text-slate-400">{info.label}</p>{info.valeur}</div>
+        ))}
       </div>
 
       <div className="space-y-6">

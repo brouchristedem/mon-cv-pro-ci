@@ -49,6 +49,15 @@ export default function Template14({ cv }: { cv: CVData }) {
           {p.adresse} {p.permis ? `· ${cv.langue === "en" ? "Driving licence" : "Permis"} ${p.permis}` : ""}
         </p>
       )}
+      {(p.linkedin || p.siteWeb || cv.personalInfo.autresInfos.length > 0) && (
+        <p className="text-[10.5px] text-slate-400 mb-5">
+          {[p.linkedin, p.siteWeb, ...cv.personalInfo.autresInfos.map((info) =>
+            info.label || info.valeur ? `${info.label}${info.label && info.valeur ? " : " : ""}${info.valeur}` : ""
+          )]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      )}
 
       <div className="grid grid-cols-3 gap-5">
         <div className="col-span-2 space-y-4">

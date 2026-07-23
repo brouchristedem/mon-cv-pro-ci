@@ -44,6 +44,9 @@ export default function Template02({ cv }: { cv: CVData }) {
           {p.permis && <p><ContactIcon type="permis" cv={cv} />{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</p>}
           {p.linkedin && <p><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</p>}
           {p.siteWeb && <p><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</p>}
+          {cv.personalInfo.autresInfos.map((info) => (
+            <p key={info.id}>{info.label}{info.label && info.valeur ? " : " : ""}{info.valeur}</p>
+          ))}
         </div>
 
         {sidebar.map((section) => (

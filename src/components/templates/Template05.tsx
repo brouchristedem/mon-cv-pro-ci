@@ -43,7 +43,17 @@ export default function Template05({ cv }: { cv: CVData }) {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {[p.email, p.telephone, p.adresse, p.permis && `${cv.langue === "en" ? "Driving licence" : "Permis"} ${p.permis}`]
+          {[
+            p.email,
+            p.telephone,
+            p.adresse,
+            p.permis && `${cv.langue === "en" ? "Driving licence" : "Permis"} ${p.permis}`,
+            p.linkedin,
+            p.siteWeb,
+            ...cv.personalInfo.autresInfos.map((info) =>
+              info.label || info.valeur ? `${info.label}${info.label && info.valeur ? " : " : ""}${info.valeur}` : ""
+            ),
+          ]
             .filter(Boolean)
             .map((v, i) => (
               <span

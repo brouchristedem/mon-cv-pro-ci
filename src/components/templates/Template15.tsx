@@ -50,6 +50,9 @@ export default function Template15({ cv }: { cv: CVData }) {
           {p.permis && <span><ContactIcon type="permis" cv={cv} />{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
             {p.linkedin && <span><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</span>}
             {p.siteWeb && <span><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</span>}
+            {cv.personalInfo.autresInfos.map((info) => (
+              <span key={info.id}>{info.label}{info.label && info.valeur ? " : " : ""}{info.valeur}</span>
+            ))}
         </div>
       </div>
 

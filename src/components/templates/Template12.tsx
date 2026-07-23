@@ -45,6 +45,11 @@ export default function Template12({ cv }: { cv: CVData }) {
           {p.telephone && <p><ContactIcon type="telephone" cv={cv} />{p.telephone}</p>}
           {p.adresse && <p><ContactIcon type="adresse" cv={cv} />{p.adresse}</p>}
           {p.permis && <p>{cv.langue === "en" ? "Driving licence" : "Permis"}: {p.permis}</p>}
+          {p.linkedin && <p><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</p>}
+          {p.siteWeb && <p><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</p>}
+          {cv.personalInfo.autresInfos.map((info) => (
+            <p key={info.id}>{info.label}{info.label && info.valeur ? " : " : ""}{info.valeur}</p>
+          ))}
         </div>
       </div>
 
