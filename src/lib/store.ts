@@ -15,6 +15,7 @@ export function defaultCV(): CVData {
     tailleTexte: 13,
     dateFormat: "texte",
     iconStyle: "aucune",
+    ordreNom: "prenom-nom",
     step: 0,
     updatedAt: Date.now(),
     personalInfo: {

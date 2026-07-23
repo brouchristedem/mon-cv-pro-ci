@@ -63,6 +63,7 @@ export interface CVData {
   tailleTexte: number; // en pt, ex: 10 à 24, comme Word/Excel
   dateFormat: "texte" | "numerique"; // "Jan 2024" ou "01/2024"
   iconStyle: "aucune" | "contour" | "remplie";
+  ordreNom: "prenom-nom" | "nom-prenom";
   personalInfo: PersonalInfo;
   sections: Section[];
   updatedAt: number;

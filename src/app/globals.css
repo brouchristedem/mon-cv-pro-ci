@@ -65,13 +65,6 @@ body {
   body * {
     visibility: hidden;
   }
-  .fit-outer {
-    height: auto !important;
-  }
-  .preview-fit-inner {
-    transform: none !important;
-    width: auto !important;
-  }
   #cv-print-area,
   #cv-print-area * {
     visibility: visible;
@@ -83,9 +76,5 @@ body {
     width: 210mm;
     margin: 0;
     box-shadow: none !important;
-  }
-  #cv-print-area.compresser {
-    height: 297mm;
-    overflow: hidden;
   }
 }

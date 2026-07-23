@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { displayName } from "@/lib/displayName";
 import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { formatDate } from "@/lib/formatDate";
@@ -21,7 +22,7 @@ export default function Template09({ cv }: { cv: CVData }) {
     <div className="w-full h-full text-slate-800 p-10 font-sans text-[13px] leading-relaxed" style={{ background: cv.couleurFond }}>
       <div className="text-center pb-5 mb-6 border-b-4 double" style={{ borderColor: color }}>
         <h1 className="text-2xl font-bold uppercase tracking-wide">
-          {p.prenom || "Prénom"} {p.nom || "Nom"}
+          {displayName(cv, "Prénom", "Nom")}
         </h1>
         <p className="text-sm text-slate-500 mt-1">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
         <div className="flex justify-center flex-wrap gap-x-4 gap-y-0.5 mt-2 text-[11px] text-slate-500">

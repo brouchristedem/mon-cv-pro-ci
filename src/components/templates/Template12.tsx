@@ -35,7 +35,11 @@ export default function Template12({ cv }: { cv: CVData }) {
           )}
           <div>
             <h1 className="text-xl font-bold uppercase">
-              {p.nom || "NOM"}, {p.prenom || "Prénom"}
+              {cv.ordreNom === "nom-prenom" ? (
+              <>{p.nom || "NOM"}, {p.prenom || "Prénom"}</>
+            ) : (
+              <>{p.prenom || "Prénom"} {p.nom || "NOM"}</>
+            )}
             </h1>
             <p className="text-[12px] text-slate-500">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
           </div>

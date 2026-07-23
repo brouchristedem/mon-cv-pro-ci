@@ -17,23 +17,37 @@ export default function CVPreviewFit({
   const scaledHeight = contentWidth * PAGE_HEIGHT_RATIO * scale;
 
   return (
-    <div ref={containerRef} className="w-full fit-outer" style={{ height: scaledHeight || undefined }}>
+    <>
+      {/* Aperçu visible à l'écran uniquement — ajusté à la largeur disponible */}
       <div
-        className={`preview-fit-inner bg-white shadow-xl ${printMode ? "" : "cv-protected"}`}
-        style={{
-          width: contentWidth,
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
-        }}
-        onContextMenu={(e) => e.preventDefault()}
+        ref={containerRef}
+        className="w-full print:hidden"
+        style={{ height: scaledHeight || undefined }}
       >
         <div
-          id={printMode ? "cv-print-area" : undefined}
-          style={printMode ? { zoom: cv.tailleTexte / 13 } : undefined}
+          className="bg-white shadow-xl cv-protected"
+          style={{
+            width: contentWidth,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+          onContextMenu={(e) => e.preventDefault()}
         >
-          <CVRenderer cv={cv} />
+          <div style={{ zoom: cv.tailleTexte / 13 }}>
+            <CVRenderer cv={cv} />
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Zone dédiée à l'impression uniquement — totalement indépendante de
+          l'aperçu écran, pour éviter tout conflit d'échelle. */}
+      {printMode && (
+        <div className="hidden print:block">
+          <div id="cv-print-area" style={{ width: "210mm", zoom: cv.tailleTexte / 13 }}>
+            <CVRenderer cv={cv} />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

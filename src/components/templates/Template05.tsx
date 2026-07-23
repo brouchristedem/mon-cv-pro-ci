@@ -35,9 +35,11 @@ export default function Template05({ cv }: { cv: CVData }) {
           )}
           <div>
             <h1 className="text-3xl font-extrabold" style={{ color }}>
-              {p.prenom || "Prénom"}
+              {cv.ordreNom === "nom-prenom" ? (p.nom || "Nom") : (p.prenom || "Prénom")}
             </h1>
-            <h1 className="text-3xl font-extrabold text-slate-800 -mt-1">{p.nom || "Nom"}</h1>
+            <h1 className="text-3xl font-extrabold text-slate-800 -mt-1">
+              {cv.ordreNom === "nom-prenom" ? (p.prenom || "Prénom") : (p.nom || "Nom")}
+            </h1>
             <p className="text-sm text-slate-500 mt-1">{p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}</p>
           </div>
         </div>

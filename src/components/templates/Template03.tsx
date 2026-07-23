@@ -28,7 +28,15 @@ export default function Template03({ cv }: { cv: CVData }) {
           />
         )}
         <h1 className="text-3xl font-light tracking-wide">
-          {p.prenom || "Prénom"} <span className="font-bold">{p.nom || "Nom"}</span>
+          {cv.ordreNom === "nom-prenom" ? (
+            <>
+              <span className="font-bold">{p.nom || "Nom"}</span> {p.prenom || "Prénom"}
+            </>
+          ) : (
+            <>
+              {p.prenom || "Prénom"} <span className="font-bold">{p.nom || "Nom"}</span>
+            </>
+          )}
         </h1>
         <p className="text-sm text-slate-500 mt-1 uppercase tracking-widest" style={{ color }}>
           {p.titre || (cv.langue === "en" ? "Job Title" : "Titre du poste")}
