@@ -2,6 +2,7 @@ import { CVData } from "@/lib/types";
 import { displayName } from "@/lib/displayName";
 import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
+import { InfoIcon } from "./InfoIcon";
 import { formatDate } from "@/lib/formatDate";
 
 function photoClass(shape: string) {
@@ -49,7 +50,7 @@ export default function Template08({ cv }: { cv: CVData }) {
           {p.linkedin && <p><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</p>}
           {p.siteWeb && <p><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</p>}
           {cv.personalInfo.autresInfos.map((info) => (
-            <p key={info.id}>{info.label}{info.label && info.valeur ? " : " : ""}{info.valeur}</p>
+            <p key={info.id}><InfoIcon label={info.label} cv={cv} />{info.label}{info.label && info.valeur ? " : " : ""}{info.valeur}</p>
           ))}
         </div>
         {sidebar.map((section) => (

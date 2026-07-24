@@ -2,6 +2,7 @@ import { CVData } from "@/lib/types";
 import { displayName } from "@/lib/displayName";
 import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
+import { InfoIcon } from "./InfoIcon";
 import { formatDate } from "@/lib/formatDate";
 
 function sortedVisible(cv: CVData) {
@@ -33,7 +34,7 @@ export default function Template09({ cv }: { cv: CVData }) {
             {p.linkedin && <span><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</span>}
             {p.siteWeb && <span><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</span>}
             {cv.personalInfo.autresInfos.map((info) => (
-              <span key={info.id}>{info.label}{info.label && info.valeur ? " : " : ""}{info.valeur}</span>
+              <span key={info.id}><InfoIcon label={info.label} cv={cv} />{info.label}{info.label && info.valeur ? " : " : ""}{info.valeur}</span>
             ))}
         </div>
       </div>
