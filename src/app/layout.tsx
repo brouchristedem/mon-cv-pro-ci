@@ -52,11 +52,20 @@ export const metadata: Metadata = {
     siteName: "Mon CV Pro CI",
     title,
     description,
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Mon CV Pro CI — Créez un CV professionnel en quelques minutes",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
+    images: ["/og-image.png"],
   },
 };
 
