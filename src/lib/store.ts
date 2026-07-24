@@ -38,9 +38,9 @@ export function defaultCV(): CVData {
       { id: uid(), type: "formation", titre: "Formation", visible: true, ordre: 2, items: [] },
       { id: uid(), type: "competences", titre: "Compétences", visible: true, ordre: 3, items: [], affichage: "ligne" },
       { id: uid(), type: "langues", titre: "Langues", visible: true, ordre: 4, items: [], affichage: "ligne" },
-      { id: uid(), type: "certifications", titre: "Certifications", visible: false, ordre: 5, items: [] },
-      { id: uid(), type: "projets", titre: "Projet académique", visible: false, ordre: 6, items: [] },
-      { id: uid(), type: "interets", titre: "Centres d'intérêt", visible: false, ordre: 7, items: [], affichage: "ligne" },
+      { id: uid(), type: "certifications", titre: "Certifications", visible: true, ordre: 5, items: [] },
+      { id: uid(), type: "projets", titre: "Projet académique", visible: true, ordre: 6, items: [] },
+      { id: uid(), type: "interets", titre: "Centres d'intérêt", visible: true, ordre: 7, items: [], affichage: "ligne" },
     ],
   };
 }

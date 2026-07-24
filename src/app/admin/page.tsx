@@ -183,7 +183,7 @@ export default function AdminPage() {
       </section>
 
       <section className="flex items-center gap-2 text-xs text-foreground/50 pt-4 border-t border-border">
-        <Phone size={12} /> Service client affiché aux utilisateurs : +225 05 45 17 75 71
+        <Phone size={12} /> Service client (WhatsApp, pas d&apos;appel) affiché aux utilisateurs : +225 05 45 17 75 71
       </section>
     </div>
   );

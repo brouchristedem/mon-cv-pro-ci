@@ -43,16 +43,33 @@ export default function CVPreviewFit({
           l'aperçu écran, pour éviter tout conflit d'échelle. */}
       {printMode && (
         <div className="hidden print:block">
+          {/* Boîte de page fixe 210x297mm : sa taille ne doit jamais dépendre
+              du réglage "taille du texte", sinon la page imprimée se
+              rétrécit/agrandit avec lui et laisse un vide en bas (ou déborde
+              sur une 2e page presque blanche). */}
           <div
             id="cv-print-area"
             style={{
               width: "210mm",
               minHeight: "297mm",
               boxSizing: "border-box",
-              zoom: cv.tailleTexte / 13,
+              overflow: "hidden",
             }}
           >
-            <CVRenderer cv={cv} />
+            {/* Le contenu, lui, est mis à l'échelle via transform (qui ne
+                change pas la taille de la boîte parente), puis compensé en
+                largeur/hauteur pour continuer à remplir exactement 210x297mm
+                après mise à l'échelle. */}
+            <div
+              style={{
+                width: `${100 / (cv.tailleTexte / 13)}%`,
+                minHeight: `${297 / (cv.tailleTexte / 13)}mm`,
+                transform: `scale(${cv.tailleTexte / 13})`,
+                transformOrigin: "top left",
+              }}
+            >
+              <CVRenderer cv={cv} />
+            </div>
           </div>
         </div>
       )}

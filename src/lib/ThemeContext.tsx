@@ -15,8 +15,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem("mon-cv-pro-ci-theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initial = stored ? stored === "dark" : prefersDark;
+    // Première visite : toujours démarrer en mode clair, quelles que soient
+    // les préférences système de l'appareil (beaucoup de téléphones sont en
+    // mode sombre par défaut, ce qui surprenait les nouveaux utilisateurs).
+    const initial = stored === "dark";
     setDark(initial);
     setMounted(true);
   }, []);

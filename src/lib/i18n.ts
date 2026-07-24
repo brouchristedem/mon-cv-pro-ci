@@ -90,7 +90,7 @@ export const UI = {
     waveReferencePlaceholder: "ex : T_2SKTWTSDZMCN24YV",
     waveReferenceRequired: "Merci de renseigner le numéro de référence affiché par Wave après votre paiement.",
     waveReferenceInvalid: "Ce numéro ne ressemble pas à une référence Wave valide (lettres et chiffres, sans espace). Vérifiez le reçu affiché par Wave.",
-    customerService: "Besoin d'aide ? Contactez le service client :",
+    customerService: "Besoin d'aide ? Écrivez-nous sur WhatsApp :",
     confirmTitle: "Confirmer le téléchargement",
     confirmFreeText: "Ce téléchargement est votre 1er téléchargement, il est gratuit.",
     confirmPaidText: "Ce téléchargement est payant : 500 FCFA (déjà réglé via Wave).",
@@ -105,8 +105,14 @@ export const UI = {
     nextDownloadInfo: "Les téléchargements suivants sont à 1000 FCFA.",
     downloadWarning:
       "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
+    beforePayWarning:
+      "Avant de payer : vérifiez que votre CV est terminé (aucune modification possible après le paiement). Une fois le paiement Wave effectué, il vous sera demandé de saisir le numéro de référence affiché sur votre reçu Wave.",
     paidFlowWarning:
       "Une fois votre référence renseignée et validée, vous devrez obligatoirement télécharger votre CV : aucun retour en arrière ne sera possible ensuite.",
+    printUnsupported:
+      "Le téléchargement PDF ne fonctionne pas dans ce navigateur intégré (ex : appli Facebook, Instagram, TikTok). Ouvrez ce site dans Chrome ou Safari pour télécharger votre CV.",
+    downloadFailed:
+      "Le téléchargement n'a pas pu démarrer. Réessayez, ou ouvrez ce site dans Chrome ou Safari.",
   },
   en: {
     steps: ["Information", "Sections", "Template & Color", "Layout", "Download"],
@@ -194,7 +200,7 @@ export const UI = {
     waveReferencePlaceholder: "e.g. T_2SKTWTSDZMCN24YV",
     waveReferenceRequired: "Please enter the reference number shown by Wave after your payment.",
     waveReferenceInvalid: "This doesn't look like a valid Wave reference (letters and numbers, no spaces). Check the receipt shown by Wave.",
-    customerService: "Need help? Contact customer service:",
+    customerService: "Need help? Message us on WhatsApp:",
     confirmTitle: "Confirm download",
     confirmFreeText: "This is your 1st download, it's free.",
     confirmPaidText: "This is a paid download: 500 FCFA (already paid via Wave).",
@@ -209,8 +215,14 @@ export const UI = {
     nextDownloadInfo: "Further downloads cost 1000 FCFA.",
     downloadWarning:
       "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
+    beforePayWarning:
+      "Before paying: make sure your CV is finished (no changes possible after payment). Once you've paid via Wave, you'll be asked to enter the reference number shown on your Wave receipt.",
     paidFlowWarning:
       "Once your reference is entered and validated, you must download your CV: there is no going back after that.",
+    printUnsupported:
+      "PDF download doesn't work inside this in-app browser (e.g. Facebook, Instagram, TikTok app). Open this site in Chrome or Safari to download your CV.",
+    downloadFailed:
+      "The download couldn't start. Try again, or open this site in Chrome or Safari.",
   },
 } as const;
 

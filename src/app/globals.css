@@ -82,8 +82,4 @@ body {
     page-break-after: avoid;
     break-after: avoid;
   }
-  #cv-print-area > div {
-    min-height: 297mm;
-    box-sizing: border-box;
-  }
 }
