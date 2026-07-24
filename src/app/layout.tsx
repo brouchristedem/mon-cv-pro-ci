@@ -39,6 +39,9 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
     },
   },
+  verification: {
+    google: "p9gV1Gq-92jhVbkcomEXCRKBbOKmkzbU8k9ZCZfd-H0",
+  },
   icons: {
     icon: "/favicon.ico",
   },
