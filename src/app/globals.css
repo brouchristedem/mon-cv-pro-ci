@@ -56,30 +56,28 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
+    height: auto !important;
   }
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
-  body * {
-    visibility: hidden;
+  /* Tout le reste de l'application est retiré du flux (display:none, pas
+     seulement invisible) pour qu'il n'occupe plus aucune place et ne
+     génère plus de pages en trop. Seul le portail d'impression (rendu
+     directement dans <body>, en dehors de l'app) reste affiché. */
+  body > *:not(#cv-print-portal) {
+    display: none !important;
   }
-  #cv-print-area,
-  #cv-print-area * {
-    visibility: visible;
+  #cv-print-portal {
+    display: block !important;
   }
   #cv-print-area {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 210mm;
     min-height: 297mm;
     margin: 0;
     box-shadow: none !important;
     box-sizing: border-box;
-    overflow: hidden;
-    page-break-after: avoid;
-    break-after: avoid;
   }
 }
