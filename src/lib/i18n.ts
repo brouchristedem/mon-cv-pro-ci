@@ -113,6 +113,8 @@ export const UI = {
       "Le téléchargement PDF ne fonctionne pas dans ce navigateur intégré (ex : appli Facebook, Instagram, TikTok). Ouvrez ce site dans Chrome ou Safari pour télécharger votre CV.",
     downloadFailed:
       "Le téléchargement n'a pas pu démarrer. Réessayez, ou ouvrez ce site dans Chrome ou Safari.",
+    iosPrintHint:
+      "Sur iPhone, une fenêtre de partage doit s'ouvrir. Si rien ne se passe : Réglages > Safari, désactivez \"Bloquer les fenêtres publicitaires\" pour ce site, puis réessayez.",
   },
   en: {
     steps: ["Information", "Sections", "Template & Color", "Layout", "Download"],
@@ -223,6 +225,8 @@ export const UI = {
       "PDF download doesn't work inside this in-app browser (e.g. Facebook, Instagram, TikTok app). Open this site in Chrome or Safari to download your CV.",
     downloadFailed:
       "The download couldn't start. Try again, or open this site in Chrome or Safari.",
+    iosPrintHint:
+      "On iPhone, a share sheet should open. If nothing happens: go to Settings > Safari, turn off \"Block Pop-ups\" for this site, then try again.",
   },
 } as const;
 

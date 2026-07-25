@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCVStore } from "@/lib/store";
 import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/lib/firebase";
@@ -28,24 +28,41 @@ export default function DownloadPanel() {
   const [confirming, setConfirming] = useState(false);
   const [waveReference, setWaveReference] = useState("");
   const [waveClicked, setWaveClicked] = useState(false);
+  const [isIOSSafari, setIsIOSSafari] = useState(false);
+
+  useEffect(() => {
+    const ua = window.navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    setIsIOSSafari(isIOS && isSafari);
+  }, []);
 
   const isFirstDownload = downloadsUsed === 0;
   const price = isFirstDownload ? PRICE_FIRST : PRICE_NEXT;
   const waveLink = isFirstDownload ? WAVE_LINK_FIRST : WAVE_LINK_NEXT;
   const canDownload = paidUnlocked || promoApplied;
 
-  // On ne débite/consomme le téléchargement payé qu'une fois que la boîte de
-  // dialogue d'impression du navigateur s'est réellement fermée (événement
-  // "afterprint"), et non au simple clic. Ça évite de facturer un nouveau
-  // téléchargement (500/1000 FCFA) si l'impression échoue silencieusement
-  // sur certains appareils, ou si la personne doit réessayer.
+  // Sur iOS Safari, window.print() doit être le tout premier appel exécuté
+  // dans le gestionnaire de clic, sans aucun code avant lui — sinon Safari
+  // considère que ce n'est plus un geste utilisateur "direct" et ignore
+  // l'appel SANS AUCUNE erreur ni message (ce qui donnait l'impression que
+  // le bouton ne faisait rien). On l'appelle donc en priorité absolue.
   const proceedDownload = () => {
-    setDownloadError("");
-
     if (typeof window === "undefined" || typeof window.print !== "function") {
       setDownloadError(t.printUnsupported);
       return;
     }
+
+    setDownloadError("");
+    let printThrew = false;
+    try {
+      window.print();
+    } catch (err) {
+      printThrew = true;
+      console.error("Erreur window.print:", err);
+      setDownloadError(t.downloadFailed);
+    }
+    if (printThrew) return;
 
     setGenerating(true);
 
@@ -67,25 +84,16 @@ export default function DownloadPanel() {
     };
 
     window.addEventListener("afterprint", finish);
-    // Filet de sécurité : si "afterprint" ne se déclenche jamais (certains
-    // navigateurs/webviews), on ne bloque pas indéfiniment le bouton.
+    // Filet de sécurité : "afterprint" ne se déclenche pas de façon fiable
+    // sur tous les navigateurs (notamment Safari iOS), donc on ne bloque
+    // jamais durablement le bouton en chargement.
     window.setTimeout(() => {
       if (!settled) {
         settled = true;
         window.removeEventListener("afterprint", finish);
         setGenerating(false);
       }
-    }, 60000);
-
-    try {
-      window.print();
-    } catch (err) {
-      settled = true;
-      window.removeEventListener("afterprint", finish);
-      console.error("Erreur window.print:", err);
-      setDownloadError(t.downloadFailed);
-      setGenerating(false);
-    }
+    }, 8000);
   };
 
   const checkPromo = async () => {
@@ -154,6 +162,9 @@ export default function DownloadPanel() {
             {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
             {t.downloadCta}
           </button>
+          {isIOSSafari && (
+            <p className="text-[11px] text-foreground/50">{t.iosPrintHint}</p>
+          )}
         </>
       ) : (
         <>
