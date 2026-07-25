@@ -47,6 +47,10 @@ body {
   user-select: none;
 }
 
+#cv-print-portal {
+  display: none;
+}
+
 @media print {
   @page {
     size: A4;
