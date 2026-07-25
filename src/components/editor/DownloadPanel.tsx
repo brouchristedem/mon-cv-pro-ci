@@ -42,22 +42,72 @@ export default function DownloadPanel() {
   const waveLink = isFirstDownload ? WAVE_LINK_FIRST : WAVE_LINK_NEXT;
   const canDownload = paidUnlocked || promoApplied;
 
-  // Génère un vrai fichier PDF côté client (html2canvas capture le CV en
-  // image haute résolution, jsPDF l'assemble en pages A4) puis déclenche le
-  // téléchargement. On n'utilise plus window.print()/la boîte de dialogue
-  // d'impression du navigateur : cette approche s'est révélée peu fiable
-  // sur mobile (notamment iPhone/Safari, qui pouvait l'ignorer sans aucun
-  // message). La génération de fichier fonctionne de façon identique sur
-  // tous les navigateurs.
-  const proceedDownload = async () => {
+  // Méthode par défaut (celle qui fonctionne pour la grande majorité des
+  // appareils) : la boîte de dialogue d'impression du navigateur. On ne
+  // débite/consomme le téléchargement payé qu'une fois cette boîte de
+  // dialogue réellement refermée (événement "afterprint"), pas au simple
+  // clic, pour ne jamais facturer un essai qui échoue.
+  const downloadViaPrint = () => {
+    if (typeof window === "undefined" || typeof window.print !== "function") {
+      setDownloadError(t.printUnsupported);
+      return;
+    }
+
+    setDownloadError("");
+    let printThrew = false;
+    try {
+      window.print();
+    } catch (err) {
+      printThrew = true;
+      console.error("Erreur window.print:", err);
+      setDownloadError(t.downloadFailed);
+    }
+    if (printThrew) return;
+
+    setGenerating(true);
+
+    let settled = false;
+    const finish = async () => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener("afterprint", finish);
+      try {
+        await incrementDownloads();
+      } catch (err) {
+        console.error("Erreur lors de l'enregistrement du téléchargement:", err);
+      } finally {
+        setPromoApplied(false);
+        setWaveClicked(false);
+        setWaveReference("");
+        setGenerating(false);
+      }
+    };
+
+    window.addEventListener("afterprint", finish);
+    window.setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        window.removeEventListener("afterprint", finish);
+        setGenerating(false);
+      }
+    }, 8000);
+  };
+
+  // Méthode réservée à iOS Safari : window.print() y est trop peu fiable
+  // (bloqué silencieusement selon les réglages). On génère un vrai PDF
+  // (html2canvas + jsPDF) et on l'OUVRE directement dans un nouvel onglet
+  // via une URL blob — le lecteur PDF natif de Safari s'ouvre alors de
+  // façon fiable, contrairement au déclenchement d'un téléchargement
+  // automatique (attribut "download"), historiquement mal supporté par
+  // iOS Safari. L'utilisateur peut ensuite l'enregistrer via le bouton de
+  // partage du lecteur PDF.
+  const downloadViaPdfBlob = async () => {
     setDownloadError("");
     setGenerating(true);
     try {
       const node = document.getElementById("cv-capture-area");
       if (!node) throw new Error("Zone de capture introuvable");
 
-      // Laisse le temps au navigateur de finaliser la mise en page (polices,
-      // images) avant la capture.
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
@@ -102,11 +152,18 @@ export default function DownloadPanel() {
         firstPage = false;
       }
 
-      const nomFichier = [cv.personalInfo?.prenom, cv.personalInfo?.nom]
-        .filter(Boolean)
-        .join("_")
-        .replace(/[^a-zA-Z0-9_-]/g, "") || "CV";
-      pdf.save(`${nomFichier}.pdf`);
+      const blobUrl = pdf.output("bloburl");
+      const opened = window.open(blobUrl as unknown as string, "_blank");
+      if (!opened) {
+        // Le navigateur a bloqué l'ouverture (rare, mais on garde un repli) :
+        // on déclenche alors le téléchargement classique via jsPDF.
+        const nomFichier =
+          [cv.personalInfo?.prenom, cv.personalInfo?.nom]
+            .filter(Boolean)
+            .join("_")
+            .replace(/[^a-zA-Z0-9_-]/g, "") || "CV";
+        pdf.save(`${nomFichier}.pdf`);
+      }
 
       try {
         await incrementDownloads();
@@ -118,9 +175,18 @@ export default function DownloadPanel() {
       setWaveReference("");
     } catch (err) {
       console.error("Erreur de génération du PDF:", err);
-      setDownloadError(t.downloadFailed);
+      const detail = err instanceof Error ? ` (${err.message})` : "";
+      setDownloadError(t.downloadFailed + detail);
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const proceedDownload = () => {
+    if (isIOSSafari) {
+      downloadViaPdfBlob();
+    } else {
+      downloadViaPrint();
     }
   };
 
