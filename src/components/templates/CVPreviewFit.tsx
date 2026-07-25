@@ -43,13 +43,47 @@ export default function CVPreviewFit({
         </div>
       </div>
 
+      {/* Zone dédiée à la génération du PDF (html2canvas + jsPDF). Rendue
+          hors-écran (pas en display:none, sinon html2canvas ne peut rien
+          capturer) à une largeur fixe correspondant à une page A4, avec le
+          même réglage de taille de texte que l'aperçu. Cette méthode ne
+          dépend plus de window.print()/la boîte de dialogue d'impression du
+          navigateur, qui s'est révélée peu fiable sur certains mobiles
+          (notamment iPhone/Safari) : un vrai fichier PDF est généré et
+          téléchargé directement. */}
+      {printMode && mounted && (
+        <div
+          id="cv-capture-area"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: "-10000px",
+            width: "794px",
+            background: "#ffffff",
+          }}
+        >
+          <div
+            style={{
+              width: `${100 / (cv.tailleTexte / 13)}%`,
+              transform: `scale(${cv.tailleTexte / 13})`,
+              transformOrigin: "top left",
+            }}
+          >
+            <CVRenderer cv={cv} />
+          </div>
+        </div>
+      )}
+
       {/* Zone dédiée à l'impression : rendue via un portail directement dans
           <body>, en dehors de l'arborescence de l'application. Le reste de
           l'app (masqué en CSS via visibility) occupait quand même sa place
           dans la page, ce qui forçait Chrome à créer des pages en trop même
           quand le CV visible tenait sur une seule page. En sortant du DOM de
           l'app, seule la vraie hauteur du CV détermine le nombre de pages
-          imprimées : 1 page par défaut, plus si le contenu déborde. */}
+          imprimées : 1 page par défaut, plus si le contenu déborde.
+          (Conservée en repli pour "Imprimer" depuis le menu du navigateur ;
+          le bouton "Télécharger" utilise désormais la génération PDF
+          directe ci-dessus.) */}
       {printMode &&
         mounted &&
         createPortal(

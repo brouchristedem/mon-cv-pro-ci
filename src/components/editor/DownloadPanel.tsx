@@ -42,58 +42,86 @@ export default function DownloadPanel() {
   const waveLink = isFirstDownload ? WAVE_LINK_FIRST : WAVE_LINK_NEXT;
   const canDownload = paidUnlocked || promoApplied;
 
-  // Sur iOS Safari, window.print() doit être le tout premier appel exécuté
-  // dans le gestionnaire de clic, sans aucun code avant lui — sinon Safari
-  // considère que ce n'est plus un geste utilisateur "direct" et ignore
-  // l'appel SANS AUCUNE erreur ni message (ce qui donnait l'impression que
-  // le bouton ne faisait rien). On l'appelle donc en priorité absolue.
-  const proceedDownload = () => {
-    if (typeof window === "undefined" || typeof window.print !== "function") {
-      setDownloadError(t.printUnsupported);
-      return;
-    }
-
+  // Génère un vrai fichier PDF côté client (html2canvas capture le CV en
+  // image haute résolution, jsPDF l'assemble en pages A4) puis déclenche le
+  // téléchargement. On n'utilise plus window.print()/la boîte de dialogue
+  // d'impression du navigateur : cette approche s'est révélée peu fiable
+  // sur mobile (notamment iPhone/Safari, qui pouvait l'ignorer sans aucun
+  // message). La génération de fichier fonctionne de façon identique sur
+  // tous les navigateurs.
+  const proceedDownload = async () => {
     setDownloadError("");
-    let printThrew = false;
-    try {
-      window.print();
-    } catch (err) {
-      printThrew = true;
-      console.error("Erreur window.print:", err);
-      setDownloadError(t.downloadFailed);
-    }
-    if (printThrew) return;
-
     setGenerating(true);
+    try {
+      const node = document.getElementById("cv-capture-area");
+      if (!node) throw new Error("Zone de capture introuvable");
 
-    let settled = false;
-    const finish = async () => {
-      if (settled) return;
-      settled = true;
-      window.removeEventListener("afterprint", finish);
+      // Laisse le temps au navigateur de finaliser la mise en page (polices,
+      // images) avant la capture.
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+        windowWidth: node.scrollWidth,
+        windowHeight: node.scrollHeight,
+      });
+
+      const pageWidthMm = 210;
+      const pageHeightMm = 297;
+      const pxPerMm = canvas.width / pageWidthMm;
+      const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
+
+      const pdf = new jsPDF({ unit: "mm", format: "a4", compress: true });
+      let renderedPx = 0;
+      let firstPage = true;
+
+      while (renderedPx < canvas.height) {
+        const sliceHeightPx = Math.min(pageHeightPx, canvas.height - renderedPx);
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = sliceHeightPx;
+        const ctx = pageCanvas.getContext("2d");
+        if (!ctx) throw new Error("Contexte canvas indisponible");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(canvas, 0, renderedPx, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+
+        const sliceData = pageCanvas.toDataURL("image/jpeg", 0.95);
+        if (!firstPage) pdf.addPage();
+        pdf.addImage(sliceData, "JPEG", 0, 0, pageWidthMm, sliceHeightPx / pxPerMm);
+
+        renderedPx += sliceHeightPx;
+        firstPage = false;
+      }
+
+      const nomFichier = [cv.personalInfo?.prenom, cv.personalInfo?.nom]
+        .filter(Boolean)
+        .join("_")
+        .replace(/[^a-zA-Z0-9_-]/g, "") || "CV";
+      pdf.save(`${nomFichier}.pdf`);
+
       try {
         await incrementDownloads();
       } catch (err) {
         console.error("Erreur lors de l'enregistrement du téléchargement:", err);
-      } finally {
-        setPromoApplied(false);
-        setWaveClicked(false);
-        setWaveReference("");
-        setGenerating(false);
       }
-    };
-
-    window.addEventListener("afterprint", finish);
-    // Filet de sécurité : "afterprint" ne se déclenche pas de façon fiable
-    // sur tous les navigateurs (notamment Safari iOS), donc on ne bloque
-    // jamais durablement le bouton en chargement.
-    window.setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        window.removeEventListener("afterprint", finish);
-        setGenerating(false);
-      }
-    }, 8000);
+      setPromoApplied(false);
+      setWaveClicked(false);
+      setWaveReference("");
+    } catch (err) {
+      console.error("Erreur de génération du PDF:", err);
+      setDownloadError(t.downloadFailed);
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const checkPromo = async () => {
