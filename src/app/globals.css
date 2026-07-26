@@ -47,6 +47,29 @@ body {
   user-select: none;
 }
 
+/* Alignement icône/texte robuste pour la génération PDF. Le décalage
+   vertical constaté (icônes légèrement au-dessus du texte) vient du calcul
+   de ligne de base ("vertical-align") : le moteur qui capture le CV pour
+   produire le PDF ne recalcule pas les métriques de police de façon
+   identique au navigateur, donc tout alignement basé sur le texte peut
+   légèrement diverger. Le flexbox, lui, ne dépend d'aucune métrique de
+   police : on force donc en flex tout conteneur direct d'une icône du CV,
+   ce qui centre fiablement l'icône sur le texte quel que soit le moteur de
+   rendu utilisé. */
+p:has(> svg.cv-icon),
+h2:has(> svg.cv-icon),
+div:has(> svg.cv-icon) {
+  display: flex;
+  align-items: center;
+}
+span:has(> svg.cv-icon) {
+  display: inline-flex;
+  align-items: center;
+}
+.text-center:has(> svg.cv-icon) {
+  justify-content: center;
+}
+
 #cv-print-portal {
   display: none;
 }

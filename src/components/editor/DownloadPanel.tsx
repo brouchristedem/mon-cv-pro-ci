@@ -15,14 +15,6 @@ const PRICE_NEXT = Number(process.env.NEXT_PUBLIC_PRICE_NEXT || 1000);
 const SUPPORT_WHATSAPP_NUMBER = "2250545177571"; // format international sans "+" ni espaces, pour le lien wa.me
 const SUPPORT_PHONE_DISPLAY = "+225 05 45 17 75 71";
 
-function hexToRgb(hex: string): [number, number, number] {
-  const clean = hex.replace("#", "");
-  const full = clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean;
-  const num = parseInt(full, 16);
-  if (full.length !== 6 || Number.isNaN(num)) return [255, 255, 255];
-  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
-}
-
 export default function DownloadPanel() {
   const { user, downloadsUsed, paidUnlocked, incrementDownloads, confirmPaidDownload } = useAuth();
   const cv = useCVStore((s) => s.cv);
@@ -98,7 +90,6 @@ export default function DownloadPanel() {
         .sort((a, b) => a - b);
 
       const pageBg = cv.couleurFond || "#ffffff";
-      const [bgR, bgG, bgB] = hexToRgb(pageBg);
 
       const canvas = await html2canvas(node, {
         scale: 2,
@@ -139,29 +130,33 @@ export default function DownloadPanel() {
           }
         }
 
+        // La page-canvas fait toujours une pleine hauteur de page (même si
+        // le contenu réel s'arrête avant) : le vrai contenu est dessiné en
+        // haut, puis la toute dernière ligne de pixels réellement rendue
+        // est étirée pour remplir le reste. Cela prolonge naturellement la
+        // couleur de chaque colonne (ex. bandeau latéral coloré à côté
+        // d'une colonne blanche) jusqu'au vrai bas de la feuille, plutôt
+        // que de deviner une seule couleur pour toute la largeur.
         const pageCanvas = document.createElement("canvas");
         pageCanvas.width = canvas.width;
-        pageCanvas.height = sliceHeightPx;
+        pageCanvas.height = pageHeightPx;
         const ctx = pageCanvas.getContext("2d");
         if (!ctx) throw new Error("Contexte canvas indisponible");
         ctx.fillStyle = pageBg;
         ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
         ctx.drawImage(canvas, 0, renderedPx, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+        if (sliceHeightPx < pageHeightPx) {
+          const lastRowY = Math.max(0, renderedPx + sliceHeightPx - 1);
+          ctx.drawImage(
+            canvas,
+            0, lastRowY, canvas.width, 1,
+            0, sliceHeightPx, canvas.width, pageHeightPx - sliceHeightPx
+          );
+        }
 
         const sliceData = pageCanvas.toDataURL("image/jpeg", 0.95);
         if (!firstPage) pdf.addPage();
-        const sliceHeightMm = sliceHeightPx / pxPerMm;
-        pdf.addImage(sliceData, "JPEG", 0, 0, pageWidthMm, sliceHeightMm);
-
-        // Quand une page s'arrête avant le bas réel de la feuille (coupure
-        // choisie avant un bloc plutôt qu'au milieu), on peint le reste de
-        // la page avec la couleur de fond du CV plutôt que de laisser un
-        // rectangle blanc par défaut qui donne l'impression que le fond
-        // "s'arrête" avant la fin de la page.
-        if (sliceHeightMm < pageHeightMm - 0.5) {
-          pdf.setFillColor(bgR, bgG, bgB);
-          pdf.rect(0, sliceHeightMm, pageWidthMm, pageHeightMm - sliceHeightMm, "F");
-        }
+        pdf.addImage(sliceData, "JPEG", 0, 0, pageWidthMm, pageHeightMm);
 
         renderedPx += sliceHeightPx;
         firstPage = false;

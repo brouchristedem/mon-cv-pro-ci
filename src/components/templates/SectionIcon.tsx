@@ -42,7 +42,7 @@ export function SectionIcon({
   return (
     <Icon
       size={size}
-      className={`inline-block mr-1.5 align-middle ${className}`}
+      className={`inline-block mr-1.5 align-middle cv-icon ${className}`}
       strokeWidth={filled ? 2.2 : 1.6}
       fill={filled ? "currentColor" : "none"}
       fillOpacity={filled ? 0.2 : undefined}
