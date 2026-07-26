@@ -73,14 +73,7 @@ export default function CVPreviewFit({
                 boxSizing: "border-box",
               }}
             >
-              <div
-                style={{
-                  width: `${100 / (cv.tailleTexte / 13)}%`,
-                  height: `${297 / (cv.tailleTexte / 13)}mm`,
-                  transform: `scale(${cv.tailleTexte / 13})`,
-                  transformOrigin: "top left",
-                }}
-              >
+              <div style={{ zoom: cv.tailleTexte / 13 }}>
                 <CVRenderer cv={cv} />
               </div>
             </div>
