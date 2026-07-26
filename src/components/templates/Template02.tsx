@@ -52,7 +52,7 @@ export default function Template02({ cv }: { cv: CVData }) {
         </div>
 
         {sidebar.map((section) => (
-          <div key={section.id} className="mt-6">
+          <div key={section.id} className="break-inside-avoid mt-6">
             <h2 className="text-[11px] font-bold uppercase tracking-wide border-b border-white/30 pb-1 mb-2">
               <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
@@ -60,8 +60,9 @@ export default function Template02({ cv }: { cv: CVData }) {
               <p className="text-[11px] opacity-60 italic">—</p>
             )}
             {section.items.map((item) => (
-              <div key={item.id} className="mb-1.5">
+              <div key={item.id} className="break-inside-avoid mb-1.5">
                 <p className="text-[12px] font-medium">{item.titre}</p>
+                {item.sousTitre && <p className="text-[10px] opacity-80">{item.sousTitre}</p>}
                 {item.niveau && <p className="text-[10px] opacity-80">{item.niveau}</p>}
               </div>
             ))}
@@ -71,7 +72,7 @@ export default function Template02({ cv }: { cv: CVData }) {
 
       <main className="flex-1 p-6 space-y-5">
         {main.map((section) => (
-          <div key={section.id}>
+          <div key={section.id} className="break-inside-avoid">
             <h2 className="text-[13px] font-bold uppercase tracking-wide mb-2" style={{ color }}>
               <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
@@ -80,7 +81,7 @@ export default function Template02({ cv }: { cv: CVData }) {
                 <p className="text-slate-400 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
-                <div key={item.id}>
+                <div key={item.id} className="break-inside-avoid">
                   <div className="flex justify-between items-baseline">
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (

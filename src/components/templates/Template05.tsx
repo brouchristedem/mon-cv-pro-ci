@@ -70,7 +70,7 @@ export default function Template05({ cv }: { cv: CVData }) {
 
         <div className="space-y-5">
           {sortedVisible(cv).map((section) => (
-            <div key={section.id}>
+            <div key={section.id} className="break-inside-avoid">
               <h2 className="text-[13px] font-extrabold uppercase mb-2 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: color }} />
                 <SectionIcon type={section.type} cv={cv} />{section.titre}
@@ -80,7 +80,7 @@ export default function Template05({ cv }: { cv: CVData }) {
                   <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
                 )}
                 {section.items.map((item) => (
-                  <div key={item.id}>
+                  <div key={item.id} className="break-inside-avoid">
                     <div className="flex justify-between items-baseline">
                       <span className="font-semibold">{item.titre}</span>
                       {(item.dateDebut || item.dateFin) && (

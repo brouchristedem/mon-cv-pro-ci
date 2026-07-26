@@ -53,7 +53,7 @@ export default function Template11({ cv }: { cv: CVData }) {
 
       <div className="space-y-6">
         {sections.map((section, idx) => (
-          <div key={section.id} className="grid grid-cols-[32px_1fr] gap-3">
+          <div key={section.id} className="break-inside-avoid grid grid-cols-[32px_1fr] gap-3">
             <span className="text-lg font-bold" style={{ color: `${color}` }}>
               {String(idx + 1).padStart(2, "0")}
             </span>
@@ -64,7 +64,7 @@ export default function Template11({ cv }: { cv: CVData }) {
                   <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
                 )}
                 {section.items.map((item) => (
-                  <div key={item.id}>
+                  <div key={item.id} className="break-inside-avoid">
                     <div className="flex justify-between items-baseline">
                       <span className="font-semibold">{item.titre}</span>
                       {(item.dateDebut || item.dateFin) && (

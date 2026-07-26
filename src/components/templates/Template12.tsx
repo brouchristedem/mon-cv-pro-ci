@@ -49,7 +49,7 @@ export default function Template12({ cv }: { cv: CVData }) {
           {p.email && <p><ContactIcon type="email" cv={cv} />{p.email}</p>}
           {p.telephone && <p><ContactIcon type="telephone" cv={cv} />{p.telephone}</p>}
           {p.adresse && <p><ContactIcon type="adresse" cv={cv} />{p.adresse}</p>}
-          {p.permis && <p>{cv.langue === "en" ? "Driving licence" : "Permis"}: {p.permis}</p>}
+          {p.permis && <p><ContactIcon type="permis" cv={cv} />{cv.langue === "en" ? "Driving licence" : "Permis"}: {p.permis}</p>}
           {p.linkedin && <p><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</p>}
           {p.siteWeb && <p><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</p>}
           {cv.personalInfo.autresInfos.map((info) => (
@@ -61,7 +61,7 @@ export default function Template12({ cv }: { cv: CVData }) {
       <div className="flex gap-6">
         <div className="flex-[1.7] space-y-4">
           {main.map((section) => (
-            <div key={section.id}>
+            <div key={section.id} className="break-inside-avoid">
               <h2
                 className="text-[11px] font-bold uppercase tracking-widest mb-2 pb-1 border-b border-slate-200"
               >
@@ -71,7 +71,7 @@ export default function Template12({ cv }: { cv: CVData }) {
                 <p className="text-slate-300 italic text-[11.5px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
-                <div key={item.id} className="mb-2 grid grid-cols-[1fr_auto] gap-2">
+                <div key={item.id} className="break-inside-avoid mb-2 grid grid-cols-[1fr_auto] gap-2">
                   <div>
                     <p className="font-semibold">{item.titre}</p>
                     {(item.sousTitre || item.lieu) && (
@@ -98,7 +98,7 @@ export default function Template12({ cv }: { cv: CVData }) {
         </div>
         <div className="flex-1 space-y-4">
           {sidebar.map((section) => (
-            <div key={section.id}>
+            <div key={section.id} className="break-inside-avoid">
               <h2
                 className="text-[11px] font-bold uppercase tracking-widest mb-2 pb-1 border-b border-slate-200"
                 style={{ color }}
@@ -113,8 +113,9 @@ export default function Template12({ cv }: { cv: CVData }) {
                 }
               >
                 {section.items.map((item) => (
-                  <div key={item.id} className="mb-1">
+                  <div key={item.id} className="break-inside-avoid mb-1">
                     <p className="font-medium text-[11.5px]">{item.titre}</p>
+                    {item.sousTitre && <p className="text-[10.5px] text-slate-400">{item.sousTitre}</p>}
                     {item.niveau && <p className="text-[10.5px] text-slate-400">{item.niveau}</p>}
                   </div>
                 ))}

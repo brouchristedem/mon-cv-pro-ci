@@ -57,7 +57,7 @@ export default function Template10({ cv }: { cv: CVData }) {
         </div>
 
         {sidebar.map((section) => (
-          <div key={section.id} className="mt-6 w-full text-left">
+          <div key={section.id} className="break-inside-avoid mt-6 w-full text-left">
             <h2
               className="text-[10px] font-bold uppercase tracking-wide mb-2 text-center pb-1 border-b"
               style={{ color, borderColor: `${color}40` }}
@@ -72,8 +72,9 @@ export default function Template10({ cv }: { cv: CVData }) {
               }
             >
               {section.items.map((item) => (
-                <div key={item.id} className="mb-1.5">
+                <div key={item.id} className="break-inside-avoid mb-1.5">
                   <p className="text-[11px] text-center">{item.titre}</p>
+                  {item.sousTitre && <p className="text-[9.5px] text-slate-400 text-center">{item.sousTitre}</p>}
                   {item.niveau && <p className="text-[9.5px] text-slate-400 text-center">{item.niveau}</p>}
                 </div>
               ))}
@@ -84,7 +85,7 @@ export default function Template10({ cv }: { cv: CVData }) {
 
       <main className="flex-1 p-7 space-y-5">
         {main.map((section) => (
-          <div key={section.id} className="relative pl-4 border-l-2" style={{ borderColor: `${color}40` }}>
+          <div key={section.id} className="break-inside-avoid relative pl-4 border-l-2" style={{ borderColor: `${color}40` }}>
             <h2 className="text-[13px] font-bold uppercase tracking-wide mb-2" style={{ color }}>
               <SectionIcon type={section.type} cv={cv} />{section.titre}
             </h2>
@@ -92,7 +93,7 @@ export default function Template10({ cv }: { cv: CVData }) {
               <p className="text-slate-400 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
             )}
             {section.items.map((item) => (
-              <div key={item.id} className="mb-3 relative">
+              <div key={item.id} className="break-inside-avoid mb-3 relative">
                 <span
                   className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full"
                   style={{ background: color }}

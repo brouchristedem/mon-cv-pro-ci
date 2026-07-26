@@ -58,7 +58,7 @@ export default function Template04({ cv }: { cv: CVData }) {
       <div className="flex">
         <main className="flex-[1.6] p-6 space-y-5">
           {main.map((section) => (
-            <div key={section.id}>
+            <div key={section.id} className="break-inside-avoid">
               <h2 className="text-[13px] font-bold uppercase tracking-wide mb-2" style={{ color }}>
                 <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
@@ -66,7 +66,7 @@ export default function Template04({ cv }: { cv: CVData }) {
                 <p className="text-slate-400 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
-                <div key={item.id} className="mb-2">
+                <div key={item.id} className="break-inside-avoid mb-2">
                   <div className="flex justify-between items-baseline">
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
@@ -93,7 +93,7 @@ export default function Template04({ cv }: { cv: CVData }) {
         </main>
         <aside className="flex-1 p-6 bg-slate-50 space-y-5">
           {sidebar.map((section) => (
-            <div key={section.id}>
+            <div key={section.id} className="break-inside-avoid">
               <h2 className="text-[12px] font-bold uppercase tracking-wide mb-2" style={{ color }}>
                 <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
@@ -108,8 +108,9 @@ export default function Template04({ cv }: { cv: CVData }) {
                 }
               >
                 {section.items.map((item) => (
-                  <div key={item.id} className="mb-1.5">
+                  <div key={item.id} className="break-inside-avoid mb-1.5">
                     <p className="text-[12px] font-medium">{item.titre}</p>
+                    {item.sousTitre && <p className="text-[10px] text-slate-500">{item.sousTitre}</p>}
                     {item.niveau && <p className="text-[10px] text-slate-500">{item.niveau}</p>}
                   </div>
                 ))}

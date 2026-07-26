@@ -54,7 +54,7 @@ export default function Template06({ cv }: { cv: CVData }) {
       <div className="flex px-6 pb-6 gap-6">
         <main className="flex-[1.7] space-y-5">
           {main.map((section) => (
-            <div key={section.id}>
+            <div key={section.id} className="break-inside-avoid">
               <h2 className="text-[12px] font-bold uppercase tracking-wide mb-2 font-mono flex items-center gap-1.5" style={{ color }}>
                 <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
@@ -62,7 +62,7 @@ export default function Template06({ cv }: { cv: CVData }) {
                 <p className="text-slate-300 italic text-[12px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
-                <div key={item.id} className="mb-2 pl-3 border-l-2 border-slate-100">
+                <div key={item.id} className="break-inside-avoid mb-2 pl-3 border-l-2 border-slate-100">
                   <div className="flex justify-between items-baseline">
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
@@ -101,7 +101,7 @@ export default function Template06({ cv }: { cv: CVData }) {
           ))}
           </div>
           {sidebar.map((section) => (
-            <div key={section.id} className="mb-5">
+            <div key={section.id} className="break-inside-avoid mb-5">
               <h2 className="text-[11px] font-bold uppercase tracking-wide mb-2 font-mono" style={{ color }}>
                 <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
@@ -115,6 +115,7 @@ export default function Template06({ cv }: { cv: CVData }) {
                     title={item.niveau}
                   >
                     {item.titre}
+                    {item.sousTitre && <span className="opacity-70"> · {item.sousTitre}</span>}
                   </span>
                 ))}
               </div>

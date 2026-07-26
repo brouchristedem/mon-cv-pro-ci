@@ -2,6 +2,7 @@ import { CVData } from "@/lib/types";
 import { displayName } from "@/lib/displayName";
 import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
+import { InfoIcon } from "./InfoIcon";
 import { formatDate } from "@/lib/formatDate";
 
 function photoClass(shape: string) {
@@ -46,24 +47,25 @@ export default function Template14({ cv }: { cv: CVData }) {
         </div>
       </div>
       {(p.adresse || p.permis) && (
-        <p className="text-[10.5px] text-slate-400 mb-5">
-          {p.adresse} {p.permis ? `· ${cv.langue === "en" ? "Driving licence" : "Permis"} ${p.permis}` : ""}
+        <p className="flex flex-wrap gap-x-3 text-[10.5px] text-slate-400 mb-5">
+          {p.adresse && <span><ContactIcon type="adresse" cv={cv} />{p.adresse}</span>}
+          {p.permis && <span><ContactIcon type="permis" cv={cv} />{cv.langue === "en" ? "Driving licence" : "Permis"} {p.permis}</span>}
         </p>
       )}
       {(p.linkedin || p.siteWeb || cv.personalInfo.autresInfos.length > 0) && (
-        <p className="text-[10.5px] text-slate-400 mb-5">
-          {[p.linkedin, p.siteWeb, ...cv.personalInfo.autresInfos.map((info) =>
-            info.label || info.valeur ? `${info.label}${info.label && info.valeur ? " : " : ""}${info.valeur}` : ""
-          )]
-            .filter(Boolean)
-            .join(" · ")}
+        <p className="flex flex-wrap gap-x-3 text-[10.5px] text-slate-400 mb-5">
+          {p.linkedin && <span><ContactIcon type="linkedin" cv={cv} />{p.linkedin}</span>}
+          {p.siteWeb && <span><ContactIcon type="siteWeb" cv={cv} />{p.siteWeb}</span>}
+          {cv.personalInfo.autresInfos.map((info) => (
+            <span key={info.id}><InfoIcon label={info.label} cv={cv} />{info.label}{info.label && info.valeur ? " : " : ""}{info.valeur}</span>
+          ))}
         </p>
       )}
 
       <div className="grid grid-cols-3 gap-5">
         <div className="col-span-2 space-y-4">
           {main.map((section) => (
-            <div key={section.id} className="border border-slate-200 rounded-lg p-3">
+            <div key={section.id} className="break-inside-avoid border border-slate-200 rounded-lg p-3">
               <h2 className="text-[11px] font-bold uppercase mb-2" style={{ color }}>
                 <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
@@ -71,7 +73,7 @@ export default function Template14({ cv }: { cv: CVData }) {
                 <p className="text-slate-300 italic text-[11.5px]">{cv.langue === "en" ? "No information added" : "Aucune information ajoutée"}</p>
               )}
               {section.items.map((item) => (
-                <div key={item.id} className="mb-2">
+                <div key={item.id} className="break-inside-avoid mb-2">
                   <div className="flex justify-between items-baseline">
                     <span className="font-semibold">{item.titre}</span>
                     {(item.dateDebut || item.dateFin) && (
@@ -98,7 +100,7 @@ export default function Template14({ cv }: { cv: CVData }) {
         </div>
         <div className="space-y-4">
           {sidebar.map((section) => (
-            <div key={section.id} className="border border-slate-200 rounded-lg p-3">
+            <div key={section.id} className="break-inside-avoid border border-slate-200 rounded-lg p-3">
               <h2 className="text-[11px] font-bold uppercase mb-2" style={{ color }}>
                 <SectionIcon type={section.type} cv={cv} />{section.titre}
               </h2>
@@ -110,8 +112,9 @@ export default function Template14({ cv }: { cv: CVData }) {
                 }
               >
                 {section.items.map((item) => (
-                  <div key={item.id} className="mb-1">
+                  <div key={item.id} className="break-inside-avoid mb-1">
                     <p className="text-[11px] font-medium">{item.titre}</p>
+                    {item.sousTitre && <p className="text-[10px] text-slate-400">{item.sousTitre}</p>}
                     {item.niveau && <p className="text-[10px] text-slate-400">{item.niveau}</p>}
                   </div>
                 ))}
