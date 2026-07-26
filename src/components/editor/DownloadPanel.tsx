@@ -42,66 +42,23 @@ export default function DownloadPanel() {
   const waveLink = isFirstDownload ? WAVE_LINK_FIRST : WAVE_LINK_NEXT;
   const canDownload = paidUnlocked || promoApplied;
 
-  // Méthode par défaut (celle qui fonctionne pour la grande majorité des
-  // appareils) : la boîte de dialogue d'impression du navigateur. On ne
-  // débite/consomme le téléchargement payé qu'une fois cette boîte de
-  // dialogue réellement refermée (événement "afterprint"), pas au simple
-  // clic, pour ne jamais facturer un essai qui échoue.
-  const downloadViaPrint = () => {
-    if (typeof window === "undefined" || typeof window.print !== "function") {
-      setDownloadError(t.printUnsupported);
-      return;
-    }
-
-    setDownloadError("");
-    let printThrew = false;
-    try {
-      window.print();
-    } catch (err) {
-      printThrew = true;
-      console.error("Erreur window.print:", err);
-      setDownloadError(t.downloadFailed);
-    }
-    if (printThrew) return;
-
-    setGenerating(true);
-
-    let settled = false;
-    const finish = async () => {
-      if (settled) return;
-      settled = true;
-      window.removeEventListener("afterprint", finish);
-      try {
-        await incrementDownloads();
-      } catch (err) {
-        console.error("Erreur lors de l'enregistrement du téléchargement:", err);
-      } finally {
-        setPromoApplied(false);
-        setWaveClicked(false);
-        setWaveReference("");
-        setGenerating(false);
-      }
-    };
-
-    window.addEventListener("afterprint", finish);
-    window.setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        window.removeEventListener("afterprint", finish);
-        setGenerating(false);
-      }
-    }, 8000);
-  };
-
-  // Méthode réservée à iOS Safari : window.print() y est trop peu fiable
-  // (bloqué silencieusement selon les réglages). On génère un vrai PDF
-  // (html2canvas + jsPDF) et on l'OUVRE directement dans un nouvel onglet
-  // via une URL blob — le lecteur PDF natif de Safari s'ouvre alors de
-  // façon fiable, contrairement au déclenchement d'un téléchargement
-  // automatique (attribut "download"), historiquement mal supporté par
-  // iOS Safari. L'utilisateur peut ensuite l'enregistrer via le bouton de
-  // partage du lecteur PDF.
-  const downloadViaPdfBlob = async () => {
+  // Méthode unique de téléchargement, utilisée sur tous les navigateurs et
+  // systèmes : on génère un vrai fichier PDF (html2canvas-pro + jsPDF) à
+  // partir de la zone dédiée #cv-capture-area plutôt que de s'appuyer sur
+  // la boîte de dialogue d'impression du navigateur (window.print()), dont
+  // le comportement de pagination s'est révélé incohérent d'un moteur à
+  // l'autre (coupures/chevauchements de texte en bas de page). Pour éviter
+  // qu'une rubrique ou une entrée du CV ne soit coupée en plein milieu par
+  // une page, on ne découpe jamais à une hauteur de page fixe : on repère
+  // d'abord la position réelle (bas) de chaque bloc marqué
+  // "break-inside-avoid" dans le DOM, puis chaque saut de page choisit la
+  // limite valide la plus proche sans jamais trancher un bloc protégé (sauf
+  // si un seul bloc est plus grand qu'une page entière, cas limite
+  // inévitable). html2canvas-pro (plutôt que html2canvas) est nécessaire
+  // car Tailwind v4 génère ses couleurs avec des fonctions CSS modernes
+  // (oklch/lab) que html2canvas classique ne sait pas interpréter et qui
+  // faisaient échouer la génération, en particulier sur iPhone/Safari.
+  const generatePdf = async () => {
     setDownloadError("");
     setGenerating(true);
     try {
@@ -111,9 +68,19 @@ export default function DownloadPanel() {
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import("html2canvas"),
+        import("html2canvas-pro"),
         import("jspdf"),
       ]);
+
+      // Positions (en px CSS, relatives au haut de la zone capturée) du bas
+      // de chaque bloc protégé : ce sont les seuls points où l'on a le
+      // droit de couper une page.
+      const protectedEls = Array.from(node.querySelectorAll<HTMLElement>(".break-inside-avoid"));
+      const nodeTop = node.getBoundingClientRect().top;
+      const safeBoundariesCss = protectedEls
+        .map((el) => el.getBoundingClientRect().bottom - nodeTop)
+        .filter((v) => v > 0)
+        .sort((a, b) => a - b);
 
       const canvas = await html2canvas(node, {
         scale: 2,
@@ -128,13 +95,32 @@ export default function DownloadPanel() {
       const pageHeightMm = 297;
       const pxPerMm = canvas.width / pageWidthMm;
       const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
+      const cssToCanvasScale = canvas.width / node.offsetWidth;
+      const safeBoundariesPx = safeBoundariesCss.map((v) => v * cssToCanvasScale);
 
       const pdf = new jsPDF({ unit: "mm", format: "a4", compress: true });
       let renderedPx = 0;
       let firstPage = true;
 
       while (renderedPx < canvas.height) {
-        const sliceHeightPx = Math.min(pageHeightPx, canvas.height - renderedPx);
+        const remaining = canvas.height - renderedPx;
+        let sliceHeightPx = Math.min(pageHeightPx, remaining);
+
+        if (remaining > pageHeightPx) {
+          // On cherche la dernière limite "sûre" qui tient dans la page
+          // courante ; si on en trouve une (strictement après le début de
+          // la page), on coupe là plutôt qu'à la hauteur de page brute.
+          const target = renderedPx + pageHeightPx;
+          let bestCut = -1;
+          for (const b of safeBoundariesPx) {
+            if (b > renderedPx && b <= target) bestCut = b;
+            if (b > target) break;
+          }
+          if (bestCut > renderedPx) {
+            sliceHeightPx = Math.floor(bestCut - renderedPx);
+          }
+        }
+
         const pageCanvas = document.createElement("canvas");
         pageCanvas.width = canvas.width;
         pageCanvas.height = sliceHeightPx;
@@ -152,16 +138,21 @@ export default function DownloadPanel() {
         firstPage = false;
       }
 
-      const blobUrl = pdf.output("bloburl");
-      const opened = window.open(blobUrl as unknown as string, "_blank");
-      if (!opened) {
-        // Le navigateur a bloqué l'ouverture (rare, mais on garde un repli) :
-        // on déclenche alors le téléchargement classique via jsPDF.
-        const nomFichier =
-          [cv.personalInfo?.prenom, cv.personalInfo?.nom]
-            .filter(Boolean)
-            .join("_")
-            .replace(/[^a-zA-Z0-9_-]/g, "") || "CV";
+      const nomFichier =
+        [cv.personalInfo?.prenom, cv.personalInfo?.nom]
+          .filter(Boolean)
+          .join("_")
+          .replace(/[^a-zA-Z0-9_-]/g, "") || "CV";
+
+      if (isIOSSafari) {
+        // iOS Safari ne déclenche pas de façon fiable le téléchargement
+        // automatique (attribut "download") : on ouvre le PDF dans un
+        // nouvel onglet via une URL blob, l'utilisateur l'enregistre alors
+        // via le bouton de partage du lecteur PDF natif de Safari.
+        const blobUrl = pdf.output("bloburl");
+        const opened = window.open(blobUrl as unknown as string, "_blank");
+        if (!opened) pdf.save(`${nomFichier}.pdf`);
+      } else {
         pdf.save(`${nomFichier}.pdf`);
       }
 
@@ -183,11 +174,7 @@ export default function DownloadPanel() {
   };
 
   const proceedDownload = () => {
-    if (isIOSSafari) {
-      downloadViaPdfBlob();
-    } else {
-      downloadViaPrint();
-    }
+    generatePdf();
   };
 
   const checkPromo = async () => {

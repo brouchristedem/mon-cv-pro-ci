@@ -45,6 +45,17 @@ export function defaultCV(): CVData {
   };
 }
 
+export function mergeWithDefaults(data: Partial<CVData> | undefined | null): CVData {
+  const def = defaultCV();
+  if (!data) return def;
+  return {
+    ...def,
+    ...data,
+    personalInfo: { ...def.personalInfo, ...(data.personalInfo || {}) },
+    sections: data.sections && data.sections.length > 0 ? data.sections : def.sections,
+  };
+}
+
 interface CVStore {
   cv: CVData;
   history: CVData[];

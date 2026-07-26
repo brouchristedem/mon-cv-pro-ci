@@ -21,6 +21,8 @@ export default function ColorPicker() {
   const t = UI[cv.langue];
 
   const setColor = (color: string) => set((c) => ({ ...c, couleurPrimaire: color }));
+  const couleurPrimaire = cv.couleurPrimaire || "#2563eb";
+  const couleurFond = cv.couleurFond || "#ffffff";
 
   return (
     <div className="space-y-3">
@@ -30,7 +32,7 @@ export default function ColorPicker() {
             key={color}
             onClick={() => setColor(color)}
             className={`w-8 h-8 rounded-full border-2 transition ${
-              cv.couleurPrimaire === color ? "border-foreground scale-110" : "border-transparent"
+              couleurPrimaire === color ? "border-foreground scale-110" : "border-transparent"
             }`}
             style={{ background: color }}
             aria-label={color}
@@ -41,7 +43,7 @@ export default function ColorPicker() {
         <label className="text-xs text-foreground/60">{t.customColor}</label>
         <input
           type="color"
-          value={cv.couleurPrimaire}
+          value={couleurPrimaire}
           onChange={(e) => setColor(e.target.value)}
           className="w-8 h-8 rounded cursor-pointer bg-transparent border border-border"
         />
@@ -54,7 +56,7 @@ export default function ColorPicker() {
               key={bg}
               onClick={() => set((c) => ({ ...c, couleurFond: bg }))}
               className={`w-8 h-8 rounded-full border-2 transition ${
-                cv.couleurFond === bg ? "border-foreground scale-110" : "border-border"
+                couleurFond === bg ? "border-foreground scale-110" : "border-border"
               }`}
               style={{ background: bg }}
               aria-label={bg}
@@ -64,7 +66,7 @@ export default function ColorPicker() {
         <div className="flex items-center gap-2">
           <input
             type="color"
-            value={cv.couleurFond}
+            value={couleurFond}
             onChange={(e) => set((c) => ({ ...c, couleurFond: e.target.value }))}
             className="w-8 h-8 rounded cursor-pointer bg-transparent border border-border"
           />

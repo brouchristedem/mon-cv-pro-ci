@@ -21,7 +21,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { auth, googleProvider, db } from "./firebase";
-import { useCVStore, defaultCV } from "./store";
+import { useCVStore, defaultCV, mergeWithDefaults } from "./store";
 import { CVData } from "./types";
 
 interface AuthContextValue {
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const snap = await getDoc(ref);
           if (snap.exists()) {
             const data = snap.data();
-            if (data.cv) reset(data.cv as CVData);
+            if (data.cv) reset(mergeWithDefaults(data.cv as Partial<CVData>));
             setDownloadsUsed(data.downloadsUsed || 0);
             setPaidUnlocked(!!data.paidUnlocked);
             setDebugInfo(
