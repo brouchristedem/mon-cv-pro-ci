@@ -145,14 +145,6 @@ export default function DownloadPanel() {
         ctx.fillStyle = pageBg;
         ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
         ctx.drawImage(canvas, 0, renderedPx, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
-        if (sliceHeightPx < pageHeightPx) {
-          const lastRowY = Math.max(0, renderedPx + sliceHeightPx - 1);
-          ctx.drawImage(
-            canvas,
-            0, lastRowY, canvas.width, 1,
-            0, sliceHeightPx, canvas.width, pageHeightPx - sliceHeightPx
-          );
-        }
 
         const sliceData = pageCanvas.toDataURL("image/jpeg", 0.95);
         if (!firstPage) pdf.addPage();
