@@ -42,155 +42,67 @@ export default function DownloadPanel() {
   const waveLink = isFirstDownload ? WAVE_LINK_FIRST : WAVE_LINK_NEXT;
   const canDownload = paidUnlocked || promoApplied;
 
-  // Méthode unique de téléchargement, utilisée sur tous les navigateurs et
-  // systèmes : on génère un vrai fichier PDF (html2canvas-pro + jsPDF) à
-  // partir de la zone dédiée #cv-capture-area plutôt que de s'appuyer sur
-  // la boîte de dialogue d'impression du navigateur (window.print()), dont
-  // le comportement de pagination s'est révélé incohérent d'un moteur à
-  // l'autre (coupures/chevauchements de texte en bas de page). Pour éviter
-  // qu'une rubrique ou une entrée du CV ne soit coupée en plein milieu par
-  // une page, on ne découpe jamais à une hauteur de page fixe : on repère
-  // d'abord la position réelle (bas) de chaque bloc marqué
-  // "break-inside-avoid" dans le DOM, puis chaque saut de page choisit la
-  // limite valide la plus proche sans jamais trancher un bloc protégé (sauf
-  // si un seul bloc est plus grand qu'une page entière, cas limite
-  // inévitable). html2canvas-pro (plutôt que html2canvas) est nécessaire
-  // car Tailwind v4 génère ses couleurs avec des fonctions CSS modernes
-  // (oklch/lab) que html2canvas classique ne sait pas interpréter et qui
-  // faisaient échouer la génération, en particulier sur iPhone/Safari.
-  const generatePdf = async () => {
+  // Méthode de téléchargement, utilisée sur tous les navigateurs : la boîte
+  // d'impression native du navigateur (window.print()), avec destination
+  // "Enregistrer en PDF". Une tentative précédente générait le PDF côté
+  // client (html2canvas) en recréant sa propre mise en page en JavaScript
+  // plutôt que d'utiliser le moteur de rendu du navigateur ; cela produisait
+  // des écarts invisibles à l'écran mais visibles une fois téléchargé
+  // (icônes légèrement décalées, quelques pixels de texte dupliqués sur une
+  // coupure de page, fond qui ne va pas jusqu'au bas de la page). En
+  // utilisant l'impression native, le PDF est produit par le même moteur qui
+  // affiche déjà correctement l'aperçu à l'écran : les deux sont donc
+  // forcément identiques. La pagination (éviter de couper une rubrique ou
+  // une entrée en plein milieu) est gérée par les règles CSS
+  // "break-inside: avoid" déjà posées sur chaque bloc du CV.
+  const downloadViaPrint = () => {
+    if (typeof window === "undefined" || typeof window.print !== "function") {
+      setDownloadError(t.printUnsupported);
+      return;
+    }
+
     setDownloadError("");
-    setGenerating(true);
+    let printThrew = false;
     try {
-      const node = document.getElementById("cv-capture-area");
-      if (!node) throw new Error("Zone de capture introuvable");
+      window.print();
+    } catch (err) {
+      printThrew = true;
+      console.error("Erreur window.print:", err);
+      setDownloadError(t.downloadFailed);
+    }
+    if (printThrew) return;
 
-      if (typeof document !== "undefined" && "fonts" in document) {
-        try {
-          await document.fonts.ready;
-        } catch {
-          // ignore, on continue avec les polices déjà chargées
-        }
-      }
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    setGenerating(true);
 
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import("html2canvas-pro"),
-        import("jspdf"),
-      ]);
-
-      // Positions (en px CSS, relatives au haut de la zone capturée) du bas
-      // de chaque bloc protégé : ce sont les seuls points où l'on a le
-      // droit de couper une page.
-      const protectedEls = Array.from(node.querySelectorAll<HTMLElement>(".break-inside-avoid"));
-      const nodeTop = node.getBoundingClientRect().top;
-      const safeBoundariesCss = protectedEls
-        .map((el) => el.getBoundingClientRect().bottom - nodeTop)
-        .filter((v) => v > 0)
-        .sort((a, b) => a - b);
-
-      const pageBg = cv.couleurFond || "#ffffff";
-
-      const canvas = await html2canvas(node, {
-        scale: 2,
-        backgroundColor: pageBg,
-        useCORS: true,
-        logging: false,
-        windowWidth: node.scrollWidth,
-        windowHeight: node.scrollHeight,
-      });
-
-      const pageWidthMm = 210;
-      const pageHeightMm = 297;
-      const pxPerMm = canvas.width / pageWidthMm;
-      const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
-      const cssToCanvasScale = canvas.width / node.offsetWidth;
-      const safeBoundariesPx = safeBoundariesCss.map((v) => v * cssToCanvasScale);
-
-      const pdf = new jsPDF({ unit: "mm", format: "a4", compress: true });
-      let renderedPx = 0;
-      let firstPage = true;
-
-      while (renderedPx < canvas.height) {
-        const remaining = canvas.height - renderedPx;
-        let sliceHeightPx = Math.min(pageHeightPx, remaining);
-
-        if (remaining > pageHeightPx) {
-          // On cherche la dernière limite "sûre" qui tient dans la page
-          // courante ; si on en trouve une (strictement après le début de
-          // la page), on coupe là plutôt qu'à la hauteur de page brute.
-          const target = renderedPx + pageHeightPx;
-          let bestCut = -1;
-          for (const b of safeBoundariesPx) {
-            if (b > renderedPx && b <= target) bestCut = b;
-            if (b > target) break;
-          }
-          if (bestCut > renderedPx) {
-            sliceHeightPx = Math.floor(bestCut - renderedPx);
-          }
-        }
-
-        // La page-canvas fait toujours une pleine hauteur de page (même si
-        // le contenu réel s'arrête avant) : le vrai contenu est dessiné en
-        // haut, puis la toute dernière ligne de pixels réellement rendue
-        // est étirée pour remplir le reste. Cela prolonge naturellement la
-        // couleur de chaque colonne (ex. bandeau latéral coloré à côté
-        // d'une colonne blanche) jusqu'au vrai bas de la feuille, plutôt
-        // que de deviner une seule couleur pour toute la largeur.
-        const pageCanvas = document.createElement("canvas");
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = pageHeightPx;
-        const ctx = pageCanvas.getContext("2d");
-        if (!ctx) throw new Error("Contexte canvas indisponible");
-        ctx.fillStyle = pageBg;
-        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-        ctx.drawImage(canvas, 0, renderedPx, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
-
-        const sliceData = pageCanvas.toDataURL("image/jpeg", 0.95);
-        if (!firstPage) pdf.addPage();
-        pdf.addImage(sliceData, "JPEG", 0, 0, pageWidthMm, pageHeightMm);
-
-        renderedPx += sliceHeightPx;
-        firstPage = false;
-      }
-
-      const nomFichier =
-        [cv.personalInfo?.prenom, cv.personalInfo?.nom]
-          .filter(Boolean)
-          .join("_")
-          .replace(/[^a-zA-Z0-9_-]/g, "") || "CV";
-
-      if (isIOSSafari) {
-        // iOS Safari ne déclenche pas de façon fiable le téléchargement
-        // automatique (attribut "download") : on ouvre le PDF dans un
-        // nouvel onglet via une URL blob, l'utilisateur l'enregistre alors
-        // via le bouton de partage du lecteur PDF natif de Safari.
-        const blobUrl = pdf.output("bloburl");
-        const opened = window.open(blobUrl as unknown as string, "_blank");
-        if (!opened) pdf.save(`${nomFichier}.pdf`);
-      } else {
-        pdf.save(`${nomFichier}.pdf`);
-      }
-
+    let settled = false;
+    const finish = async () => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener("afterprint", finish);
       try {
         await incrementDownloads();
       } catch (err) {
         console.error("Erreur lors de l'enregistrement du téléchargement:", err);
+      } finally {
+        setPromoApplied(false);
+        setWaveClicked(false);
+        setWaveReference("");
+        setGenerating(false);
       }
-      setPromoApplied(false);
-      setWaveClicked(false);
-      setWaveReference("");
-    } catch (err) {
-      console.error("Erreur de génération du PDF:", err);
-      const detail = err instanceof Error ? ` (${err.message})` : "";
-      setDownloadError(t.downloadFailed + detail);
-    } finally {
-      setGenerating(false);
-    }
+    };
+
+    window.addEventListener("afterprint", finish);
+    window.setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        window.removeEventListener("afterprint", finish);
+        setGenerating(false);
+      }
+    }, 8000);
   };
 
   const proceedDownload = () => {
-    generatePdf();
+    downloadViaPrint();
   };
 
   const checkPromo = async () => {

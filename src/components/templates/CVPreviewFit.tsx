@@ -43,37 +43,6 @@ export default function CVPreviewFit({
         </div>
       </div>
 
-      {/* Zone dédiée à la génération du PDF (html2canvas + jsPDF). Rendue
-          hors-écran (pas en display:none, sinon html2canvas ne peut rien
-          capturer) à une largeur fixe correspondant à une page A4, avec le
-          même réglage de taille de texte que l'aperçu. Cette méthode ne
-          dépend plus de window.print()/la boîte de dialogue d'impression du
-          navigateur, qui s'est révélée peu fiable sur certains mobiles
-          (notamment iPhone/Safari) : un vrai fichier PDF est généré et
-          téléchargé directement. */}
-      {printMode && mounted && (
-        <div
-          id="cv-capture-area"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: "-10000px",
-            width: "794px",
-            background: "#ffffff",
-          }}
-        >
-          <div
-            style={{
-              width: `${100 / (cv.tailleTexte / 13)}%`,
-              transform: `scale(${cv.tailleTexte / 13})`,
-              transformOrigin: "top left",
-            }}
-          >
-            <CVRenderer cv={cv} />
-          </div>
-        </div>
-      )}
-
       {/* Zone dédiée à l'impression : rendue via un portail directement dans
           <body>, en dehors de l'arborescence de l'application. Le reste de
           l'app (masqué en CSS via visibility) occupait quand même sa place
@@ -81,9 +50,17 @@ export default function CVPreviewFit({
           quand le CV visible tenait sur une seule page. En sortant du DOM de
           l'app, seule la vraie hauteur du CV détermine le nombre de pages
           imprimées : 1 page par défaut, plus si le contenu déborde.
-          (Conservée en repli pour "Imprimer" depuis le menu du navigateur ;
-          le bouton "Télécharger" utilise désormais la génération PDF
-          directe ci-dessus.) */}
+
+          C'est l'impression native du navigateur (window.print()) qui sert
+          désormais de méthode de téléchargement, sur tous les navigateurs :
+          une tentative précédente générait le PDF côté client (html2canvas)
+          en recréant sa propre mise en page en JavaScript plutôt que
+          d'utiliser le moteur du navigateur, ce qui produisait de petits
+          écarts invisibles à l'écran mais visibles une fois téléchargé
+          (icônes légèrement décalées, texte dupliqué de quelques pixels sur
+          une coupure de page). L'impression native utilise le même moteur de
+          rendu que l'aperçu à l'écran : ce qui est correct à l'écran l'est
+          donc aussi une fois téléchargé. */}
       {printMode &&
         mounted &&
         createPortal(
@@ -99,7 +76,7 @@ export default function CVPreviewFit({
               <div
                 style={{
                   width: `${100 / (cv.tailleTexte / 13)}%`,
-                  minHeight: `${297 / (cv.tailleTexte / 13)}mm`,
+                  height: `${297 / (cv.tailleTexte / 13)}mm`,
                   transform: `scale(${cv.tailleTexte / 13})`,
                   transformOrigin: "top left",
                 }}
