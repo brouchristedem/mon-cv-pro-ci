@@ -27,7 +27,7 @@ export function ContactIcon({
   return (
     <Icon
       size={size}
-      className={`inline-block mr-1 align-[-2px] ${className}`}
+      className={`inline-block mr-1 align-middle ${className}`}
       strokeWidth={filled ? 2.2 : 1.6}
       fill={filled ? "currentColor" : "none"}
       fillOpacity={filled ? 0.25 : undefined}
