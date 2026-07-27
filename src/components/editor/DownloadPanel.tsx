@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { useCVStore } from "@/lib/store";
 import { useAuth } from "@/lib/AuthContext";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
 import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, MessageCircle, Info } from "lucide-react";
 import { UI } from "@/lib/i18n";
 
@@ -16,7 +14,8 @@ const SUPPORT_WHATSAPP_NUMBER = "2250545177571"; // format international sans "+
 const SUPPORT_PHONE_DISPLAY = "+225 05 45 17 75 71";
 
 export default function DownloadPanel() {
-  const { user, downloadsUsed, paidUnlocked, incrementDownloads, confirmPaidDownload } = useAuth();
+  const { user, downloadsUsed, paidUnlocked, isAdmin, incrementDownloads, confirmPaidDownload, applyPromoCode } =
+    useAuth();
   const cv = useCVStore((s) => s.cv);
   const t = UI[cv.langue];
   const [promoCode, setPromoCode] = useState("");
@@ -40,7 +39,7 @@ export default function DownloadPanel() {
   const isFirstDownload = downloadsUsed === 0;
   const price = isFirstDownload ? PRICE_FIRST : PRICE_NEXT;
   const waveLink = isFirstDownload ? WAVE_LINK_FIRST : WAVE_LINK_NEXT;
-  const canDownload = paidUnlocked || promoApplied;
+  const canDownload = paidUnlocked || promoApplied || isAdmin;
 
   // Méthode de téléchargement, utilisée sur tous les navigateurs : la boîte
   // d'impression native du navigateur (window.print()), avec destination
@@ -80,7 +79,14 @@ export default function DownloadPanel() {
       settled = true;
       window.removeEventListener("afterprint", finish);
       try {
-        await incrementDownloads();
+        // Seul un téléchargement réellement payé (Wave) fait passer le tarif
+        // au palier suivant. Un code promo ou un téléchargement admin ne doit
+        // jamais compter comme "premier téléchargement consommé", sinon la
+        // personne se retrouve à devoir payer 1000 FCFA dès son prochain
+        // téléchargement alors qu'elle n'a encore rien payé.
+        if (paidUnlocked && !promoApplied && !isAdmin) {
+          await incrementDownloads();
+        }
       } catch (err) {
         console.error("Erreur lors de l'enregistrement du téléchargement:", err);
       } finally {
@@ -109,15 +115,11 @@ export default function DownloadPanel() {
     setPromoError("");
     if (!promoCode.trim()) return;
     try {
-      const snap = await getDoc(doc(db, "promoCodes", promoCode.trim()));
-      if (snap.exists() && snap.data().actif) {
-        setPromoApplied(true);
-      } else {
-        setPromoError(t.promoInvalid);
-      }
+      await applyPromoCode(promoCode);
+      setPromoApplied(true);
     } catch (err) {
-      console.error("Erreur code promo:", err);
-      setPromoError(t.genericError);
+      const message = err instanceof Error ? err.message : t.genericError;
+      setPromoError(message);
     }
   };
 
@@ -149,7 +151,13 @@ export default function DownloadPanel() {
     }
   };
 
-  const statusMessage = promoApplied ? t.statusPromo : paidUnlocked ? t.statusPaid : null;
+  const statusMessage = isAdmin
+    ? "Téléchargement gratuit (compte admin)"
+    : promoApplied
+      ? t.statusPromo
+      : paidUnlocked
+        ? t.statusPaid
+        : null;
 
   return (
     <div className="space-y-3">

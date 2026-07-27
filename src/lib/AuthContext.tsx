@@ -33,6 +33,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   downloadsUsed: number;
   paidUnlocked: boolean;
+  usedPromoCodes: string[];
   authError: string;
   loadError: string;
   debugInfo: string;
@@ -45,6 +46,7 @@ interface AuthContextValue {
   saveProgress: (cv: CVData) => Promise<void>;
   incrementDownloads: () => Promise<void>;
   confirmPaidDownload: (waveReference: string) => Promise<void>;
+  applyPromoCode: (code: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -80,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [downloadsUsed, setDownloadsUsed] = useState(0);
   const [paidUnlocked, setPaidUnlocked] = useState(false);
+  const [usedPromoCodes, setUsedPromoCodes] = useState<string[]>([]);
   const [authError, setAuthError] = useState("");
   const [loadError, setLoadError] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
@@ -108,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (data.cv) reset(mergeWithDefaults(data.cv as Partial<CVData>));
             setDownloadsUsed(data.downloadsUsed || 0);
             setPaidUnlocked(!!data.paidUnlocked);
+            setUsedPromoCodes(Array.isArray(data.usedPromoCodes) ? data.usedPromoCodes : []);
             setDebugInfo(
               `uid=${u.uid.slice(0, 8)}... | document trouvé | téléchargements=${data.downloadsUsed || 0} | prénom sauvegardé="${data.cv?.personalInfo?.prenom || ""}"`
             );
@@ -117,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email: u.email,
               displayName: u.displayName,
               downloadsUsed: 0,
+              usedPromoCodes: [],
               cv: fresh,
               createdAt: serverTimestamp(),
             });
@@ -241,6 +246,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user]
   );
 
+  const applyPromoCode = useCallback(
+    async (code: string) => {
+      if (!user) throw new Error("Vous devez être connecté.");
+      const trimmed = code.trim();
+      if (!trimmed) throw new Error("Entrez un code promo.");
+      if (usedPromoCodes.includes(trimmed)) {
+        throw new Error("Vous avez déjà utilisé ce code promo. Chaque code n'est utilisable qu'une seule fois par personne.");
+      }
+      const snap = await getDoc(doc(db, "promoCodes", trimmed));
+      if (!snap.exists() || !snap.data().actif) {
+        throw new Error("Code promo invalide ou expiré.");
+      }
+      const nextUsed = [...usedPromoCodes, trimmed];
+      setUsedPromoCodes(nextUsed);
+      const ref = doc(db, "users", user.uid);
+      await setDoc(ref, { usedPromoCodes: nextUsed }, { merge: true });
+    },
+    [user, usedPromoCodes]
+  );
+
   const isAdmin = !!user?.email && user.email === ADMIN_EMAIL;
 
   return (
@@ -251,6 +276,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAdmin,
         downloadsUsed,
         paidUnlocked,
+        usedPromoCodes,
         authError,
         loadError,
         debugInfo,
@@ -263,6 +289,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         saveProgress,
         incrementDownloads,
         confirmPaidDownload,
+        applyPromoCode,
       }}
     >
       {children}
