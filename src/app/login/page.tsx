@@ -4,11 +4,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 
+type Mode = "signin" | "signup";
+
 export default function LoginPage() {
-  const { user, loading, signInWithGoogle, authError } = useAuth();
+  const { user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword, authError } =
+    useAuth();
   const router = useRouter();
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [mode, setMode] = useState<Mode>("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     if (!loading && user) router.replace("/editor");
@@ -27,8 +34,9 @@ export default function LoginPage() {
     return () => clearTimeout(t);
   }, [connecting]);
 
-  const handleClick = async () => {
+  const handleGoogleClick = async () => {
     setError("");
+    setInfo("");
     setConnecting(true);
     try {
       await signInWithGoogle();
@@ -39,17 +47,51 @@ export default function LoginPage() {
     }
   };
 
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    setConnecting(true);
+    try {
+      if (mode === "signup") {
+        await signUpWithEmail(email, password);
+      } else {
+        await signInWithEmail(email, password);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      setConnecting(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setError("");
+    setInfo("");
+    if (!email) {
+      setError("Entrez d'abord votre adresse email ci-dessus, puis cliquez à nouveau.");
+      return;
+    }
+    try {
+      await resetPassword(email);
+      setInfo("Un email pour réinitialiser votre mot de passe a été envoyé. Vérifiez votre boîte de réception.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10 text-center">
       <h1 className="text-2xl font-extrabold mb-2 uppercase tracking-wide">CV Pro CI</h1>
       <p className="text-sm text-foreground/60 mb-8 max-w-sm">
-        Connectez-vous avec Google pour créer votre CV et retrouver votre progression à chaque
-        visite.
+        Connectez-vous pour créer votre CV et retrouver votre progression à chaque visite.
       </p>
+
       <button
-        onClick={handleClick}
+        onClick={handleGoogleClick}
         disabled={connecting}
-        className="flex items-center gap-3 rounded-xl border border-border bg-surface px-6 py-3 font-medium hover:bg-surface-muted transition disabled:opacity-60"
+        className="flex items-center gap-3 rounded-xl border border-border bg-surface px-6 py-3 font-medium hover:bg-surface-muted transition disabled:opacity-60 w-full max-w-sm justify-center"
       >
         <svg width="18" height="18" viewBox="0 0 48 48">
           <path
@@ -71,6 +113,76 @@ export default function LoginPage() {
         </svg>
         {connecting ? "Connexion en cours..." : "Continuer avec Google"}
       </button>
+
+      <div className="flex items-center gap-3 w-full max-w-sm my-6">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs text-foreground/40">ou</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
+      <form onSubmit={handleEmailSubmit} className="w-full max-w-sm flex flex-col gap-3 text-left">
+        <input
+          type="email"
+          required
+          placeholder="Adresse email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          className="rounded-xl border border-border bg-surface px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="password"
+          required
+          minLength={6}
+          placeholder="Mot de passe (6 caractères minimum)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete={mode === "signup" ? "new-password" : "current-password"}
+          className="rounded-xl border border-border bg-surface px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          type="submit"
+          disabled={connecting}
+          className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition disabled:opacity-60"
+        >
+          {connecting
+            ? "Connexion en cours..."
+            : mode === "signup"
+              ? "Créer mon compte"
+              : "Se connecter"}
+        </button>
+
+        {mode === "signin" && (
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            className="text-xs text-foreground/50 hover:text-foreground/80 underline self-center"
+          >
+            Mot de passe oublié ?
+          </button>
+        )}
+      </form>
+
+      <p className="text-xs text-foreground/60 mt-5">
+        {mode === "signin" ? "Pas encore de compte ?" : "Vous avez déjà un compte ?"}{" "}
+        <button
+          onClick={() => {
+            setMode(mode === "signin" ? "signup" : "signin");
+            setError("");
+            setInfo("");
+          }}
+          className="text-blue-600 font-medium hover:underline"
+        >
+          {mode === "signin" ? "Créer un compte" : "Se connecter"}
+        </button>
+      </p>
+
+      {info && (
+        <div className="mt-6 max-w-sm rounded-lg border border-green-300 bg-green-50 p-3 text-left">
+          <p className="text-[11px] text-green-700">{info}</p>
+        </div>
+      )}
+
       {displayError && (
         <div className="mt-6 max-w-sm rounded-lg border border-red-300 bg-red-50 p-3 text-left">
           <p className="text-xs font-medium text-red-700">Erreur détectée :</p>
@@ -80,4 +192,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

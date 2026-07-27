@@ -8,6 +8,9 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signOut as fbSignOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import {
   doc,
@@ -35,6 +38,9 @@ interface AuthContextValue {
   debugInfo: string;
   dataLoaded: boolean;
   signInWithGoogle: () => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   saveProgress: (cv: CVData) => Promise<void>;
   incrementDownloads: () => Promise<void>;
@@ -44,6 +50,30 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
+// Traduit les codes d'erreur Firebase Auth en messages compréhensibles en français.
+function friendlyAuthError(err: unknown): string {
+  const code = (err as { code?: string })?.code || "";
+  switch (code) {
+    case "auth/email-already-in-use":
+      return "Un compte existe déjà avec cet email. Essayez de vous connecter à la place, ou utilisez \"Mot de passe oublié\".";
+    case "auth/invalid-email":
+      return "Cette adresse email n'est pas valide.";
+    case "auth/weak-password":
+      return "Le mot de passe doit contenir au moins 6 caractères.";
+    case "auth/wrong-password":
+    case "auth/invalid-credential":
+      return "Email ou mot de passe incorrect.";
+    case "auth/user-not-found":
+      return "Aucun compte trouvé avec cet email. Créez un compte d'abord.";
+    case "auth/too-many-requests":
+      return "Trop de tentatives. Réessayez dans quelques minutes.";
+    default: {
+      const message = err instanceof Error ? err.message : String(err);
+      return message;
+    }
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -127,6 +157,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const signUpWithEmail = useCallback(async (email: string, password: string) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      throw new Error(friendlyAuthError(err));
+    }
+  }, []);
+
+  const signInWithEmail = useCallback(async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      throw new Error(friendlyAuthError(err));
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (err) {
+      throw new Error(friendlyAuthError(err));
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     await fbSignOut(auth);
     reset(defaultCV());
@@ -202,6 +256,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         debugInfo,
         dataLoaded,
         signInWithGoogle,
+        signUpWithEmail,
+        signInWithEmail,
+        resetPassword,
         signOut,
         saveProgress,
         incrementDownloads,

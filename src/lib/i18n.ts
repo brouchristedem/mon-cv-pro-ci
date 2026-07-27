@@ -114,7 +114,7 @@ export const UI = {
     downloadFailed:
       "Le téléchargement n'a pas pu démarrer. Réessayez, ou ouvrez ce site dans Chrome ou Safari.",
     iosPrintHint:
-      "Sur iPhone, si le PDF s'ouvre dans un nouvel onglet au lieu de se télécharger : appuyez sur l'icône de partage, puis \"Enregistrer dans Fichiers\".",
+      "Sur iPhone : si rien ne s'ouvre après avoir appuyé sur Télécharger, utilisez plutôt le bouton de partage de Safari (en bas de l'écran) → \"Imprimer\" → pincez l'aperçu avec deux doigts pour l'agrandir → bouton de partage en haut à gauche → \"Enregistrer dans Fichiers\". Ça fonctionne toujours, même quand le bouton ne réagit pas.",
   },
   en: {
     steps: ["Information", "Sections", "Template & Color", "Layout", "Download"],
@@ -226,7 +226,7 @@ export const UI = {
     downloadFailed:
       "The download couldn't start. Try again, or open this site in Chrome or Safari.",
     iosPrintHint:
-      "On iPhone, if the PDF opens in a new tab instead of downloading: tap the share icon, then \"Save to Files\".",
+      "On iPhone: if nothing opens after tapping Download, use Safari's share button (bottom of screen) → \"Print\" → pinch the preview with two fingers to zoom in → share button top-left → \"Save to Files\". This always works, even when the button doesn't respond.",
   },
 } as const;
 

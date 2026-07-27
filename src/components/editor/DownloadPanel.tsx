@@ -172,7 +172,10 @@ export default function DownloadPanel() {
             {t.downloadCta}
           </button>
           {isIOSSafari && (
-            <p className="text-[11px] text-foreground/50">{t.iosPrintHint}</p>
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800">
+              <Info size={14} className="flex-shrink-0 mt-0.5" />
+              <span>{t.iosPrintHint}</span>
+            </div>
           )}
         </>
       ) : (
