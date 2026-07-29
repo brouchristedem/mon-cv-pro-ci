@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { CVData } from "@/lib/types";
 import CVRenderer from "./CVRenderer";
 import { useFitScale } from "@/lib/useFitScale";
+import { useCompactFit } from "@/lib/useCompactFit";
 
 const PAGE_HEIGHT_RATIO = 297 / 210;
 
@@ -19,6 +20,16 @@ export default function CVPreviewFit({
   const scaledHeight = contentWidth * PAGE_HEIGHT_RATIO * scale;
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  const baseZoom = cv.tailleTexte / 13;
+  // Une clé simple qui change dès que le contenu affiché change, pour
+  // redéclencher la mesure du mode compact (sans dépendre d'une sérialisation
+  // complète et coûteuse de tout l'objet cv à chaque frappe).
+  const watchKey = `${cv.templateId}|${cv.tailleTexte}|${cv.sections
+    .map((s) => `${s.id}:${s.visible}:${s.items.length}:${s.items.map((i) => (i.description || "").length + (i.titre || "").length).join(",")}`)
+    .join("|")}`;
+  const { measureRef, compactScale } = useCompactFit(!!cv.modeCompact, baseZoom, watchKey);
+  const finalZoom = baseZoom * compactScale;
 
   return (
     <>
@@ -37,11 +48,31 @@ export default function CVPreviewFit({
           }}
           onContextMenu={(e) => e.preventDefault()}
         >
-          <div style={{ zoom: cv.tailleTexte / 13 }}>
+          <div style={{ zoom: finalZoom }}>
             <CVRenderer cv={cv} />
           </div>
         </div>
       </div>
+
+      {/* Mesure invisible hors-écran, à l'échelle de base (sans le
+          rétrécissement du mode compact), pour savoir si le contenu déborde
+          d'une page et calculer de combien il faut réduire. */}
+      {cv.modeCompact && (
+        <div
+          aria-hidden
+          style={{
+            position: "fixed",
+            top: 0,
+            left: -99999,
+            width: 794,
+            pointerEvents: "none",
+          }}
+        >
+          <div ref={measureRef} style={{ zoom: baseZoom }}>
+            <CVRenderer cv={cv} />
+          </div>
+        </div>
+      )}
 
       {/* Zone dédiée à l'impression : rendue via un portail directement dans
           <body>, en dehors de l'arborescence de l'application. Le reste de
@@ -73,7 +104,7 @@ export default function CVPreviewFit({
                 boxSizing: "border-box",
               }}
             >
-              <div style={{ zoom: cv.tailleTexte / 13 }}>
+              <div style={{ zoom: finalZoom }}>
                 <CVRenderer cv={cv} />
               </div>
             </div>

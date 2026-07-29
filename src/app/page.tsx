@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { ArrowRight, Sparkles, Palette, Download } from "lucide-react";
-import { useAuth } from "@/lib/AuthContext";
 
 export default function Home() {
-  const { user, loading } = useAuth();
-  const ctaHref = !loading && user ? "/editor" : "/login";
+  const ctaHref = "/editor";
 
   return (
     <div className="min-h-screen flex flex-col">

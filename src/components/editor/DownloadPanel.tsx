@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useCVStore } from "@/lib/store";
 import { useAuth } from "@/lib/AuthContext";
-import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, MessageCircle, Info } from "lucide-react";
+import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, MessageCircle, Info, LogIn } from "lucide-react";
 import { UI } from "@/lib/i18n";
 
 const WAVE_LINK_FIRST = process.env.NEXT_PUBLIC_WAVE_LINK_FIRST || "#";
@@ -158,6 +159,28 @@ export default function DownloadPanel() {
       : paidUnlocked
         ? t.statusPaid
         : null;
+
+  if (!user) {
+    return (
+      <div className="space-y-3">
+        <p className="text-xs text-foreground/60">
+          {cv.langue === "en"
+            ? "Your CV is ready. Log in to download it — nothing is lost, your work is already saved on this device."
+            : "Votre CV est prêt. Connectez-vous pour le télécharger — rien n'est perdu, votre travail est déjà sauvegardé sur cet appareil."}
+        </p>
+        <Link
+          href="/login"
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition"
+        >
+          <LogIn size={18} />
+          {cv.langue === "en" ? "Log in to download" : "Se connecter pour télécharger"}
+        </Link>
+        <p className="text-[11px] text-foreground/50 text-center">
+          {cv.langue === "en" ? `From ${PRICE_FIRST} FCFA for the first CV` : `À partir de ${PRICE_FIRST} FCFA le premier CV`}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

@@ -1,4 +1,5 @@
 import { CVData } from "@/lib/types";
+import { renderRichText } from "@/lib/richText";
 import { displayName } from "@/lib/displayName";
 import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
@@ -83,7 +84,7 @@ export default function Template07({ cv }: { cv: CVData }) {
                   {item.niveau && <p className="text-[12px] text-slate-400">{item.niveau}</p>}
                   {item.description && (
                     <p className="text-[12px] text-slate-500 mt-1 whitespace-pre-line">
-                      {item.description}
+                      {renderRichText(item.description)}
                     </p>
                   )}
                 </div>

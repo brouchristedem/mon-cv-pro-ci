@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/AuthContext";
+import { useAuth, saveGuestDraft } from "@/lib/AuthContext";
 import { useCVStore } from "@/lib/store";
 import CVPreviewFit from "@/components/templates/CVPreviewFit";
 import PersonalInfoForm from "@/components/editor/PersonalInfoForm";
@@ -26,7 +25,6 @@ import {
 import Link from "next/link";
 
 export default function EditorPage() {
-  const router = useRouter();
   const { user, loading, isAdmin, signOut, saveProgress, loadError, debugInfo, dataLoaded } = useAuth();
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
@@ -42,12 +40,6 @@ export default function EditorPage() {
   const [saveError, setSaveError] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [manualSaveConfirm, setManualSaveConfirm] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login");
-    }
-  }, [loading, user, router]);
 
   useEffect(() => {
     setStep(cv.step || 0);
@@ -99,6 +91,16 @@ export default function EditorPage() {
     };
   }, [cv, step, user, dataLoaded, saveProgress]);
 
+  // Sauvegarde locale (navigateur) de la progression pour les visiteurs qui
+  // n'ont pas encore de compte, afin qu'ils ne perdent rien en actualisant
+  // la page. Dès qu'ils se connectent, ce brouillon est repris et enregistré
+  // sur leur compte (voir AuthContext).
+  useEffect(() => {
+    if (user || !dataLoaded) return;
+    const timeout = setTimeout(() => saveGuestDraft({ ...cv, step }), 400);
+    return () => clearTimeout(timeout);
+  }, [cv, step, user, dataLoaded]);
+
   const goStep = useCallback(
     (n: number) => {
       const clamped = Math.max(0, Math.min(t.steps.length - 1, n));
@@ -108,7 +110,7 @@ export default function EditorPage() {
     [set, t.steps.length]
   );
 
-  if (loading || !user || !dataLoaded) {
+  if (loading || !dataLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-foreground/60">
         {t.loading}
@@ -165,15 +167,37 @@ export default function EditorPage() {
               <ShieldCheck size={16} />
             </Link>
           )}
-          <button
-            onClick={() => signOut().catch((err) => console.error(err))}
-            className="p-2 rounded-lg hover:bg-surface-muted transition"
-            title={t.logout}
-          >
-            <LogOut size={16} />
-          </button>
+          {user ? (
+            <button
+              onClick={() => signOut().catch((err) => console.error(err))}
+              className="p-2 rounded-lg hover:bg-surface-muted transition"
+              title={t.logout}
+            >
+              <LogOut size={16} />
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="text-xs font-medium px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+            >
+              {cv.langue === "en" ? "Log in" : "Se connecter"}
+            </Link>
+          )}
         </div>
       </header>
+
+      {!user && (
+        <div className="bg-blue-50 border-b border-blue-200 px-4 py-2 text-[11px] text-blue-700 flex items-center justify-between gap-3">
+          <span>
+            {cv.langue === "en"
+              ? "Your CV is saved on this device. Log in to download it — 500 FCFA for the first CV."
+              : "Votre CV est sauvegardé sur cet appareil. Connectez-vous pour le télécharger — 500 FCFA le premier CV."}
+          </span>
+          <Link href="/login" className="font-semibold whitespace-nowrap hover:underline">
+            {cv.langue === "en" ? "Log in" : "Se connecter"}
+          </Link>
+        </div>
+      )}
 
       {(loadError || saveError) && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-[11px] text-red-700 break-words">
@@ -251,6 +275,37 @@ export default function EditorPage() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold mb-2">
+                  {cv.langue === "en" ? "One-page mode" : "Mode compact (une page)"}
+                </h3>
+                <button
+                  onClick={() => set((c) => ({ ...c, modeCompact: !c.modeCompact }))}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 text-xs rounded-lg border transition ${
+                    cv.modeCompact
+                      ? "border-blue-600 bg-blue-600/10 text-blue-600"
+                      : "border-border hover:bg-surface-muted"
+                  }`}
+                >
+                  <span>
+                    {cv.langue === "en"
+                      ? "Automatically shrink to fit on a single page"
+                      : "Réduit automatiquement le CV pour tenir sur une seule page"}
+                  </span>
+                  <span
+                    className={`w-9 h-5 rounded-full relative transition flex-shrink-0 ${
+                      cv.modeCompact ? "bg-blue-600" : "bg-foreground/20"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
+                        cv.modeCompact ? "left-4" : "left-0.5"
+                      }`}
+                    />
+                  </span>
+                </button>
               </div>
 
               <div>

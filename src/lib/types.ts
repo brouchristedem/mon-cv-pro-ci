@@ -64,6 +64,7 @@ export interface CVData {
   dateFormat: "texte" | "numerique"; // "Jan 2024" ou "01/2024"
   iconStyle: "aucune" | "contour" | "remplie";
   ordreNom: "prenom-nom" | "nom-prenom";
+  modeCompact?: boolean; // réduit la mise en page pour tenir sur une seule page
   personalInfo: PersonalInfo;
   sections: Section[];
   updatedAt: number;

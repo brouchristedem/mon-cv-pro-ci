@@ -19,11 +19,77 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { UI } from "@/lib/i18n";
-import { GripVertical, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp, Pencil } from "lucide-react";
-import { useState } from "react";
+import { GripVertical, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp, Pencil, Bold, Underline } from "lucide-react";
+import { useRef, useState } from "react";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
+}
+
+// Enveloppe le texte sélectionné dans une zone de texte avec des marqueurs
+// (** pour le gras, __ pour le souligné), pour un rendu identique sur
+// l'aperçu et le PDF final (voir src/lib/richText.tsx).
+function wrapSelection(
+  textarea: HTMLTextAreaElement,
+  value: string,
+  marker: string,
+  onChange: (next: string) => void
+) {
+  const start = textarea.selectionStart ?? value.length;
+  const end = textarea.selectionEnd ?? value.length;
+  const selected = value.slice(start, end) || (marker === "**" ? "texte en gras" : "texte souligné");
+  const next = value.slice(0, start) + marker + selected + marker + value.slice(end);
+  onChange(next);
+  requestAnimationFrame(() => {
+    textarea.focus();
+    const cursor = start + marker.length + selected.length + marker.length;
+    textarea.setSelectionRange(cursor, cursor);
+  });
+}
+
+function DescriptionField({
+  value,
+  placeholder,
+  onChange,
+}: {
+  value: string;
+  placeholder: string;
+  onChange: (next: string) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          title="Gras"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => ref.current && wrapSelection(ref.current, value, "**", onChange)}
+          className="p-1.5 rounded border border-border text-foreground/60 hover:text-foreground hover:bg-surface-muted transition"
+        >
+          <Bold size={12} />
+        </button>
+        <button
+          type="button"
+          title="Souligné"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => ref.current && wrapSelection(ref.current, value, "__", onChange)}
+          className="p-1.5 rounded border border-border text-foreground/60 hover:text-foreground hover:bg-surface-muted transition"
+        >
+          <Underline size={12} />
+        </button>
+      </div>
+      <textarea
+        ref={ref}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-transparent text-xs outline-none resize-none"
+        rows={2}
+      />
+    </div>
+  );
 }
 
 const ALL_TYPES: SectionType[] = [
@@ -269,12 +335,10 @@ function SortableSection({ section }: { section: Section }) {
                   className="w-full bg-transparent text-xs outline-none"
                 />
               ) : isSimpleText ? (
-                <textarea
+                <DescriptionField
                   placeholder={t.description}
                   value={item.description || ""}
-                  onChange={(e) => updateItem(item.id, { description: e.target.value })}
-                  className="w-full bg-transparent text-xs outline-none resize-none"
-                  rows={2}
+                  onChange={(next) => updateItem(item.id, { description: next })}
                 />
               ) : (
                 <>
@@ -321,12 +385,10 @@ function SortableSection({ section }: { section: Section }) {
                     />
                     {t.current}
                   </label>
-                  <textarea
+                  <DescriptionField
                     placeholder={t.description}
                     value={item.description || ""}
-                    onChange={(e) => updateItem(item.id, { description: e.target.value })}
-                    className="w-full bg-transparent text-xs outline-none resize-none"
-                    rows={2}
+                    onChange={(next) => updateItem(item.id, { description: next })}
                   />
                 </>
               )}

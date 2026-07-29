@@ -27,6 +27,46 @@ import { auth, googleProvider, db } from "./firebase";
 import { useCVStore, defaultCV, mergeWithDefaults } from "./store";
 import { CVData } from "./types";
 
+const GUEST_DRAFT_KEY = "cvpro_guest_draft";
+
+function loadGuestDraft(): CVData | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(GUEST_DRAFT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as CVData;
+  } catch {
+    return null;
+  }
+}
+
+export function saveGuestDraft(cv: CVData) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(GUEST_DRAFT_KEY, JSON.stringify(cv));
+  } catch {
+    // stockage local indisponible (navigation privée, quota...) : non bloquant
+  }
+}
+
+function clearGuestDraft() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(GUEST_DRAFT_KEY);
+  } catch {
+    // non bloquant
+  }
+}
+
+// Un brouillon invité est considéré "utile" seulement s'il contient un
+// minimum de contenu réel, pour éviter d'écraser un profil existant avec un
+// brouillon vide.
+function hasRealContent(cv: CVData): boolean {
+  const p = cv.personalInfo;
+  if (p.prenom.trim() || p.nom.trim() || p.titre.trim() || p.email.trim()) return true;
+  return cv.sections.some((s) => s.items.some((it) => (it.titre || "").trim() || (it.description || "").trim()));
+}
+
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
@@ -106,17 +146,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setDebugInfo(`uid=${u.uid.slice(0, 8)}... | lecture en cours...`);
           const ref = doc(db, "users", u.uid);
           const snap = await getDoc(ref);
+          const guestDraft = loadGuestDraft();
+          const guestHasContent = guestDraft ? hasRealContent(guestDraft) : false;
+
           if (snap.exists()) {
             const data = snap.data();
-            if (data.cv) reset(mergeWithDefaults(data.cv as Partial<CVData>));
+            const merged = guestHasContent
+              ? mergeWithDefaults(guestDraft as Partial<CVData>)
+              : data.cv
+                ? mergeWithDefaults(data.cv as Partial<CVData>)
+                : null;
+            if (merged) reset(merged);
             setDownloadsUsed(data.downloadsUsed || 0);
             setPaidUnlocked(!!data.paidUnlocked);
             setUsedPromoCodes(Array.isArray(data.usedPromoCodes) ? data.usedPromoCodes : []);
+            if (guestHasContent) {
+              // Le CV construit avant connexion prime : on l'enregistre tout
+              // de suite sur le compte pour ne rien perdre.
+              await setDoc(ref, { cv: merged, updatedAt: serverTimestamp() }, { merge: true });
+              clearGuestDraft();
+            }
             setDebugInfo(
-              `uid=${u.uid.slice(0, 8)}... | document trouvé | téléchargements=${data.downloadsUsed || 0} | prénom sauvegardé="${data.cv?.personalInfo?.prenom || ""}"`
+              `uid=${u.uid.slice(0, 8)}... | document trouvé | téléchargements=${data.downloadsUsed || 0} | prénom sauvegardé="${merged?.personalInfo?.prenom || ""}"`
             );
           } else {
-            const fresh = defaultCV();
+            const fresh = guestHasContent && guestDraft ? mergeWithDefaults(guestDraft) : defaultCV();
             await setDoc(ref, {
               email: u.email,
               displayName: u.displayName,
@@ -126,11 +180,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               createdAt: serverTimestamp(),
             });
             reset(fresh);
+            if (guestHasContent) clearGuestDraft();
             setDebugInfo(`uid=${u.uid.slice(0, 8)}... | AUCUN document trouvé, nouveau profil créé`);
           }
           setDataLoaded(true);
         } else {
-          setDebugInfo("Aucun utilisateur connecté");
+          // Invité (non connecté) : on charge son brouillon local s'il existe,
+          // pour lui permettre de construire et prévisualiser son CV sans
+          // compte. Le téléchargement, lui, reste réservé aux comptes connectés.
+          const guestDraft = loadGuestDraft();
+          if (guestDraft) reset(mergeWithDefaults(guestDraft));
+          setDataLoaded(true);
+          setDebugInfo("Aucun utilisateur connecté (mode invité)");
         }
       } catch (err: unknown) {
         console.error("Erreur lors du chargement du profil:", err);
