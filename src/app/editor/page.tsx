@@ -46,6 +46,18 @@ export default function EditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
+  // Pré-sélectionne le modèle choisi depuis la galerie de la page d'accueil
+  // (lien du type /editor?template=template-04), une seule fois au chargement.
+  const templateFromUrlApplied = useRef(false);
+  useEffect(() => {
+    if (templateFromUrlApplied.current || !dataLoaded) return;
+    const tpl = new URLSearchParams(window.location.search).get("template");
+    if (tpl) {
+      set((c) => ({ ...c, templateId: tpl }));
+    }
+    templateFromUrlApplied.current = true;
+  }, [dataLoaded, set]);
+
   useEffect(() => {
     if (!user || !dataLoaded) return;
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
@@ -122,7 +134,7 @@ export default function EditorPage() {
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-border">
         <Link href="/" className="font-extrabold text-sm tracking-wide uppercase">
-          CV Pro CI
+          MON CV PRO
         </Link>
         <div className="flex items-center gap-1.5">
           <button

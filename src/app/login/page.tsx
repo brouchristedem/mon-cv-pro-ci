@@ -83,7 +83,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10 text-center">
-      <h1 className="text-2xl font-extrabold mb-2 uppercase tracking-wide">CV Pro CI</h1>
+      <h1 className="text-2xl font-extrabold mb-2 uppercase tracking-wide">MON CV PRO</h1>
       <p className="text-sm text-foreground/60 mb-8 max-w-sm">
         Connectez-vous pour créer votre CV et retrouver votre progression à chaque visite.
       </p>

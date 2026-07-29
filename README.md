@@ -1,4 +1,4 @@
-# Mon CV Pro CI
+# MON CV PRO
 
 Application de création de CV professionnels — Next.js + Firebase.
 

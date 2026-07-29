@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/lib/AuthContext";
 
 const siteUrl = "https://mon-cv-pro-ci.vercel.app";
-const title = "Mon CV Pro CI — Créez un CV professionnel en quelques minutes";
+const title = "MON CV PRO — Créez un CV professionnel en quelques minutes";
 const description =
   "Créez un CV professionnel et moderne, prisé par les recruteurs internationaux. 15 modèles, personnalisation complète, export PDF. Pensé pour la Côte d'Ivoire.";
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: title,
-    template: "%s | Mon CV Pro CI",
+    template: "%s | MON CV PRO",
   },
   description,
   keywords: [
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     "générateur de CV",
     "faire un CV PDF",
   ],
-  authors: [{ name: "CV Pro CI" }],
+  authors: [{ name: "MON CV PRO" }],
   alternates: {
     canonical: "/",
   },
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     url: siteUrl,
-    siteName: "Mon CV Pro CI",
+    siteName: "MON CV PRO",
     title,
     description,
     images: [
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
         url: "/og-image-v2.png",
         width: 1200,
         height: 630,
-        alt: "Mon CV Pro CI — Créez un CV professionnel en quelques minutes",
+        alt: "MON CV PRO — Créez un CV professionnel en quelques minutes",
       },
     ],
   },
@@ -83,7 +83,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              name: "Mon CV Pro CI",
+              name: "MON CV PRO",
               url: siteUrl,
               description,
               applicationCategory: "BusinessApplication",
