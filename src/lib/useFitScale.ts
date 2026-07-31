@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 
 const CONTENT_WIDTH_PX = 794; // équivalent de 210mm à 96dpi
 
-export function useFitScale() {
+export function useFitScale(zoomMultiplier: number = 1) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+  const [baseScale, setBaseScale] = useState(1);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -15,7 +15,7 @@ export function useFitScale() {
     const compute = () => {
       const width = el.clientWidth;
       if (width > 0) {
-        setScale(Math.min(1, width / CONTENT_WIDTH_PX));
+        setBaseScale(Math.min(1, width / CONTENT_WIDTH_PX));
       }
     };
 
@@ -25,5 +25,5 @@ export function useFitScale() {
     return () => observer.disconnect();
   }, []);
 
-  return { containerRef, scale, contentWidth: CONTENT_WIDTH_PX };
+  return { containerRef, scale: baseScale * zoomMultiplier, contentWidth: CONTENT_WIDTH_PX };
 }

@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    if (!loading && user) router.replace("/");
+    if (!loading && user) router.replace("/editor");
   }, [loading, user, router]);
 
   const displayError = error || authError;

@@ -135,6 +135,12 @@ export default function PersonalInfoForm() {
         </div>
       )}
 
+      <div className="pt-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-foreground/40 mb-2">
+          {t.identityGroup}
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t.firstName}</label>
@@ -164,6 +170,12 @@ export default function PersonalInfoForm() {
           onChange={(e) => update("titre", e.target.value)}
           placeholder={t.jobTitlePlaceholder}
         />
+      </div>
+
+      <div className="pt-2 border-t border-border">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-foreground/40 mb-2 mt-3">
+          {t.contactGroup}
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

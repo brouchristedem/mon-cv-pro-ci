@@ -12,11 +12,13 @@ const PAGE_HEIGHT_RATIO = 297 / 210;
 export default function CVPreviewFit({
   cv,
   printMode = false,
+  zoom = 1,
 }: {
   cv: CVData;
   printMode?: boolean;
+  zoom?: number;
 }) {
-  const { containerRef, scale, contentWidth } = useFitScale();
+  const { containerRef, scale, contentWidth } = useFitScale(zoom);
   const scaledHeight = contentWidth * PAGE_HEIGHT_RATIO * scale;
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -56,11 +58,11 @@ export default function CVPreviewFit({
       {/* Aperçu visible à l'écran uniquement — ajusté à la largeur disponible */}
       <div
         ref={containerRef}
-        className="w-full print:hidden"
+        className="w-full print:hidden overflow-x-auto"
         style={{ height: scaledHeight || undefined }}
       >
         <div
-          className="bg-white shadow-xl cv-protected"
+          className="bg-white shadow-xl cv-protected mx-auto"
           style={{
             width: contentWidth,
             transform: `scale(${scale})`,

@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useAuth, saveGuestDraft } from "@/lib/AuthContext";
 import { useCVStore } from "@/lib/store";
 import CVPreviewFit from "@/components/templates/CVPreviewFit";
 import PersonalInfoForm from "@/components/editor/PersonalInfoForm";
-import SectionsEditor from "@/components/editor/SectionsEditor";
+import SectionPanel from "@/components/editor/SectionPanel";
 import TemplatePicker from "@/components/editor/TemplatePicker";
 import ColorPicker from "@/components/editor/ColorPicker";
 import DownloadPanel from "@/components/editor/DownloadPanel";
 import { useTheme } from "@/lib/ThemeContext";
-import { SECTION_LABELS_FR, SECTION_LABELS_EN } from "@/lib/types";
+import { SECTION_LABELS_FR, SECTION_LABELS_EN, Section, SectionType, PersonalInfo } from "@/lib/types";
 import { UI } from "@/lib/i18n";
 import {
   Undo2,
@@ -18,12 +18,84 @@ import {
   Moon,
   Sun,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
   ShieldCheck,
+  Download,
+  Plus,
+  Check,
+  Minus,
+  Maximize2,
+  X,
+  Palette,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+const ALL_TYPES: SectionType[] = [
+  "profil",
+  "experience",
+  "formation",
+  "competences",
+  "langues",
+  "certifications",
+  "projets",
+  "interets",
+  "references",
+];
+
+const QUICK_COLORS = ["#2563eb", "#0891b2", "#059669", "#dc2626", "#7c3aed", "#0f172a"];
+
+type Status = "empty" | "partial" | "done";
+
+function sectionStatus(section: Section): Status {
+  if (section.items.length === 0) return "empty";
+  const filled = section.items.filter((it) => (it.titre || "").trim().length > 0).length;
+  if (filled === 0) return "empty";
+  return filled === section.items.length ? "done" : "partial";
+}
+
+function infosStatus(p: PersonalInfo): Status {
+  const fields = [p.prenom, p.nom, p.titre, p.email, p.telephone];
+  const filled = fields.filter((v) => (v || "").trim().length > 0).length;
+  if (filled === 0) return "empty";
+  return filled === fields.length ? "done" : "partial";
+}
+
+function StatusDot({ status }: { status: Status }) {
+  if (status === "done") return <Check size={13} className="text-green-500 flex-shrink-0" />;
+  if (status === "partial")
+    return <span className="w-3 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />;
+  return <span className="w-1.5 h-1.5 rounded-full bg-foreground/25 flex-shrink-0" />;
+}
+
+function NavButton({
+  label,
+  status,
+  active,
+  onClick,
+}: {
+  label: string;
+  status?: Status;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 flex-shrink-0 lg:w-full text-left px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition ${
+        active
+          ? "bg-blue-600 text-white"
+          : "bg-surface-muted lg:bg-transparent text-foreground/70 hover:bg-surface-muted"
+      }`}
+    >
+      <span className="flex-1 truncate">{label}</span>
+      {status && <StatusDot status={status} />}
+    </button>
+  );
+}
 
 export default function EditorPage() {
   const { user, loading, isAdmin, signOut, saveProgress, loadError, debugInfo, dataLoaded } = useAuth();
@@ -33,20 +105,20 @@ export default function EditorPage() {
   const redo = useCVStore((s) => s.redo);
   const canUndo = useCVStore((s) => s.canUndo);
   const canRedo = useCVStore((s) => s.canRedo);
+  const addSection = useCVStore((s) => s.addSection);
   const { dark, toggle } = useTheme();
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = UI[cv.langue];
-
   const router = useRouter();
-  const [step, setStep] = useState(0);
+
   const [saveError, setSaveError] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [manualSaveConfirm, setManualSaveConfirm] = useState(false);
-
-  useEffect(() => {
-    setStep(cv.step || 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.uid]);
+  const [activeId, setActiveId] = useState<string>("infos");
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [fullscreen, setFullscreen] = useState(false);
 
   // Quand l'utilisateur appuie sur "retour" (navigateur ou bouton physique
   // sur mobile) depuis la page d'édition, on le renvoie toujours vers la
@@ -76,7 +148,7 @@ export default function EditorPage() {
     if (!user || !dataLoaded) return;
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
-      saveProgress({ ...cv, step })
+      saveProgress(cv)
         .then(() => {
           setSaveError("");
           setLastSaved(new Date());
@@ -89,7 +161,7 @@ export default function EditorPage() {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [cv, step, user, dataLoaded, saveProgress]);
+  }, [cv, user, dataLoaded, saveProgress]);
 
   // Sauvegarde immédiate (sans attendre le délai) dès que la page se cache,
   // se ferme, ou passe en arrière-plan — pour ne rien perdre lors d'une
@@ -98,7 +170,7 @@ export default function EditorPage() {
     if (!user || !dataLoaded) return;
     const flush = () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
-      saveProgress({ ...cv, step })
+      saveProgress(cv)
         .then(() => setLastSaved(new Date()))
         .catch((err) => console.error("Erreur de sauvegarde:", err));
     };
@@ -115,7 +187,7 @@ export default function EditorPage() {
       window.removeEventListener("beforeunload", flush);
       document.removeEventListener("focusout", flush);
     };
-  }, [cv, step, user, dataLoaded, saveProgress]);
+  }, [cv, user, dataLoaded, saveProgress]);
 
   // Sauvegarde locale (navigateur) de la progression pour les visiteurs qui
   // n'ont pas encore de compte, afin qu'ils ne perdent rien en actualisant
@@ -123,18 +195,17 @@ export default function EditorPage() {
   // sur leur compte (voir AuthContext).
   useEffect(() => {
     if (user || !dataLoaded) return;
-    const timeout = setTimeout(() => saveGuestDraft({ ...cv, step }), 400);
+    const timeout = setTimeout(() => saveGuestDraft(cv), 400);
     return () => clearTimeout(timeout);
-  }, [cv, step, user, dataLoaded]);
+  }, [cv, user, dataLoaded]);
 
-  const goStep = useCallback(
-    (n: number) => {
-      const clamped = Math.max(0, Math.min(t.steps.length - 1, n));
-      setStep(clamped);
-      set((c) => ({ ...c, step: clamped }));
-    },
-    [set, t.steps.length]
+  const orderedSections = useMemo(
+    () => [...cv.sections].sort((a, b) => a.ordre - b.ordre),
+    [cv.sections]
   );
+  const labels = cv.langue === "en" ? SECTION_LABELS_EN : SECTION_LABELS_FR;
+  const missingTypes = ALL_TYPES.filter((type) => !cv.sections.some((s) => s.type === type));
+  const activeSection = orderedSections.find((s) => s.id === activeId);
 
   if (loading || !dataLoaded) {
     return (
@@ -146,11 +217,25 @@ export default function EditorPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-border">
-        <Link href="/" className="font-extrabold text-sm tracking-wide uppercase">
+      <header className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-border gap-2">
+        <Link href="/" className="font-extrabold text-sm tracking-wide uppercase flex-shrink-0">
           MON CV PRO
         </Link>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+          <span
+            className={`hidden sm:flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full ${
+              user && lastSaved
+                ? "bg-green-500/10 text-green-600"
+                : "bg-foreground/5 text-foreground/40"
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                user && lastSaved ? "bg-green-500" : "bg-foreground/30"
+              }`}
+            />
+            {user ? (lastSaved ? t.savedBadge : t.savingBadge) : t.localSavedBadge}
+          </span>
           <button
             onClick={undo}
             disabled={!canUndo}
@@ -171,12 +256,12 @@ export default function EditorPage() {
             value={cv.langue}
             onChange={(e) => {
               const langue = e.target.value as "fr" | "en";
-              const labels = langue === "en" ? SECTION_LABELS_EN : SECTION_LABELS_FR;
+              const newLabels = langue === "en" ? SECTION_LABELS_EN : SECTION_LABELS_FR;
               set((c) => ({
                 ...c,
                 langue,
                 sections: c.sections.map((s) =>
-                  s.type === "custom" ? s : { ...s, titre: labels[s.type] }
+                  s.type === "custom" ? s : { ...s, titre: newLabels[s.type] }
                 ),
               }));
             }}
@@ -193,6 +278,12 @@ export default function EditorPage() {
               <ShieldCheck size={16} />
             </Link>
           )}
+          <button
+            onClick={() => setDownloadOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+          >
+            <Download size={14} /> {t.steps[4]}
+          </button>
           {user ? (
             <button
               onClick={() => signOut().catch((err) => console.error(err))}
@@ -204,7 +295,7 @@ export default function EditorPage() {
           ) : (
             <Link
               href="/login"
-              className="text-xs font-medium px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+              className="text-xs font-medium px-3 py-2 rounded-lg bg-surface-muted hover:bg-surface transition"
             >
               {cv.langue === "en" ? "Log in" : "Se connecter"}
             </Link>
@@ -244,27 +335,122 @@ export default function EditorPage() {
         </div>
       )}
 
-      <div className="flex items-center gap-1 px-4 lg:px-6 py-2 overflow-x-auto border-b border-border text-xs">
-        {t.steps.map((label, i) => (
-          <button
-            key={label}
-            onClick={() => goStep(i)}
-            className={`px-3 py-1.5 rounded-full whitespace-nowrap transition ${
-              step === i
-                ? "bg-blue-600 text-white"
-                : "bg-surface-muted text-foreground/60 hover:text-foreground"
-            }`}
-          >
-            {i + 1}. {label}
-          </button>
-        ))}
-      </div>
+      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {/* Sidebar : sections + progression, palette rapide intégrée */}
+        <nav className="lg:w-60 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-border flex flex-col overflow-hidden">
+          <div className="flex lg:flex-col gap-1.5 p-3 overflow-x-auto lg:overflow-y-auto">
+            <NavButton
+              label={t.steps[0]}
+              status={infosStatus(cv.personalInfo)}
+              active={activeId === "infos"}
+              onClick={() => setActiveId("infos")}
+            />
+            {orderedSections.map((section) => (
+              <NavButton
+                key={section.id}
+                label={section.titre}
+                status={sectionStatus(section)}
+                active={activeId === section.id}
+                onClick={() => setActiveId(section.id)}
+              />
+            ))}
+            <div className="relative flex-shrink-0 lg:w-full">
+              <button
+                onClick={() => setAddMenuOpen((o) => !o)}
+                className="flex items-center gap-1.5 flex-shrink-0 lg:w-full text-left px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap text-blue-600 border border-dashed border-blue-400 hover:bg-blue-500/10 transition"
+              >
+                <Plus size={13} /> {cv.langue === "en" ? "Add a section" : "Ajouter une rubrique"}
+              </button>
+              {addMenuOpen && missingTypes.length >= 0 && (
+                <div className="absolute z-20 top-full mt-1.5 left-0 bg-surface border border-border rounded-xl p-2 shadow-lg flex flex-wrap gap-1.5 w-64">
+                  {missingTypes.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        const id = uid();
+                        addSection({
+                          id,
+                          type,
+                          titre: labels[type],
+                          visible: true,
+                          ordre: cv.sections.length,
+                          items: [],
+                        });
+                        setActiveId(id);
+                        setAddMenuOpen(false);
+                      }}
+                      className="text-[11px] px-2 py-1.5 rounded-lg border border-border hover:bg-surface-muted transition"
+                    >
+                      + {labels[type]}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => {
+                      const id = uid();
+                      addSection({
+                        id,
+                        type: "custom",
+                        titre: cv.langue === "en" ? "New section" : "Nouvelle rubrique",
+                        visible: true,
+                        ordre: cv.sections.length,
+                        items: [],
+                      });
+                      setActiveId(id);
+                      setAddMenuOpen(false);
+                    }}
+                    className="text-[11px] px-2 py-1.5 rounded-lg border border-dashed border-blue-400 text-blue-600 hover:bg-blue-500/10 transition"
+                  >
+                    {t.customSection}
+                  </button>
+                </div>
+              )}
+            </div>
+            <NavButton
+              label={t.steps[2]}
+              active={activeId === "template"}
+              onClick={() => setActiveId("template")}
+            />
+            <NavButton
+              label={t.steps[3]}
+              active={activeId === "settings"}
+              onClick={() => setActiveId("settings")}
+            />
+          </div>
 
-      <main className="flex-1 flex flex-col lg:flex-row">
+          <div className="p-3 border-t border-border">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-foreground/40 mb-2 flex items-center gap-1">
+              <Palette size={12} /> {t.personalizeLabel}
+            </p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {QUICK_COLORS.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => set((c) => ({ ...c, couleurPrimaire: color }))}
+                  className={`w-6 h-6 rounded-full border-2 transition ${
+                    cv.couleurPrimaire === color ? "border-foreground scale-110" : "border-transparent"
+                  }`}
+                  style={{ background: color }}
+                  aria-label={color}
+                />
+              ))}
+              <button
+                onClick={() => setActiveId("template")}
+                className="w-6 h-6 rounded-full border border-dashed border-border flex items-center justify-center text-foreground/40 hover:text-foreground/70 hover:border-foreground/40 transition"
+                title={t.steps[2]}
+              >
+                <Plus size={12} />
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        {/* Panneau central : formulaire de la section sélectionnée */}
         <section className="lg:w-[420px] flex-shrink-0 p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-border overflow-y-auto">
-          {step === 0 && <PersonalInfoForm />}
-          {step === 1 && <SectionsEditor />}
-          {step === 2 && (
+          {activeId === "infos" && <PersonalInfoForm />}
+
+          {activeSection && <SectionPanel section={activeSection} />}
+
+          {activeId === "template" && (
             <div className="space-y-6">
               <div>
                 <h3 className="text-sm font-semibold mb-2">{t.chooseTemplate}</h3>
@@ -276,7 +462,8 @@ export default function EditorPage() {
               </div>
             </div>
           )}
-          {step === 3 && (
+
+          {activeId === "settings" && (
             <div className="space-y-5">
               <div>
                 <h3 className="text-sm font-semibold mb-2">{t.textSize}</h3>
@@ -397,65 +584,106 @@ export default function EditorPage() {
                   ))}
                 </div>
               </div>
-            </div>
-          )}
-          {step === 4 && <DownloadPanel />}
 
-          {step === 3 && (
-            <button
-              onClick={() => {
-                saveProgress({ ...cv, step })
-                  .then(() => {
-                    setLastSaved(new Date());
-                    setManualSaveConfirm(true);
-                    setTimeout(() => setManualSaveConfirm(false), 2500);
-                  })
-                  .catch((err) => {
-                    console.error("Erreur de sauvegarde:", err);
-                    setSaveError(err instanceof Error ? err.message : String(err));
-                  });
-              }}
-              className="w-full mt-4 flex items-center justify-center gap-2 rounded-xl border border-blue-600 text-blue-600 font-medium py-2.5 hover:bg-blue-600/10 transition"
-            >
-              {manualSaveConfirm ? t.savedConfirm : t.saveCV}
-            </button>
-          )}
-
-          <div className="flex justify-between pt-6">
-            <button
-              onClick={() => goStep(step - 1)}
-              disabled={step === 0}
-              className="flex items-center gap-1 text-xs px-3 py-2 rounded-lg hover:bg-surface-muted disabled:opacity-30 transition"
-            >
-              <ChevronLeft size={14} /> {t.previous}
-            </button>
-            {step < t.steps.length - 1 && (
               <button
-                onClick={() => goStep(step + 1)}
-                className="flex items-center gap-1 text-xs px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+                onClick={() => {
+                  saveProgress(cv)
+                    .then(() => {
+                      setLastSaved(new Date());
+                      setManualSaveConfirm(true);
+                      setTimeout(() => setManualSaveConfirm(false), 2500);
+                    })
+                    .catch((err) => {
+                      console.error("Erreur de sauvegarde:", err);
+                      setSaveError(err instanceof Error ? err.message : String(err));
+                    });
+                }}
+                className="w-full flex items-center justify-center gap-2 rounded-xl border border-blue-600 text-blue-600 font-medium py-2.5 hover:bg-blue-600/10 transition"
               >
-                {t.next} <ChevronRight size={14} />
+                {manualSaveConfirm ? t.savedConfirm : t.saveCV}
               </button>
-            )}
-          </div>
-          {step < t.steps.length - 1 && (
-            <button
-              onClick={() => goStep(t.steps.length - 1)}
-              className="text-[11px] text-foreground/40 hover:text-foreground/70 mt-2 underline"
-            >
-              {t.skipToDownload}
-            </button>
+            </div>
           )}
         </section>
 
-        <section
-          className="flex-1 flex items-start justify-center p-4 lg:p-10 overflow-auto bg-surface-muted"
-        >
-          <div className="w-full max-w-[210mm]">
-            <CVPreviewFit cv={cv} printMode />
+        {/* Aperçu, avec contrôles de zoom et plein écran */}
+        <section className="flex-1 flex flex-col p-4 lg:p-6 overflow-auto bg-surface-muted">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-foreground/50">{t.preview} · A4</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setZoom((z) => Math.max(0.6, +(z - 0.1).toFixed(2)))}
+                className="p-1.5 rounded-lg border border-border hover:bg-surface transition"
+                title={t.zoomLabel}
+              >
+                <Minus size={14} />
+              </button>
+              <span className="text-[11px] w-10 text-center tabular-nums text-foreground/60">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button
+                onClick={() => setZoom((z) => Math.min(1.4, +(z + 0.1).toFixed(2)))}
+                className="p-1.5 rounded-lg border border-border hover:bg-surface transition"
+                title={t.zoomLabel}
+              >
+                <Plus size={14} />
+              </button>
+              <button
+                onClick={() => setFullscreen(true)}
+                className="p-1.5 rounded-lg border border-border hover:bg-surface transition"
+                title={t.fullscreenLabel}
+              >
+                <Maximize2 size={14} />
+              </button>
+            </div>
+          </div>
+          <div className="w-full max-w-[210mm] mx-auto">
+            <CVPreviewFit cv={cv} printMode zoom={zoom} />
           </div>
         </section>
       </main>
+
+      {fullscreen && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex flex-col p-4">
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={() => setFullscreen(false)}
+              className="text-white p-2 rounded-lg hover:bg-white/10 transition"
+              title={t.closeLabel}
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto flex items-start justify-center">
+            <div className="w-full max-w-[210mm]">
+              <CVPreviewFit cv={cv} zoom={1} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {downloadOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+          onClick={() => setDownloadOpen(false)}
+        >
+          <div
+            className="bg-surface rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold">{t.steps[4]}</h2>
+              <button
+                onClick={() => setDownloadOpen(false)}
+                className="p-1 hover:bg-surface-muted rounded-lg"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <DownloadPanel />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

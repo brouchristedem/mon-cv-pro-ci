@@ -115,6 +115,16 @@ export const UI = {
       "Le téléchargement n'a pas pu démarrer. Réessayez, ou ouvrez ce site dans Chrome ou Safari.",
     iosPrintHint:
       "Sur iPhone : si rien ne s'ouvre après avoir appuyé sur Télécharger, utilisez plutôt le bouton de partage de Safari (en bas de l'écran) → \"Imprimer\" → pincez l'aperçu avec deux doigts pour l'agrandir → bouton de partage en haut à gauche → \"Enregistrer dans Fichiers\". Ça fonctionne toujours, même quand le bouton ne réagit pas.",
+    // Nouvelle interface éditeur (une seule page)
+    savedBadge: "Sauvegardé",
+    savingBadge: "Sauvegarde...",
+    localSavedBadge: "Sauvegardé sur cet appareil",
+    fullscreenLabel: "Plein écran",
+    closeLabel: "Fermer",
+    identityGroup: "Identité",
+    contactGroup: "Coordonnées",
+    personalizeLabel: "Personnaliser",
+    zoomLabel: "Zoom",
   },
   en: {
     steps: ["Information", "Sections", "Template & Color", "Layout", "Download"],
@@ -227,6 +237,16 @@ export const UI = {
       "The download couldn't start. Try again, or open this site in Chrome or Safari.",
     iosPrintHint:
       "On iPhone: if nothing opens after tapping Download, use Safari's share button (bottom of screen) → \"Print\" → pinch the preview with two fingers to zoom in → share button top-left → \"Save to Files\". This always works, even when the button doesn't respond.",
+    // New editor UI (single page)
+    savedBadge: "Saved",
+    savingBadge: "Saving...",
+    localSavedBadge: "Saved on this device",
+    fullscreenLabel: "Fullscreen",
+    closeLabel: "Close",
+    identityGroup: "Identity",
+    contactGroup: "Contact",
+    personalizeLabel: "Customize",
+    zoomLabel: "Zoom",
   },
 } as const;
 
