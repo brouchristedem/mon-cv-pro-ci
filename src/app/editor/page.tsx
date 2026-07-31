@@ -23,6 +23,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function EditorPage() {
   const { user, loading, isAdmin, signOut, saveProgress, loadError, debugInfo, dataLoaded } = useAuth();
@@ -36,6 +37,7 @@ export default function EditorPage() {
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = UI[cv.langue];
 
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [saveError, setSaveError] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -45,6 +47,18 @@ export default function EditorPage() {
     setStep(cv.step || 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
+
+  // Quand l'utilisateur appuie sur "retour" (navigateur ou bouton physique
+  // sur mobile) depuis la page d'édition, on le renvoie toujours vers la
+  // page d'accueil, quel que soit l'historique de navigation précédent.
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+    const handlePopState = () => {
+      router.replace("/");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [router]);
 
   // Pré-sélectionne le modèle choisi depuis la galerie de la page d'accueil
   // (lien du type /editor?template=template-04), une seule fois au chargement.
