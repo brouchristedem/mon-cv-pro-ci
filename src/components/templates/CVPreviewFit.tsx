@@ -22,11 +22,31 @@ export default function CVPreviewFit({
   useEffect(() => setMounted(true), []);
 
   const baseZoom = cv.tailleTexte / 13;
-  // Une clé simple qui change dès que le contenu affiché change, pour
-  // redéclencher la mesure du mode compact (sans dépendre d'une sérialisation
-  // complète et coûteuse de tout l'objet cv à chaque frappe).
-  const watchKey = `${cv.templateId}|${cv.tailleTexte}|${cv.sections
-    .map((s) => `${s.id}:${s.visible}:${s.items.length}:${s.items.map((i) => (i.description || "").length + (i.titre || "").length).join(",")}`)
+  // Une clé simple qui change dès que quelque chose susceptible d'affecter la
+  // hauteur du CV change, pour redéclencher la mesure du mode compact (sans
+  // dépendre d'une sérialisation complète et coûteuse de tout l'objet cv à
+  // chaque frappe). Doit couvrir tout ce qui influe visuellement sur la
+  // hauteur : infos personnelles (en-tête), mode d'affichage des rubriques
+  // (ligne vs liste change radicalement la hauteur), et chaque champ texte
+  // d'un item, pas seulement titre/description.
+  const p = cv.personalInfo;
+  const personalKey = `${p.showPhoto ? p.photoShape : "x"}|${p.prenom.length}|${p.nom.length}|${p.titre.length}|${p.email.length}|${p.telephone.length}|${p.adresse.length}|${(p.permis || "").length}|${(p.linkedin || "").length}|${(p.siteWeb || "").length}|${p.autresInfos.map((i) => i.label.length + i.valeur.length).join(",")}`;
+  const watchKey = `${cv.templateId}|${cv.tailleTexte}|${cv.dateFormat}|${cv.iconStyle}|${cv.ordreNom}|${personalKey}|${cv.sections
+    .map(
+      (s) =>
+        `${s.id}:${s.visible}:${s.affichage || ""}:${s.items.length}:${s.items
+          .map(
+            (i) =>
+              (i.titre || "").length +
+              (i.sousTitre || "").length +
+              (i.lieu || "").length +
+              (i.dateDebut || "").length +
+              (i.dateFin || "").length +
+              (i.niveau || "").length +
+              (i.description || "").length
+          )
+          .join(",")}`
+    )
     .join("|")}`;
   const { measureRef, compactScale } = useCompactFit(!!cv.modeCompact, baseZoom, watchKey);
   const finalZoom = baseZoom * compactScale;
@@ -54,9 +74,10 @@ export default function CVPreviewFit({
         </div>
       </div>
 
-      {/* Mesure invisible hors-écran, à l'échelle de base (sans le
-          rétrécissement du mode compact), pour savoir si le contenu déborde
-          d'une page et calculer de combien il faut réduire. */}
+      {/* Mesure invisible hors-écran, rendue à l'échelle actuellement
+          candidate (finalZoom), pour savoir si le contenu déborde d'une page
+          à cette taille et affiner le facteur de réduction sur plusieurs
+          passes si besoin — voir useCompactFit. */}
       {cv.modeCompact && (
         <div
           aria-hidden
@@ -68,7 +89,7 @@ export default function CVPreviewFit({
             pointerEvents: "none",
           }}
         >
-          <div ref={measureRef} style={{ zoom: baseZoom }}>
+          <div ref={measureRef} style={{ zoom: finalZoom }}>
             <CVRenderer cv={cv} />
           </div>
         </div>
