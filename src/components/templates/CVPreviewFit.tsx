@@ -58,7 +58,7 @@ export default function CVPreviewFit({
       {/* Aperçu visible à l'écran uniquement — ajusté à la largeur disponible */}
       <div
         ref={containerRef}
-        className="w-full print:hidden overflow-x-auto"
+        className="w-full print:hidden"
         style={{ height: scaledHeight || undefined }}
       >
         <div

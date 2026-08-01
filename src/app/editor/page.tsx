@@ -346,7 +346,7 @@ export default function EditorPage() {
         </div>
       )}
 
-      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <main className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden">
         {/* Sidebar : sections + progression, palette rapide intégrée */}
         <nav className="lg:w-60 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-border flex flex-col overflow-hidden">
           <div className="flex lg:flex-col gap-1.5 p-3 overflow-x-auto lg:overflow-y-auto">
@@ -623,7 +623,7 @@ export default function EditorPage() {
         </section>
 
         {/* Aperçu, avec contrôles de zoom et plein écran */}
-        <section className="flex-1 flex flex-col p-4 lg:p-6 overflow-auto bg-surface-muted">
+        <section className="flex-1 flex flex-col p-4 lg:p-6 lg:overflow-y-auto bg-surface-muted">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-foreground/50">{t.preview} · A4</span>
             <div className="flex items-center gap-1">
