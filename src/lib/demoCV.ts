@@ -20,7 +20,7 @@ export function demoCV(templateId: string, couleurPrimaire = "#2563eb"): CVData 
     dateFormat: "texte",
     iconStyle: "contour",
     ordreNom: "prenom-nom",
-    modeCompact: false,
+    modeCompact: true,
     step: 0,
     updatedAt: Date.now(),
     personalInfo: {

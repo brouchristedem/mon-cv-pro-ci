@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
+import { ENTRY_GATE_KEY } from "@/lib/entryGate";
 
 type Mode = "signin" | "signup";
 
@@ -20,6 +21,14 @@ export default function LoginPage() {
   useEffect(() => {
     if (!loading && user) router.replace("/editor");
   }, [loading, user, router]);
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(ENTRY_GATE_KEY, "1");
+    } catch {
+      // Ignoré si sessionStorage est indisponible.
+    }
+  }, []);
 
   const displayError = error || authError;
 
@@ -83,7 +92,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10 text-center">
-      <h1 className="text-2xl font-extrabold mb-2 uppercase tracking-wide">MON CV PRO</h1>
+      <h1 className="text-2xl font-extrabold mb-2 uppercase tracking-wide">MON CV PRO CI</h1>
       <p className="text-sm text-foreground/60 mb-8 max-w-sm">
         Connectez-vous pour créer votre CV et retrouver votre progression à chaque visite.
       </p>

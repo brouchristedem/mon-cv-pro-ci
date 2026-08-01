@@ -92,7 +92,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen max-w-3xl mx-auto px-4 py-8 space-y-10">
-      <h1 className="text-xl font-bold">Administration — MON CV PRO</h1>
+      <h1 className="text-xl font-bold">Administration — MON CV PRO CI</h1>
 
       <section>
         <h2 className="text-sm font-semibold mb-1">Journal des paiements déclarés</h2>

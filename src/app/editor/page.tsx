@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ENTRY_GATE_KEY } from "@/lib/entryGate";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -113,12 +114,25 @@ export default function EditorPage() {
 
   const [saveError, setSaveError] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [manualSaveConfirm, setManualSaveConfirm] = useState(false);
   const [activeId, setActiveId] = useState<string>("infos");
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [fullscreen, setFullscreen] = useState(false);
+
+  // Empêche d'atterrir directement sur l'éditeur (lien externe, favori, URL
+  // tapée à la main) sans être d'abord passé par la page d'accueil — ou par
+  // la page de connexion, pour le parcours "télécharger → connexion →
+  // éditeur". Voir src/lib/entryGate.ts.
+  useEffect(() => {
+    try {
+      if (window.sessionStorage.getItem(ENTRY_GATE_KEY) !== "1") {
+        router.replace("/");
+      }
+    } catch {
+      // sessionStorage indisponible : on n'empêche pas l'accès.
+    }
+  }, [router]);
 
   // Quand l'utilisateur appuie sur "retour" (navigateur ou bouton physique
   // sur mobile) depuis la page d'édition, on le renvoie toujours vers la
@@ -207,6 +221,23 @@ export default function EditorPage() {
   const missingTypes = ALL_TYPES.filter((type) => !cv.sections.some((s) => s.type === type));
   const activeSection = orderedSections.find((s) => s.id === activeId);
 
+  // Liste ordonnée de tous les panneaux du formulaire, pour permettre de
+  // naviguer avec des boutons "Suivant" / "Précédent" en plus du menu
+  // latéral (sinon, sur mobile en particulier, il faut toujours revenir
+  // cliquer sur la rubrique voulue dans la barre du haut).
+  const panelSteps: { id: string; label: string }[] = [
+    { id: "infos", label: t.steps[0] },
+    ...orderedSections.map((s) => ({ id: s.id, label: s.titre })),
+    { id: "template", label: t.steps[2] },
+    { id: "settings", label: t.steps[3] },
+  ];
+  const currentStepIndex = panelSteps.findIndex((s) => s.id === activeId);
+  const prevStep = currentStepIndex > 0 ? panelSteps[currentStepIndex - 1] : null;
+  const nextStep =
+    currentStepIndex >= 0 && currentStepIndex < panelSteps.length - 1
+      ? panelSteps[currentStepIndex + 1]
+      : null;
+
   if (loading || !dataLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-foreground/60">
@@ -219,7 +250,7 @@ export default function EditorPage() {
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-border gap-2">
         <Link href="/" className="font-extrabold text-sm tracking-wide uppercase flex-shrink-0">
-          MON CV PRO
+          MON CV PRO CI
         </Link>
         <div className="flex items-center gap-1.5 flex-wrap justify-end">
           <span
@@ -302,19 +333,6 @@ export default function EditorPage() {
           )}
         </div>
       </header>
-
-      {!user && (
-        <div className="bg-blue-50 border-b border-blue-200 px-4 py-2 text-[11px] text-blue-700 flex items-center justify-between gap-3">
-          <span>
-            {cv.langue === "en"
-              ? "Your CV is saved on this device. Log in to download it — 500 FCFA for the first CV."
-              : "Votre CV est sauvegardé sur cet appareil. Connectez-vous pour le télécharger — 500 FCFA le premier CV."}
-          </span>
-          <Link href="/login" className="font-semibold whitespace-nowrap hover:underline">
-            {cv.langue === "en" ? "Log in" : "Se connecter"}
-          </Link>
-        </div>
-      )}
 
       {(loadError || saveError) && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-[11px] text-red-700 break-words">
@@ -444,8 +462,11 @@ export default function EditorPage() {
           </div>
         </nav>
 
-        {/* Panneau central : formulaire de la section sélectionnée */}
-        <section className="lg:w-[420px] flex-shrink-0 p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-border overflow-y-auto">
+        {/* Panneau central : formulaire de la section sélectionnée. Hauteur
+            plafonnée sur mobile (avec défilement interne) pour que
+            l'ajout d'un élément en bas de liste ne fasse pas défiler toute
+            la page (nav + aperçu compris) : seul ce panneau bouge. */}
+        <section className="lg:w-[420px] flex-shrink-0 p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-border overflow-y-auto max-h-[65vh] lg:max-h-none">
           {activeId === "infos" && <PersonalInfoForm />}
 
           {activeSection && <SectionPanel section={activeSection} />}
@@ -585,25 +606,27 @@ export default function EditorPage() {
                 </div>
               </div>
 
-              <button
-                onClick={() => {
-                  saveProgress(cv)
-                    .then(() => {
-                      setLastSaved(new Date());
-                      setManualSaveConfirm(true);
-                      setTimeout(() => setManualSaveConfirm(false), 2500);
-                    })
-                    .catch((err) => {
-                      console.error("Erreur de sauvegarde:", err);
-                      setSaveError(err instanceof Error ? err.message : String(err));
-                    });
-                }}
-                className="w-full flex items-center justify-center gap-2 rounded-xl border border-blue-600 text-blue-600 font-medium py-2.5 hover:bg-blue-600/10 transition"
-              >
-                {manualSaveConfirm ? t.savedConfirm : t.saveCV}
-              </button>
             </div>
           )}
+
+          {/* Navigation Précédent / Suivant : permet d'avancer dans toutes
+              les rubriques sans avoir à recliquer dans le menu du haut. */}
+          <div className="flex items-center justify-between gap-2 mt-6 pt-4 border-t border-border">
+            <button
+              onClick={() => prevStep && setActiveId(prevStep.id)}
+              disabled={!prevStep}
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2.5 rounded-lg border border-border hover:bg-surface-muted transition disabled:opacity-30 disabled:hover:bg-transparent"
+            >
+              ← {t.previous}
+            </button>
+            <button
+              onClick={() => nextStep && setActiveId(nextStep.id)}
+              disabled={!nextStep}
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-30 disabled:hover:bg-blue-600"
+            >
+              {t.next} →
+            </button>
+          </div>
         </section>
 
         {/* Aperçu, avec contrôles de zoom et plein écran */}

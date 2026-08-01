@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/lib/AuthContext";
 
 const siteUrl = "https://mon-cv-pro-ci.vercel.app";
-const title = "MON CV PRO — Créez un CV professionnel en quelques minutes";
+const title = "MON CV PRO CI — Créez un CV professionnel en quelques minutes";
 const description =
   "Créez un CV professionnel et moderne, prisé par les recruteurs internationaux. 15 modèles, personnalisation complète, export PDF. Pensé pour la Côte d'Ivoire.";
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: title,
-    template: "%s | MON CV PRO",
+    template: "%s | MON CV PRO CI",
   },
   description,
   keywords: [
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     "générateur de CV",
     "faire un CV PDF",
   ],
-  authors: [{ name: "MON CV PRO" }],
+  authors: [{ name: "MON CV PRO CI" }],
   alternates: {
     canonical: "/",
   },
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     url: siteUrl,
-    siteName: "MON CV PRO",
+    siteName: "MON CV PRO CI",
     title,
     description,
     images: [
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
         url: "/og-image-v2.png",
         width: 1200,
         height: 630,
-        alt: "MON CV PRO — Créez un CV professionnel en quelques minutes",
+        alt: "MON CV PRO CI — Créez un CV professionnel en quelques minutes",
       },
     ],
   },
@@ -83,7 +83,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              name: "MON CV PRO",
+              name: "MON CV PRO CI",
               url: siteUrl,
               description,
               applicationCategory: "BusinessApplication",
@@ -91,7 +91,7 @@ export default function RootLayout({
               offers: {
                 "@type": "Offer",
                 priceCurrency: "XOF",
-                price: "500",
+                price: "1000",
               },
               inLanguage: ["fr", "en"],
             }),

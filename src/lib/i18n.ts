@@ -93,7 +93,7 @@ export const UI = {
     customerService: "Besoin d'aide ? Écrivez-nous sur WhatsApp :",
     confirmTitle: "Confirmer le téléchargement",
     confirmFreeText: "Ce téléchargement est votre 1er téléchargement, il est gratuit.",
-    confirmPaidText: "Ce téléchargement est payant : 500 FCFA (déjà réglé via Wave).",
+    confirmPaidText: "Ce téléchargement est payant : 1000 FCFA (déjà réglé via Wave).",
     confirmWarning:
       "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
     confirmCancel: "Annuler",
@@ -101,8 +101,9 @@ export const UI = {
     statusPromo: "Ce téléchargement est gratuit grâce au code promo.",
     statusPaid: "Paiement effectué — vous pouvez télécharger votre CV.",
     downloadCta: "Télécharger le CV",
-    firstDownloadInfo: "Votre 1er téléchargement est à 500 FCFA.",
-    nextDownloadInfo: "Les téléchargements suivants sont à 1000 FCFA.",
+    firstDownloadInfo: "Le téléchargement est à 1000 FCFA.",
+    nextDownloadInfo: "Le téléchargement est à 1000 FCFA.",
+    downloadPriceInfo: "Le téléchargement de votre CV coûte 1000 FCFA.",
     downloadWarning:
       "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
     beforePayWarning:
@@ -215,7 +216,7 @@ export const UI = {
     customerService: "Need help? Message us on WhatsApp:",
     confirmTitle: "Confirm download",
     confirmFreeText: "This is your 1st download, it's free.",
-    confirmPaidText: "This is a paid download: 500 FCFA (already paid via Wave).",
+    confirmPaidText: "This is a paid download: 1000 FCFA (already paid via Wave).",
     confirmWarning:
       "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
     confirmCancel: "Cancel",
@@ -223,8 +224,9 @@ export const UI = {
     statusPromo: "This download is free thanks to the promo code.",
     statusPaid: "Payment completed — you can download your CV.",
     downloadCta: "Download the CV",
-    firstDownloadInfo: "Your 1st download costs 500 FCFA.",
-    nextDownloadInfo: "Further downloads cost 1000 FCFA.",
+    firstDownloadInfo: "The download costs 1000 FCFA.",
+    nextDownloadInfo: "The download costs 1000 FCFA.",
+    downloadPriceInfo: "Downloading your CV costs 1000 FCFA.",
     downloadWarning:
       "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
     beforePayWarning:

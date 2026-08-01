@@ -1,15 +1,29 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, Palette, Download, CheckCircle2 } from "lucide-react";
 import CVPreviewFit from "@/components/templates/CVPreviewFit";
 import TemplateGallery from "@/components/landing/TemplateGallery";
 import FadeIn from "@/components/landing/FadeIn";
 import { demoCV } from "@/lib/demoCV";
+import { ENTRY_GATE_KEY } from "@/lib/entryGate";
 
 export default function Home() {
   const ctaHref = "/editor";
   const heroCV = demoCV("template-04");
+
+  // Marque que la personne est bien passée par la page d'accueil : la page
+  // éditeur exige cette marque (voir src/lib/entryGate.ts) pour empêcher un
+  // accès direct à l'éditeur sans être d'abord passé par ici.
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(ENTRY_GATE_KEY, "1");
+    } catch {
+      // sessionStorage indisponible (navigation privée stricte, etc.) : on
+      // laisse simplement l'éditeur accessible sans bloquer la personne.
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
@@ -17,7 +31,7 @@ export default function Home() {
       <header className="sticky top-0 z-30 backdrop-blur bg-background/80 border-b border-border">
         <div className="flex items-center justify-between px-6 py-4 max-w-6xl w-full mx-auto">
           <span className="font-extrabold text-lg sm:text-xl tracking-wide">
-            MON <span className="text-blue-600">CV PRO</span>
+            MON <span className="text-blue-600">CV PRO</span> CI
           </span>
           <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-foreground/70">
             <a href="#modeles" className="hover:text-foreground transition">
@@ -74,7 +88,7 @@ export default function Home() {
 
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center lg:justify-start text-xs sm:text-sm text-foreground/60">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-blue-600" /> 1er téléchargement à 500 FCFA
+                <CheckCircle2 size={15} className="text-blue-600" /> Téléchargement à 1000 FCFA
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-blue-600" /> Paiement via Wave
@@ -148,10 +162,8 @@ export default function Home() {
             Payez facilement par Wave, sans carte bancaire ni abonnement.
           </p>
           <div className="rounded-2xl border border-border bg-surface p-8">
-            <p className="text-sm text-foreground/50 mb-1">1er téléchargement</p>
-            <p className="text-4xl font-extrabold text-blue-600 mb-4">500 FCFA</p>
-            <p className="text-sm text-foreground/50 mb-1">Téléchargements suivants</p>
-            <p className="text-2xl font-bold mb-6">1000 FCFA</p>
+            <p className="text-sm text-foreground/50 mb-1">Prix unique</p>
+            <p className="text-4xl font-extrabold text-blue-600 mb-6">1000 FCFA</p>
             <Link
               href={ctaHref}
               className="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-blue-600 text-white px-6 py-3 font-semibold hover:bg-blue-700 transition"
@@ -164,7 +176,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="px-6 py-8 text-center text-xs text-foreground/50">
-        <p className="font-semibold text-foreground/70 mb-1">MON CV PRO</p>
+        <p className="font-semibold text-foreground/70 mb-1">MON CV PRO CI</p>
         <p>Assistance : +225 05 45 17 75 71</p>
       </footer>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCVStore } from "@/lib/store";
 import { EntryItem, Section } from "@/lib/types";
 import { UI } from "@/lib/i18n";
@@ -42,6 +42,21 @@ function DescriptionField({
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
+  // La zone de texte grandit automatiquement avec son contenu (jusqu'à une
+  // hauteur maximale, au-delà de laquelle elle défile elle-même) : on voit
+  // ainsi toujours ce qu'on vient de taper, sans avoir à faire défiler la
+  // page manuellement à chaque ligne.
+  const autoResize = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 240)}px`;
+  };
+
+  useEffect(() => {
+    autoResize();
+  }, [value]);
+
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-1">
@@ -69,7 +84,7 @@ function DescriptionField({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs outline-none resize-none"
+        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs outline-none resize-none overflow-y-auto"
         rows={3}
       />
     </div>
@@ -103,7 +118,8 @@ export default function SectionPanel({ section }: { section: Section }) {
 
   const canToggleAffichage = ["langues", "competences", "interets"].includes(section.type);
 
-  const addItem = () =>
+  const addItem = () => {
+    const newId = uid();
     set((c) => ({
       ...c,
       sections: c.sections.map((s) =>
@@ -112,12 +128,18 @@ export default function SectionPanel({ section }: { section: Section }) {
               ...s,
               items: [
                 ...s.items,
-                { id: uid(), titre: "", sousTitre: "", description: "" } as EntryItem,
+                { id: newId, titre: "", sousTitre: "", description: "" } as EntryItem,
               ],
             }
           : s
       ),
     }));
+    // Fait défiler jusqu'au nouvel élément dès qu'il est rendu, pour ne pas
+    // laisser la personne chercher où il est apparu.
+    requestAnimationFrame(() => {
+      document.getElementById(`item-${newId}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  };
 
   const updateItem = (itemId: string, patch: Partial<EntryItem>) =>
     set((c) => ({
@@ -229,7 +251,7 @@ export default function SectionPanel({ section }: { section: Section }) {
 
       <div className="space-y-3">
         {section.items.map((item) => (
-          <div key={item.id} className="rounded-xl border border-border bg-surface p-3 space-y-2 relative">
+          <div key={item.id} id={`item-${item.id}`} className="rounded-xl border border-border bg-surface p-3 space-y-2 relative">
             <button
               onClick={() => removeItem(item.id)}
               className="absolute top-2.5 right-2.5 text-red-400 hover:text-red-500"

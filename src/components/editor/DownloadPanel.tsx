@@ -7,15 +7,17 @@ import { useAuth } from "@/lib/AuthContext";
 import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, MessageCircle, Info, LogIn } from "lucide-react";
 import { UI } from "@/lib/i18n";
 
-const WAVE_LINK_FIRST = process.env.NEXT_PUBLIC_WAVE_LINK_FIRST || "#";
-const PRICE_FIRST = Number(process.env.NEXT_PUBLIC_PRICE_FIRST || 500);
-const WAVE_LINK_NEXT = process.env.NEXT_PUBLIC_WAVE_LINK_NEXT || "#";
-const PRICE_NEXT = Number(process.env.NEXT_PUBLIC_PRICE_NEXT || 1000);
+// Prix unique pour tous les téléchargements, qu'il s'agisse du premier ou
+// des suivants. On réutilise volontairement les variables d'environnement
+// "NEXT" existantes (déjà à 1000 FCFA côté Vercel) pour ne pas avoir à
+// toucher à la configuration de déploiement.
+const WAVE_LINK = process.env.NEXT_PUBLIC_WAVE_LINK_NEXT || "#";
+const PRICE = Number(process.env.NEXT_PUBLIC_PRICE_NEXT || 1000);
 const SUPPORT_WHATSAPP_NUMBER = "2250545177571"; // format international sans "+" ni espaces, pour le lien wa.me
 const SUPPORT_PHONE_DISPLAY = "+225 05 45 17 75 71";
 
 export default function DownloadPanel() {
-  const { user, downloadsUsed, paidUnlocked, isAdmin, incrementDownloads, confirmPaidDownload, applyPromoCode } =
+  const { user, paidUnlocked, isAdmin, incrementDownloads, confirmPaidDownload, applyPromoCode } =
     useAuth();
   const cv = useCVStore((s) => s.cv);
   const t = UI[cv.langue];
@@ -37,9 +39,6 @@ export default function DownloadPanel() {
     setIsIOSSafari(isIOS && isSafari);
   }, []);
 
-  const isFirstDownload = downloadsUsed === 0;
-  const price = isFirstDownload ? PRICE_FIRST : PRICE_NEXT;
-  const waveLink = isFirstDownload ? WAVE_LINK_FIRST : WAVE_LINK_NEXT;
   const canDownload = paidUnlocked || promoApplied || isAdmin;
 
   // Méthode de téléchargement, utilisée sur tous les navigateurs : la boîte
@@ -176,7 +175,7 @@ export default function DownloadPanel() {
           {cv.langue === "en" ? "Log in to download" : "Se connecter pour télécharger"}
         </Link>
         <p className="text-[11px] text-foreground/50 text-center">
-          {cv.langue === "en" ? `From ${PRICE_FIRST} FCFA for the first CV` : `À partir de ${PRICE_FIRST} FCFA le premier CV`}
+          {cv.langue === "en" ? `Flat price: ${PRICE} FCFA` : `Prix unique : ${PRICE} FCFA`}
         </p>
       </div>
     );
@@ -211,9 +210,7 @@ export default function DownloadPanel() {
         </>
       ) : (
         <>
-          <p className="text-xs text-foreground/60">
-            {isFirstDownload ? t.firstDownloadInfo : t.nextDownloadInfo}
-          </p>
+          <p className="text-xs text-foreground/60">{t.downloadPriceInfo}</p>
 
           <div className="flex gap-2">
             <input
@@ -238,13 +235,13 @@ export default function DownloadPanel() {
             </div>
 
             <a
-              href={waveLink}
+              href={WAVE_LINK}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setWaveClicked(true)}
               className="flex items-center justify-center gap-2 w-full rounded-lg bg-[#1DC8CD] hover:opacity-90 text-white font-semibold py-3 text-sm transition"
             >
-              {t.payWithWave} {price} FCFA {t.payWithWaveSuffix} <ExternalLink size={14} />
+              {t.payWithWave} {PRICE} FCFA {t.payWithWaveSuffix} <ExternalLink size={14} />
             </a>
 
             {waveClicked && (
