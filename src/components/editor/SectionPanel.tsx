@@ -4,31 +4,65 @@ import { useEffect, useRef, useState } from "react";
 import { useCVStore } from "@/lib/store";
 import { EntryItem, Section } from "@/lib/types";
 import { UI } from "@/lib/i18n";
+import { parseRichRuns } from "@/lib/richText";
 import { Trash2, Plus, Eye, EyeOff, Pencil, Bold, Underline } from "lucide-react";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-// Enveloppe le texte sélectionné dans une zone de texte avec des marqueurs
-// (** pour le gras, __ pour le souligné), pour un rendu identique sur
-// l'aperçu et le PDF final (voir src/lib/richText.tsx).
-function wrapSelection(
-  textarea: HTMLTextAreaElement,
-  value: string,
-  marker: string,
-  onChange: (next: string) => void
-) {
-  const start = textarea.selectionStart ?? value.length;
-  const end = textarea.selectionEnd ?? value.length;
-  const selected = value.slice(start, end) || (marker === "**" ? "texte en gras" : "texte souligné");
-  const next = value.slice(0, start) + marker + selected + marker + value.slice(end);
-  onChange(next);
-  requestAnimationFrame(() => {
-    textarea.focus();
-    const cursor = start + marker.length + selected.length + marker.length;
-    textarea.setSelectionRange(cursor, cursor);
-  });
+// Convertit le texte stocké (avec marqueurs **gras** / __souligné__) en
+// HTML pour initialiser la zone éditable.
+function markerTextToHtml(text: string): string {
+  const runs = parseRichRuns(text);
+  const escape = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  if (runs.length === 0) return "";
+  return runs
+    .map((run) => {
+      const escaped = escape(run.text).replace(/\n/g, "<br>");
+      if (run.bold && run.underline) return `<strong><u>${escaped}</u></strong>`;
+      if (run.bold) return `<strong>${escaped}</strong>`;
+      if (run.underline) return `<u>${escaped}</u>`;
+      return escaped;
+    })
+    .join("");
+}
+
+// Reconvertit le HTML de la zone éditable en texte avec marqueurs, pour
+// le stockage (compatible avec l'aperçu et l'export PDF existants).
+function htmlToMarkerText(root: Node): string {
+  const runs: { text: string; bold: boolean; underline: boolean }[] = [];
+  const collect = (node: Node, bold: boolean, underline: boolean) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || "";
+      if (text) runs.push({ text, bold, underline });
+      return;
+    }
+    if (node.nodeName === "BR") {
+      runs.push({ text: "\n", bold: false, underline: false });
+      return;
+    }
+    const el = node as HTMLElement;
+    const nextBold = bold || el.tagName === "B" || el.tagName === "STRONG";
+    const nextUnderline = underline || el.tagName === "U";
+    node.childNodes.forEach((child) => collect(child, nextBold, nextUnderline));
+    if (["DIV", "P"].includes(el.tagName) && node.nextSibling) {
+      runs.push({ text: "\n", bold: false, underline: false });
+    }
+  };
+  root.childNodes.forEach((child) => collect(child, false, false));
+
+  let out = "";
+  for (const run of runs) {
+    const clean = run.text.replace(/\*\*/g, "").replace(/__/g, "");
+    if (!clean) continue;
+    if (run.bold && run.underline) out += `**__${clean}__**`;
+    else if (run.bold) out += `**${clean}**`;
+    else if (run.underline) out += `__${clean}__`;
+    else out += clean;
+  }
+  return out;
 }
 
 function DescriptionField({
@@ -40,22 +74,38 @@ function DescriptionField({
   placeholder: string;
   onChange: (next: string) => void;
 }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const [boldActive, setBoldActive] = useState(false);
+  const [underlineActive, setUnderlineActive] = useState(false);
 
-  // La zone de texte grandit automatiquement avec son contenu (jusqu'à une
-  // hauteur maximale, au-delà de laquelle elle défile elle-même) : on voit
-  // ainsi toujours ce qu'on vient de taper, sans avoir à faire défiler la
-  // page manuellement à chaque ligne.
-  const autoResize = () => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 240)}px`;
+  // Initialise le contenu une seule fois au montage (le composant est
+  // remonté à chaque changement d'élément grâce à la clé posée sur son
+  // parent) : on ne touche plus ensuite au DOM depuis React, pour ne pas
+  // faire sauter la position du curseur pendant la frappe.
+  useEffect(() => {
+    if (ref.current) ref.current.innerHTML = markerTextToHtml(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const syncActiveState = () => {
+    try {
+      setBoldActive(document.queryCommandState("bold"));
+      setUnderlineActive(document.queryCommandState("underline"));
+    } catch {
+      // Ignore : certains navigateurs peuvent lever une erreur hors focus.
+    }
   };
 
-  useEffect(() => {
-    autoResize();
-  }, [value]);
+  const handleInput = () => {
+    if (ref.current) onChange(htmlToMarkerText(ref.current));
+    syncActiveState();
+  };
+
+  const toggle = (command: "bold" | "underline") => {
+    ref.current?.focus();
+    document.execCommand(command);
+    handleInput();
+  };
 
   return (
     <div className="space-y-1">
@@ -64,8 +114,12 @@ function DescriptionField({
           type="button"
           title="Gras"
           onMouseDown={(e) => e.preventDefault()}
-          onClick={() => ref.current && wrapSelection(ref.current, value, "**", onChange)}
-          className="p-1.5 rounded border border-border text-foreground/60 hover:text-foreground hover:bg-surface-muted transition"
+          onClick={() => toggle("bold")}
+          className={`p-1.5 rounded border transition ${
+            boldActive
+              ? "border-blue-600 bg-blue-600/10 text-blue-600"
+              : "border-border text-foreground/60 hover:text-foreground hover:bg-surface-muted"
+          }`}
         >
           <Bold size={12} />
         </button>
@@ -73,19 +127,33 @@ function DescriptionField({
           type="button"
           title="Souligné"
           onMouseDown={(e) => e.preventDefault()}
-          onClick={() => ref.current && wrapSelection(ref.current, value, "__", onChange)}
-          className="p-1.5 rounded border border-border text-foreground/60 hover:text-foreground hover:bg-surface-muted transition"
+          onClick={() => toggle("underline")}
+          className={`p-1.5 rounded border transition ${
+            underlineActive
+              ? "border-blue-600 bg-blue-600/10 text-blue-600"
+              : "border-border text-foreground/60 hover:text-foreground hover:bg-surface-muted"
+          }`}
         >
           <Underline size={12} />
         </button>
       </div>
-      <textarea
+      <div
         ref={ref}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs outline-none resize-none overflow-y-auto"
-        rows={3}
+        contentEditable
+        suppressContentEditableWarning
+        data-placeholder={placeholder}
+        onInput={handleInput}
+        onKeyUp={syncActiveState}
+        onMouseUp={syncActiveState}
+        onFocus={syncActiveState}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            document.execCommand("insertLineBreak");
+            handleInput();
+          }
+        }}
+        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs outline-none overflow-y-auto max-h-60 min-h-[4.5rem] whitespace-pre-wrap empty:before:content-[attr(data-placeholder)] empty:before:text-foreground/30"
       />
     </div>
   );

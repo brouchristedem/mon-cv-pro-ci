@@ -1,6 +1,45 @@
 import React from "react";
 
 /**
+ * Un segment de texte avec son état de mise en forme (gras / souligné
+ * peuvent être actifs en même temps).
+ */
+export interface RichRun {
+  text: string;
+  bold: boolean;
+  underline: boolean;
+}
+
+/**
+ * Découpe un texte contenant une mise en forme simple type Markdown
+ * (**gras** et __souligné__, combinables) en segments avec leur état
+ * de mise en forme. Les marqueurs sont de simples bascules : on n'exige
+ * pas un emboîtement strict, ce qui tolère __**texte**__ comme **__texte__**.
+ */
+export function parseRichRuns(text?: string): RichRun[] {
+  if (!text) return [];
+  const tokens = text.split(/(\*\*|__)/);
+  const runs: RichRun[] = [];
+  let bold = false;
+  let underline = false;
+  for (const token of tokens) {
+    if (token === "**") {
+      bold = !bold;
+    } else if (token === "__") {
+      underline = !underline;
+    } else if (token) {
+      const last = runs[runs.length - 1];
+      if (last && last.bold === bold && last.underline === underline) {
+        last.text += token;
+      } else {
+        runs.push({ text: token, bold, underline });
+      }
+    }
+  }
+  return runs;
+}
+
+/**
  * Convertit un texte contenant une mise en forme simple type Markdown
  * (**gras** et __souligné__) en éléments React. Utilisé pour afficher
  * les descriptions du CV (expérience, formation, profil, etc.) avec
@@ -8,26 +47,27 @@ import React from "react";
  */
 export function renderRichText(text?: string): React.ReactNode {
   if (!text) return text;
-  const regex = /(\*\*[^*]+\*\*|__[^_]+__)/g;
-  const parts: React.ReactNode[] = [];
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
+  const runs = parseRichRuns(text);
   let key = 0;
-
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
+  return runs.map((run) => {
+    // Une ligne peut contenir des retours à la ligne (\n) : on les
+    // transforme en <br /> tout en gardant la mise en forme du segment.
+    const lines = run.text.split("\n");
+    const content: React.ReactNode = lines.map((line, i) => (
+      <React.Fragment key={i}>
+        {i > 0 && <br />}
+        {line}
+      </React.Fragment>
+    ));
+    if (run.bold && run.underline) {
+      return (
+        <strong key={key++}>
+          <u>{content}</u>
+        </strong>
+      );
     }
-    const token = match[0];
-    if (token.startsWith("**")) {
-      parts.push(<strong key={key++}>{token.slice(2, -2)}</strong>);
-    } else {
-      parts.push(<u key={key++}>{token.slice(2, -2)}</u>);
-    }
-    lastIndex = regex.lastIndex;
-  }
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
-  return parts;
+    if (run.bold) return <strong key={key++}>{content}</strong>;
+    if (run.underline) return <u key={key++}>{content}</u>;
+    return <React.Fragment key={key++}>{content}</React.Fragment>;
+  });
 }

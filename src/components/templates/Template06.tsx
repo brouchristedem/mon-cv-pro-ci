@@ -1,5 +1,6 @@
 import { CVData } from "@/lib/types";
 import { renderRichText } from "@/lib/richText";
+import { bulletTitle } from "@/lib/bulletTitle";
 import { displayName } from "@/lib/displayName";
 import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
@@ -65,7 +66,7 @@ export default function Template06({ cv }: { cv: CVData }) {
               {section.items.map((item) => (
                 <div key={item.id} className="break-inside-avoid mb-2 pl-3 border-l-2 border-slate-100">
                   <div className="flex justify-between items-baseline">
-                    <span className="font-semibold">{item.titre}</span>
+                    <span className="font-semibold">{bulletTitle(section.type, item.titre)}</span>
                     {(item.dateDebut || item.dateFin) && (
                       <span className="text-[10px] text-slate-400 font-mono">
                         {formatDate(item.dateDebut, cv.dateFormat, cv.langue)} - {item.enCours ? (cv.langue === "en" ? "present" : "présent") : formatDate(item.dateFin, cv.dateFormat, cv.langue)}
@@ -115,7 +116,7 @@ export default function Template06({ cv }: { cv: CVData }) {
                     style={{ borderColor: `${color}40`, color }}
                     title={item.niveau}
                   >
-                    {item.titre}
+                    {bulletTitle(section.type, item.titre)}
                     {item.sousTitre && <span className="opacity-70"> · {item.sousTitre}</span>}
                   </span>
                 ))}

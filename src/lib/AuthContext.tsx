@@ -259,13 +259,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       const ref = doc(db, "users", user.uid);
       await setDoc(ref, { cv, updatedAt: serverTimestamp() }, { merge: true });
-      // Vérification immédiate : on relit ce qui a vraiment été écrit côté serveur,
-      // pour être certain que la sauvegarde a réellement pris effet.
-      const verify = await getDoc(ref);
-      const savedPrenom = verify.exists() ? verify.data()?.cv?.personalInfo?.prenom : undefined;
-      setDebugInfo(
-        `Dernière écriture vérifiée à ${new Date().toLocaleTimeString("fr-FR")} | prénom confirmé sur le serveur = "${savedPrenom ?? "ERREUR: absent"}"`
-      );
     },
     [user]
   );

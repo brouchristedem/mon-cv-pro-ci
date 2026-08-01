@@ -41,12 +41,6 @@ export default function Home() {
               Tarifs
             </a>
           </nav>
-          <Link
-            href={ctaHref}
-            className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-semibold hover:bg-blue-700 transition"
-          >
-            Créer mon CV
-          </Link>
         </div>
       </header>
 
@@ -76,7 +70,7 @@ export default function Home() {
                 href={ctaHref}
                 className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white px-7 py-3.5 text-base font-semibold shadow-lg shadow-blue-600/25 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 transition"
               >
-                Créer mon CV gratuitement <ArrowRight size={18} />
+                Créer mon CV <ArrowRight size={18} />
               </Link>
               <a
                 href="#modeles"
@@ -164,12 +158,6 @@ export default function Home() {
           <div className="rounded-2xl border border-border bg-surface p-8">
             <p className="text-sm text-foreground/50 mb-1">Prix unique</p>
             <p className="text-4xl font-extrabold text-blue-600 mb-6">1000 FCFA</p>
-            <Link
-              href={ctaHref}
-              className="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-blue-600 text-white px-6 py-3 font-semibold hover:bg-blue-700 transition"
-            >
-              Créer mon CV maintenant <ArrowRight size={16} />
-            </Link>
           </div>
         </FadeIn>
       </section>

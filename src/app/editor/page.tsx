@@ -99,7 +99,7 @@ function NavButton({
 }
 
 export default function EditorPage() {
-  const { user, loading, isAdmin, signOut, saveProgress, loadError, debugInfo, dataLoaded } = useAuth();
+  const { user, loading, isAdmin, signOut, saveProgress, loadError, dataLoaded } = useAuth();
   const cv = useCVStore((s) => s.cv);
   const set = useCVStore((s) => s.set);
   const undo = useCVStore((s) => s.undo);
@@ -343,13 +343,6 @@ export default function EditorPage() {
             </p>
           )}
           {saveError && <p>Erreur de sauvegarde : {saveError}</p>}
-        </div>
-      )}
-
-      {isAdmin && debugInfo && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-1.5 text-[10px] text-amber-800 break-words font-mono">
-          {debugInfo}
-          {lastSaved && ` | dernière sauvegarde réussie à ${lastSaved.toLocaleTimeString("fr-FR")}`}
         </div>
       )}
 

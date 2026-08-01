@@ -1,5 +1,6 @@
 import { CVData } from "@/lib/types";
 import { renderRichText } from "@/lib/richText";
+import { bulletTitle } from "@/lib/bulletTitle";
 import { SectionIcon } from "./SectionIcon";
 import { ContactIcon } from "./ContactIcon";
 import { InfoIcon } from "./InfoIcon";
@@ -74,7 +75,7 @@ export default function Template12({ cv }: { cv: CVData }) {
               {section.items.map((item) => (
                 <div key={item.id} className="break-inside-avoid mb-2 grid grid-cols-[1fr_auto] gap-2">
                   <div>
-                    <p className="font-semibold">{item.titre}</p>
+                    <p className="font-semibold">{bulletTitle(section.type, item.titre)}</p>
                     {(item.sousTitre || item.lieu) && (
                   <p className="text-[11.5px] text-slate-500">
                     {item.sousTitre && <span className="font-medium">{item.sousTitre}</span>}
@@ -115,7 +116,7 @@ export default function Template12({ cv }: { cv: CVData }) {
               >
                 {section.items.map((item) => (
                   <div key={item.id} className="break-inside-avoid mb-1">
-                    <p className="font-medium text-[11.5px]">{item.titre}</p>
+                    <p className="font-medium text-[11.5px]">{bulletTitle(section.type, item.titre)}</p>
                     {item.sousTitre && <p className="text-[10.5px] text-slate-400">{item.sousTitre}</p>}
                     {item.niveau && <p className="text-[10.5px] text-slate-400">{item.niveau}</p>}
                   </div>
