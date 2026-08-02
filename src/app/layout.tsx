@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/lib/AuthContext";
+import { Analytics } from "@vercel/analytics/next";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const siteUrl = "https://mon-cv-pro-ci.vercel.app";
 const title = "MON CV PRO CI — Créez un CV professionnel en quelques minutes";
@@ -100,6 +102,8 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
+        <WhatsAppButton />
+        <Analytics />
       </body>
     </html>
   );
