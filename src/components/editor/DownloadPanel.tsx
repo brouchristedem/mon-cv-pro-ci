@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCVStore } from "@/lib/store";
 import { useAuth } from "@/lib/AuthContext";
-import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, MessageCircle, Info, LogIn } from "lucide-react";
+import { Download, Loader2, CheckCircle2, ExternalLink, AlertCircle, MessageCircle, Info, LogIn, Gift, Copy, Check } from "lucide-react";
 import { UI } from "@/lib/i18n";
 
 // Prix unique pour tous les téléchargements, qu'il s'agisse du premier ou
@@ -17,13 +17,26 @@ const SUPPORT_WHATSAPP_NUMBER = "2250545177571"; // format international sans "+
 const SUPPORT_PHONE_DISPLAY = "+225 05 45 17 75 71";
 
 export default function DownloadPanel() {
-  const { user, paidUnlocked, isAdmin, incrementDownloads, confirmPaidDownload, applyPromoCode } =
-    useAuth();
+  const {
+    user,
+    paidUnlocked,
+    isAdmin,
+    incrementDownloads,
+    confirmPaidDownload,
+    applyPromoCode,
+    referralCode,
+    referralCreditFCFA,
+    referralCount,
+    redeemReferralCredit,
+  } = useAuth();
   const cv = useCVStore((s) => s.cv);
   const t = UI[cv.langue];
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
+  const [referralApplied, setReferralApplied] = useState(false);
+  const [referralError, setReferralError] = useState("");
+  const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [unlockError, setUnlockError] = useState("");
   const [downloadError, setDownloadError] = useState("");
@@ -31,6 +44,13 @@ export default function DownloadPanel() {
   const [waveReference, setWaveReference] = useState("");
   const [waveClicked, setWaveClicked] = useState(false);
   const [isIOSSafari, setIsIOSSafari] = useState(false);
+  const [referralLink, setReferralLink] = useState("");
+
+  useEffect(() => {
+    if (referralCode && typeof window !== "undefined") {
+      setReferralLink(`${window.location.origin}/editor?ref=${referralCode}`);
+    }
+  }, [referralCode]);
 
   useEffect(() => {
     const ua = window.navigator.userAgent;
@@ -39,7 +59,7 @@ export default function DownloadPanel() {
     setIsIOSSafari(isIOS && isSafari);
   }, []);
 
-  const canDownload = paidUnlocked || promoApplied || isAdmin;
+  const canDownload = paidUnlocked || promoApplied || referralApplied || isAdmin;
 
   // Méthode de téléchargement, utilisée sur tous les navigateurs : la boîte
   // d'impression native du navigateur (window.print()), avec destination
@@ -80,17 +100,19 @@ export default function DownloadPanel() {
       window.removeEventListener("afterprint", finish);
       try {
         // Seul un téléchargement réellement payé (Wave) fait passer le tarif
-        // au palier suivant. Un code promo ou un téléchargement admin ne doit
-        // jamais compter comme "premier téléchargement consommé", sinon la
-        // personne se retrouve à devoir payer 1000 FCFA dès son prochain
-        // téléchargement alors qu'elle n'a encore rien payé.
-        if (paidUnlocked && !promoApplied && !isAdmin) {
+        // au palier suivant. Un code promo, un crédit de parrainage ou un
+        // téléchargement admin ne doit jamais compter comme "premier
+        // téléchargement consommé", sinon la personne se retrouve à devoir
+        // payer 1000 FCFA dès son prochain téléchargement alors qu'elle n'a
+        // encore rien payé.
+        if (paidUnlocked && !promoApplied && !referralApplied && !isAdmin) {
           await incrementDownloads();
         }
       } catch (err) {
         console.error("Erreur lors de l'enregistrement du téléchargement:", err);
       } finally {
         setPromoApplied(false);
+        setReferralApplied(false);
         setWaveClicked(false);
         setWaveReference("");
         setGenerating(false);
@@ -120,6 +142,28 @@ export default function DownloadPanel() {
     } catch (err) {
       const message = err instanceof Error ? err.message : t.genericError;
       setPromoError(message);
+    }
+  };
+
+  const handleRedeemReferral = async () => {
+    setReferralError("");
+    try {
+      await redeemReferralCredit(PRICE);
+      setReferralApplied(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t.genericError;
+      setReferralError(message);
+    }
+  };
+
+  const handleCopyReferralLink = async () => {
+    if (!referralLink) return;
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // navigateur sans accès au presse-papiers : non bloquant
     }
   };
 
@@ -277,6 +321,77 @@ export default function DownloadPanel() {
             <MessageCircle size={12} /> {t.customerService} {SUPPORT_PHONE_DISPLAY}
           </a>
         </>
+      )}
+
+      {referralCode && (
+        <div className="rounded-xl border border-border p-3 text-xs space-y-2.5">
+          <div className="flex items-center gap-1.5 font-medium text-foreground/80">
+            <Gift size={14} className="text-blue-600" />
+            Parrainez un ami
+          </div>
+
+          {referralCreditFCFA >= PRICE ? (
+            <div className="space-y-2">
+              <p className="text-green-700 bg-green-50 border border-green-200 rounded-lg p-2">
+                Vous avez {referralCreditFCFA} FCFA de crédit parrainage — un téléchargement gratuit
+                vous attend !
+              </p>
+              <button
+                onClick={handleRedeemReferral}
+                disabled={referralApplied}
+                className="w-full rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 transition disabled:opacity-60"
+              >
+                {referralApplied ? "Crédit utilisé ✓" : `Utiliser mes ${PRICE} FCFA de crédit`}
+              </button>
+            </div>
+          ) : referralCreditFCFA > 0 ? (
+            <p className="text-foreground/60">
+              {referralCreditFCFA} FCFA de réduction cumulés (sur {PRICE} FCFA nécessaires pour un
+              téléchargement gratuit).
+            </p>
+          ) : (
+            <p className="text-foreground/60">
+              Partagez votre lien : chaque ami qui télécharge son CV vous fait gagner 250 FCFA de
+              réduction.
+            </p>
+          )}
+          {referralError && <p className="text-red-500">{referralError}</p>}
+
+          {referralLink && (
+            <div className="flex gap-2">
+              <input
+                readOnly
+                value={referralLink}
+                onClick={(e) => e.currentTarget.select()}
+                className="flex-1 min-w-0 rounded-lg border border-border bg-surface-muted px-2.5 py-1.5 text-[11px] outline-none truncate"
+              />
+              <button
+                onClick={handleCopyReferralLink}
+                title="Copier le lien"
+                className="px-2.5 py-1.5 rounded-lg border border-border hover:bg-surface-muted transition flex-shrink-0"
+              >
+                {copied ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
+              </button>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  `Crée ton CV professionnel en quelques minutes avec MON CV PRO CI 👉 ${referralLink}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Partager sur WhatsApp"
+                className="px-2.5 py-1.5 rounded-lg bg-[#25D366] text-white hover:opacity-90 transition flex-shrink-0 flex items-center justify-center"
+              >
+                <MessageCircle size={13} />
+              </a>
+            </div>
+          )}
+
+          {referralCount > 0 && (
+            <p className="text-foreground/50">
+              {referralCount} ami{referralCount > 1 ? "s" : ""} déjà parrainé{referralCount > 1 ? "s" : ""}.
+            </p>
+          )}
+        </div>
       )}
 
       {(unlockError || downloadError) && (

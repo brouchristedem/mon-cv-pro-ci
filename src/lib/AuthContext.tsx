@@ -22,12 +22,15 @@ import {
   query,
   where,
   serverTimestamp,
+  increment,
 } from "firebase/firestore";
 import { auth, googleProvider, db } from "./firebase";
 import { useCVStore, defaultCV, mergeWithDefaults } from "./store";
 import { CVData } from "./types";
 
 const GUEST_DRAFT_KEY = "cvpro_guest_draft";
+const REFERRAL_KEY = "cvpro_referral_code";
+const REFERRAL_REWARD_FCFA = 250; // crédit gagné par le parrain à chaque filleul qui paie son premier téléchargement
 
 function loadGuestDraft(): CVData | null {
   if (typeof window === "undefined") return null;
@@ -58,6 +61,43 @@ function clearGuestDraft() {
   }
 }
 
+// Capture le code de parrainage présent dans l'URL (?ref=CODE) au premier
+// passage sur le site, et le garde en mémoire locale jusqu'à la création
+// du compte (l'attribution se fait "au premier lien cliqué" : si un code
+// est déjà enregistré, on ne l'écrase pas avec un lien visité plus tard).
+export function capturePendingReferral() {
+  if (typeof window === "undefined") return;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("ref")?.trim().toUpperCase();
+    if (!code) return;
+    if (!window.localStorage.getItem(REFERRAL_KEY)) {
+      window.localStorage.setItem(REFERRAL_KEY, code);
+    }
+  } catch {
+    // stockage local indisponible : non bloquant, le parrainage ne sera
+    // simplement pas attribué
+  }
+}
+
+function loadPendingReferral(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(REFERRAL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function clearPendingReferral() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(REFERRAL_KEY);
+  } catch {
+    // non bloquant
+  }
+}
+
 // Un brouillon invité est considéré "utile" seulement s'il contient un
 // minimum de contenu réel, pour éviter d'écraser un profil existant avec un
 // brouillon vide.
@@ -74,6 +114,9 @@ interface AuthContextValue {
   downloadsUsed: number;
   paidUnlocked: boolean;
   usedPromoCodes: string[];
+  referralCode: string;
+  referralCreditFCFA: number;
+  referralCount: number;
   authError: string;
   loadError: string;
   debugInfo: string;
@@ -87,6 +130,7 @@ interface AuthContextValue {
   incrementDownloads: () => Promise<void>;
   confirmPaidDownload: (waveReference: string) => Promise<void>;
   applyPromoCode: (code: string) => Promise<void>;
+  redeemReferralCredit: (amount: number) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -123,11 +167,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [downloadsUsed, setDownloadsUsed] = useState(0);
   const [paidUnlocked, setPaidUnlocked] = useState(false);
   const [usedPromoCodes, setUsedPromoCodes] = useState<string[]>([]);
+  const [referralCode, setReferralCode] = useState("");
+  const [referralCreditFCFA, setReferralCreditFCFA] = useState(0);
+  const [referralCount, setReferralCount] = useState(0);
+  const [referredBy, setReferredBy] = useState<string | null>(null);
+  const [referralRewardGranted, setReferralRewardGranted] = useState(false);
   const [authError, setAuthError] = useState("");
   const [loadError, setLoadError] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
   const [dataLoaded, setDataLoaded] = useState(false);
   const reset = useCVStore((s) => s.reset);
+
+  useEffect(() => {
+    capturePendingReferral();
+  }, []);
 
   useEffect(() => {
     // Récupère le résultat d'une éventuelle redirection Google en cours,
@@ -160,6 +213,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setDownloadsUsed(data.downloadsUsed || 0);
             setPaidUnlocked(!!data.paidUnlocked);
             setUsedPromoCodes(Array.isArray(data.usedPromoCodes) ? data.usedPromoCodes : []);
+            let existingReferralCode = data.referralCode as string | undefined;
+            if (!existingReferralCode) {
+              // Compte créé avant l'ajout du parrainage : on lui génère un
+              // code à la volée pour qu'il puisse en profiter aussi, et on
+              // initialise les compteurs numériques (nécessaire pour que la
+              // règle de sécurité qui valide les incréments fonctionne).
+              existingReferralCode = u.uid.slice(0, 8).toUpperCase();
+              await setDoc(
+                ref,
+                { referralCode: existingReferralCode, referralCreditFCFA: 0, referralCount: 0 },
+                { merge: true }
+              );
+              await setDoc(doc(db, "referralCodes", existingReferralCode), { ownerUid: u.uid });
+            }
+            setReferralCode(existingReferralCode);
+            setReferralCreditFCFA(data.referralCreditFCFA || 0);
+            setReferralCount(data.referralCount || 0);
+            setReferredBy(data.referredBy || null);
+            setReferralRewardGranted(!!data.referralRewardGranted);
             if (guestHasContent) {
               // Le CV construit avant connexion prime : on l'enregistre tout
               // de suite sur le compte pour ne rien perdre.
@@ -171,15 +243,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             );
           } else {
             const fresh = guestHasContent && guestDraft ? mergeWithDefaults(guestDraft) : defaultCV();
+            const ownReferralCode = u.uid.slice(0, 8).toUpperCase();
+            const pendingReferral = loadPendingReferral();
+            // Un code de parrainage n'est retenu que s'il ne s'agit pas de
+            // son propre code (auto-parrainage), pour éviter les abus.
+            const referredByCode =
+              pendingReferral && pendingReferral !== ownReferralCode ? pendingReferral : null;
             await setDoc(ref, {
               email: u.email,
               displayName: u.displayName,
               downloadsUsed: 0,
               usedPromoCodes: [],
+              referralCode: ownReferralCode,
+              referralCreditFCFA: 0,
+              referralCount: 0,
+              referredBy: referredByCode,
+              referralRewardGranted: false,
               cv: fresh,
               createdAt: serverTimestamp(),
             });
             reset(fresh);
+            setReferralCode(ownReferralCode);
+            setReferredBy(referredByCode);
+            await setDoc(doc(db, "referralCodes", ownReferralCode), { ownerUid: u.uid });
+            clearPendingReferral();
             if (guestHasContent) clearGuestDraft();
             setDebugInfo(`uid=${u.uid.slice(0, 8)}... | AUCUN document trouvé, nouveau profil créé`);
           }
@@ -296,8 +383,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         // non bloquant
       }
+      // Récompense de parrainage : seulement au tout premier paiement
+      // confirmé de ce compte, pour éviter qu'un même filleul ne fasse
+      // gagner du crédit à son parrain à chaque téléchargement.
+      if (referredBy && !referralRewardGranted) {
+        try {
+          const mappingSnap = await getDoc(doc(db, "referralCodes", referredBy));
+          if (mappingSnap.exists()) {
+            const referrerUid = mappingSnap.data().ownerUid as string;
+            const referrerRef = doc(db, "users", referrerUid);
+            await setDoc(
+              referrerRef,
+              { referralCreditFCFA: increment(REFERRAL_REWARD_FCFA), referralCount: increment(1) },
+              { merge: true }
+            );
+          }
+          setReferralRewardGranted(true);
+          await setDoc(ref, { referralRewardGranted: true }, { merge: true });
+        } catch (err) {
+          console.error("Erreur lors de l'attribution de la récompense de parrainage:", err);
+        }
+      }
     },
-    [user]
+    [user, referredBy, referralRewardGranted]
   );
 
   const applyPromoCode = useCallback(
@@ -320,6 +428,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user, usedPromoCodes]
   );
 
+  const redeemReferralCredit = useCallback(
+    async (amount: number) => {
+      if (!user) throw new Error("Vous devez être connecté.");
+      if (referralCreditFCFA < amount) {
+        throw new Error("Crédit de parrainage insuffisant.");
+      }
+      const next = referralCreditFCFA - amount;
+      setReferralCreditFCFA(next);
+      const ref = doc(db, "users", user.uid);
+      await setDoc(ref, { referralCreditFCFA: next }, { merge: true });
+    },
+    [user, referralCreditFCFA]
+  );
+
   const isAdmin = !!user?.email && user.email === ADMIN_EMAIL;
 
   return (
@@ -331,6 +453,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         downloadsUsed,
         paidUnlocked,
         usedPromoCodes,
+        referralCode,
+        referralCreditFCFA,
+        referralCount,
         authError,
         loadError,
         debugInfo,
@@ -344,6 +469,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         incrementDownloads,
         confirmPaidDownload,
         applyPromoCode,
+        redeemReferralCredit,
       }}
     >
       {children}
