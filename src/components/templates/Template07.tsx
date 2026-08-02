@@ -36,7 +36,7 @@ export default function Template07({ cv }: { cv: CVData }) {
           <img
             src={p.photoUrl}
             alt=""
-            className={`w-20 h-20 object-cover flex-shrink-0 grayscale ${photoClass(p.photoShape)}`}
+            className={`w-20 h-20 object-cover flex-shrink-0 ${photoClass(p.photoShape)}`}
           />
         )}
       </div>
