@@ -97,8 +97,12 @@ export default function Home() {
               className="absolute -inset-6 bg-gradient-to-tr from-blue-600/20 to-transparent rounded-3xl blur-2xl"
             />
             <div className="relative rotate-2 hover:rotate-0 transition-transform duration-500">
-              <div className="pointer-events-none rounded-lg overflow-hidden ring-1 ring-black/5">
+              <div className="relative pointer-events-none rounded-lg overflow-hidden ring-1 ring-black/5 aspect-[4/5]">
                 <CVPreviewFit cv={heroCV} />
+                <div
+                  aria-hidden
+                  className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent"
+                />
               </div>
             </div>
           </div>
