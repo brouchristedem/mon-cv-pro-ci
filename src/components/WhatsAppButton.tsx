@@ -2,7 +2,7 @@
 
 // Bouton flottant vers WhatsApp, affiché sur tout le site pour un accès
 // rapide au support (canal le plus utilisé par nos utilisateurs).
-const WHATSAPP_NUMBER = "225545177571"; // +225 05 45 17 75 71
+const WHATSAPP_NUMBER = "2250545177571"; // +225 05 45 17 75 71
 const DEFAULT_MESSAGE = "Bonjour, j'ai besoin d'aide avec MON CV PRO CI.";
 
 export default function WhatsAppButton() {
