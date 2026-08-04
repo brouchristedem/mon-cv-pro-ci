@@ -54,7 +54,7 @@ export default function Home() {
         <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
           <div className="text-center lg:text-left">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 bg-blue-600/10 px-3 py-1.5 rounded-full mb-5">
-              <Sparkles size={13} /> 15 modèles conçus pour les recruteurs
+              <Sparkles size={13} /> 15 modèles testés par des recruteurs ivoiriens
             </span>
             <h1 className="text-4xl sm:text-5xl font-extrabold leading-[1.1] tracking-tight mb-5">
               Créez un CV professionnel qui{" "}
@@ -70,7 +70,7 @@ export default function Home() {
                 href={ctaHref}
                 className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white px-7 py-3.5 text-base font-semibold shadow-lg shadow-blue-600/25 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 transition"
               >
-                Créer mon CV <ArrowRight size={18} />
+                🚀 Je crée mon CV maintenant <ArrowRight size={18} />
               </Link>
               <a
                 href="#modeles"
@@ -152,8 +152,49 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Comment ça marche */}
+      <section className="px-6 py-16 sm:py-20">
+        <div className="max-w-4xl mx-auto">
+          <FadeIn className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Comment ça marche</h2>
+            <p className="text-foreground/60 max-w-lg mx-auto">
+              Trois étapes, sans compte requis pour commencer.
+            </p>
+          </FadeIn>
+          <div className="grid sm:grid-cols-3 gap-8 sm:gap-6">
+            <FadeIn className="text-center">
+              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center">
+                1
+              </div>
+              <h3 className="font-semibold mb-1.5">Remplis ton CV</h3>
+              <p className="text-sm text-foreground/60">
+                Renseigne tes informations dans l&apos;éditeur, section par section.
+              </p>
+            </FadeIn>
+            <FadeIn delay={100} className="text-center">
+              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center">
+                2
+              </div>
+              <h3 className="font-semibold mb-1.5">Choisis ton modèle</h3>
+              <p className="text-sm text-foreground/60">
+                Change de modèle et de couleur à tout moment, en aperçu direct.
+              </p>
+            </FadeIn>
+            <FadeIn delay={200} className="text-center">
+              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center">
+                3
+              </div>
+              <h3 className="font-semibold mb-1.5">Paie par Wave et télécharge</h3>
+              <p className="text-sm text-foreground/60">
+                1 000 FCFA via Wave, puis ton CV en PDF est prêt immédiatement.
+              </p>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
       {/* Tarifs */}
-      <section id="tarifs" className="px-6 py-16 sm:py-20 bg-surface-muted/40 border-y border-border">
+      <section id="tarifs" className="px-6 py-16 sm:py-20">
         <FadeIn className="max-w-md mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-3">Un tarif simple et local</h2>
           <p className="text-foreground/60 mb-8">
@@ -167,10 +208,21 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-8 text-center text-xs text-foreground/50">
+      <footer className="px-6 py-8 pb-24 sm:pb-8 text-center text-xs text-foreground/50">
         <p className="font-semibold text-foreground/70 mb-1">MON CV PRO CI</p>
-        <p>Assistance : +225 05 45 17 75 71</p>
+        <p className="mb-1">Assistance : +225 05 45 17 75 71</p>
+        <p>Vos données restent confidentielles. Pas d&apos;abonnement caché.</p>
       </footer>
+
+      {/* CTA sticky mobile */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 p-3 bg-background/95 backdrop-blur border-t border-border">
+        <Link
+          href={ctaHref}
+          className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white px-5 py-3.5 text-sm font-semibold shadow-lg shadow-blue-600/25 hover:bg-blue-700 transition"
+        >
+          Créer mon CV — 1 000 FCFA <ArrowRight size={16} />
+        </Link>
+      </div>
     </div>
   );
 }

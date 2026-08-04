@@ -334,6 +334,20 @@ export default function EditorPage() {
         </div>
       </header>
 
+      {currentStepIndex >= 0 && (
+        <div className="px-4 lg:px-6 py-2 border-b border-border flex items-center gap-3">
+          <span className="text-[11px] font-medium text-foreground/50 flex-shrink-0">
+            {cv.langue === "en" ? "Step" : "Étape"} {currentStepIndex + 1}/{panelSteps.length}
+          </span>
+          <div className="flex-1 h-1.5 rounded-full bg-surface-muted overflow-hidden">
+            <div
+              className="h-full bg-blue-600 rounded-full transition-all duration-300"
+              style={{ width: `${((currentStepIndex + 1) / panelSteps.length) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {(loadError || saveError) && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-[11px] text-red-700 break-words">
           {loadError && (
