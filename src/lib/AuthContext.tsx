@@ -131,6 +131,7 @@ interface AuthContextValue {
   confirmPaidDownload: (waveReference: string) => Promise<void>;
   applyPromoCode: (code: string) => Promise<void>;
   redeemReferralCredit: (amount: number) => Promise<void>;
+  logDownload: (source: "paid" | "promo" | "referral" | "admin") => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -350,6 +351,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user]
   );
 
+  // Enregistre chaque téléchargement réellement effectué (payant, promo,
+  // crédit de parrainage ou admin), pour permettre de compter le nombre
+  // total de CV téléchargés côté admin — indépendamment de "downloadsUsed"
+  // qui ne suit que les téléchargements payants (pour la tarification).
+  // Non bloquant : une erreur ici ne doit jamais empêcher le téléchargement.
+  const logDownload = useCallback(
+    async (source: "paid" | "promo" | "referral" | "admin") => {
+      if (!user) return;
+      try {
+        await addDoc(collection(db, "downloads"), {
+          userId: user.uid,
+          email: user.email,
+          source,
+          createdAt: serverTimestamp(),
+        });
+      } catch (err) {
+        console.error("Erreur lors de l'enregistrement du téléchargement:", err);
+      }
+    },
+    [user]
+  );
+
   const incrementDownloads = useCallback(async () => {
     if (!user) return;
     const ref = doc(db, "users", user.uid);
@@ -470,6 +493,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         confirmPaidDownload,
         applyPromoCode,
         redeemReferralCredit,
+        logDownload,
       }}
     >
       {children}

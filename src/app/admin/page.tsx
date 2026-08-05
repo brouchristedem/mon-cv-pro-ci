@@ -17,7 +17,7 @@ import {
   limit,
 } from "firebase/firestore";
 import { TEMPLATE_LIST } from "@/lib/templateRegistry";
-import { Trash2, Plus, Phone, Search, Users, Wallet, TicketPercent } from "lucide-react";
+import { Trash2, Plus, Phone, Search, Users, Wallet, TicketPercent, Download } from "lucide-react";
 
 const PRICE = Number(process.env.NEXT_PUBLIC_PRICE_NEXT || 1000);
 
@@ -38,6 +38,9 @@ interface AdminStats {
   usersToday: number;
   topPromoCode: string | null;
   topPromoCodeCount: number;
+  totalDownloads: number;
+  totalRevenueFCFA: number;
+  referralConversions: number;
 }
 
 export default function AdminPage() {
@@ -81,19 +84,25 @@ export default function AdminPage() {
   // les rafraîchir.
   useEffect(() => {
     if (!isAdmin) return;
-    getDocs(collection(db, "users"))
-      .then((snap) => {
+    Promise.all([
+      getDocs(collection(db, "users")),
+      getDocs(collection(db, "downloads")),
+      getDocs(collection(db, "paymentClaims")),
+    ])
+      .then(([usersSnap, downloadsSnap, claimsSnap]) => {
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
         const startOfTodaySeconds = startOfToday.getTime() / 1000;
 
         let usersToday = 0;
+        let referralConversions = 0;
         const promoUsage: Record<string, number> = {};
 
-        snap.forEach((d) => {
+        usersSnap.forEach((d) => {
           const data = d.data();
           const createdAtSeconds: number | undefined = data.createdAt?.seconds;
           if (createdAtSeconds && createdAtSeconds >= startOfTodaySeconds) usersToday += 1;
+          referralConversions += Number(data.referralCount) || 0;
           const used: string[] = Array.isArray(data.usedPromoCodes) ? data.usedPromoCodes : [];
           used.forEach((code) => {
             promoUsage[code] = (promoUsage[code] || 0) + 1;
@@ -109,7 +118,15 @@ export default function AdminPage() {
           }
         });
 
-        setStats({ totalUsers: snap.size, usersToday, topPromoCode, topPromoCodeCount });
+        setStats({
+          totalUsers: usersSnap.size,
+          usersToday,
+          topPromoCode,
+          topPromoCodeCount,
+          totalDownloads: downloadsSnap.size,
+          totalRevenueFCFA: claimsSnap.size * PRICE,
+          referralConversions,
+        });
       })
       .catch((err) => console.error("Erreur de chargement des statistiques admin:", err))
       .finally(() => setStatsLoading(false));
@@ -158,14 +175,20 @@ export default function AdminPage() {
 
       <section>
         <h2 className="text-sm font-semibold mb-3">Aperçu rapide</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-xl border border-border p-3">
             <div className="flex items-center gap-1.5 text-foreground/50 text-[11px] mb-1">
-              <Wallet size={13} /> Revenus estimés (30 derniers paiements)
+              <Wallet size={13} /> Chiffre d&apos;affaires total
             </div>
             <p className="text-lg font-bold">
-              {statsLoading && claims.length === 0 ? "…" : `${(claims.length * PRICE).toLocaleString("fr-FR")} FCFA`}
+              {statsLoading ? "…" : `${(stats?.totalRevenueFCFA ?? 0).toLocaleString("fr-FR")} FCFA`}
             </p>
+          </div>
+          <div className="rounded-xl border border-border p-3">
+            <div className="flex items-center gap-1.5 text-foreground/50 text-[11px] mb-1">
+              <Download size={13} /> CV téléchargés
+            </div>
+            <p className="text-lg font-bold">{statsLoading ? "…" : stats?.totalDownloads ?? 0}</p>
           </div>
           <div className="rounded-xl border border-border p-3">
             <div className="flex items-center gap-1.5 text-foreground/50 text-[11px] mb-1">
@@ -180,17 +203,21 @@ export default function AdminPage() {
           </div>
           <div className="rounded-xl border border-border p-3">
             <div className="flex items-center gap-1.5 text-foreground/50 text-[11px] mb-1">
-              <TicketPercent size={13} /> Code promo le plus utilisé
+              <TicketPercent size={13} /> Téléchargements parrainés
             </div>
-            <p className="text-lg font-bold font-mono truncate">
-              {statsLoading
-                ? "…"
-                : stats?.topPromoCode
-                  ? `${stats.topPromoCode} (${stats.topPromoCodeCount})`
-                  : "—"}
-            </p>
+            <p className="text-lg font-bold">{statsLoading ? "…" : stats?.referralConversions ?? 0}</p>
           </div>
         </div>
+        <p className="text-[10px] text-foreground/40 mt-2">
+          Code promo le plus utilisé :{" "}
+          {statsLoading
+            ? "…"
+            : stats?.topPromoCode
+              ? `${stats.topPromoCode} (${stats.topPromoCodeCount})`
+              : "—"}
+          {" · "}
+          Le compteur &quot;CV téléchargés&quot; ne comptabilise que les téléchargements effectués depuis la mise en place de ce suivi (historique antérieur non disponible).
+        </p>
       </section>
 
       <section>

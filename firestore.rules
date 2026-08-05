@@ -65,5 +65,14 @@ service cloud.firestore {
       allow delete: if request.auth != null &&
         request.auth.token.email == "brouchristedem@gmail.com";
     }
+
+    // Journal de chaque téléchargement de CV réellement effectué (payant,
+    // promo, crédit de parrainage ou admin), utilisé uniquement pour le
+    // compteur "CV téléchargés" du tableau de bord admin.
+    match /downloads/{downloadId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read: if request.auth != null &&
+        request.auth.token.email == "brouchristedem@gmail.com";
+    }
   }
 }

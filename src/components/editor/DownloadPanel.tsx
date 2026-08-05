@@ -28,6 +28,7 @@ export default function DownloadPanel() {
     referralCreditFCFA,
     referralCount,
     redeemReferralCredit,
+    logDownload,
   } = useAuth();
   const cv = useCVStore((s) => s.cv);
   const t = UI[cv.langue];
@@ -108,6 +109,14 @@ export default function DownloadPanel() {
         if (paidUnlocked && !promoApplied && !referralApplied && !isAdmin) {
           await incrementDownloads();
         }
+        const source = isAdmin
+          ? "admin"
+          : promoApplied
+            ? "promo"
+            : referralApplied
+              ? "referral"
+              : "paid";
+        await logDownload(source);
       } catch (err) {
         console.error("Erreur lors de l'enregistrement du téléchargement:", err);
       } finally {
