@@ -105,11 +105,11 @@ export const UI = {
     nextDownloadInfo: "Le téléchargement est à 1000 FCFA.",
     downloadPriceInfo: "Le téléchargement de votre CV coûte 1000 FCFA.",
     downloadWarning:
-      "Assurez-vous d'avoir terminé toutes vos modifications avant de continuer : aucun retour en arrière n'est possible après le téléchargement.",
+      "Vérifiez que votre CV est prêt avant de télécharger. Vous pourrez toujours revenir le modifier ensuite — un nouveau téléchargement sera alors nécessaire (1000 FCFA).",
     beforePayWarning:
-      "Avant de payer : vérifiez que votre CV est terminé (aucune modification possible après le paiement). Une fois le paiement Wave effectué, il vous sera demandé de saisir le numéro de référence affiché sur votre reçu Wave.",
+      "Avant de payer : vérifiez que votre CV est prêt. Une fois le paiement Wave effectué, il vous sera demandé de saisir le numéro de référence affiché sur votre reçu Wave.",
     paidFlowWarning:
-      "Une fois votre référence renseignée et validée, vous devrez obligatoirement télécharger votre CV : aucun retour en arrière ne sera possible ensuite.",
+      "Une fois votre référence renseignée et validée, vous pourrez télécharger votre CV.",
     printUnsupported:
       "Le téléchargement PDF ne fonctionne pas dans ce navigateur intégré (ex : appli Facebook, Instagram, TikTok). Ouvrez ce site dans Chrome ou Safari pour télécharger votre CV.",
     downloadFailed:
@@ -246,11 +246,11 @@ export const UI = {
     nextDownloadInfo: "The download costs 1000 FCFA.",
     downloadPriceInfo: "Downloading your CV costs 1000 FCFA.",
     downloadWarning:
-      "Make sure you've finished all your changes before continuing: there is no going back after downloading.",
+      "Make sure your CV is ready before downloading. You can always come back to edit it later — a new download will then be needed (1000 FCFA).",
     beforePayWarning:
-      "Before paying: make sure your CV is finished (no changes possible after payment). Once you've paid via Wave, you'll be asked to enter the reference number shown on your Wave receipt.",
+      "Before paying: make sure your CV is ready. Once you've paid via Wave, you'll be asked to enter the reference number shown on your Wave receipt.",
     paidFlowWarning:
-      "Once your reference is entered and validated, you must download your CV: there is no going back after that.",
+      "Once your reference is entered and validated, you'll be able to download your CV.",
     printUnsupported:
       "PDF download doesn't work inside this in-app browser (e.g. Facebook, Instagram, TikTok app). Open this site in Chrome or Safari to download your CV.",
     downloadFailed:

@@ -29,6 +29,7 @@ import {
   Palette,
   FileDown,
   FileUp,
+  Eye,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -252,11 +253,11 @@ export default function EditorPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-border gap-2">
-        <Link href="/" className="font-extrabold text-sm tracking-wide uppercase flex-shrink-0">
+      <header className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-3 border-b border-border gap-2">
+        <Link href="/" className="font-extrabold text-xs sm:text-sm tracking-wide uppercase flex-shrink-0">
           MON CV PRO CI
         </Link>
-        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
           <span
             className={`hidden sm:flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full ${
               user && lastSaved
@@ -300,7 +301,7 @@ export default function EditorPage() {
                 ),
               }));
             }}
-            className="text-xs bg-transparent border border-border rounded-lg px-2 py-1.5"
+            className="text-xs bg-transparent border border-border rounded-lg px-1.5 sm:px-2 py-1.5"
           >
             <option value="fr">Français</option>
             <option value="en">English</option>
@@ -370,13 +371,14 @@ export default function EditorPage() {
           <div className="hidden lg:block">
             <CompletenessScore />
           </div>
-          <div className="flex lg:flex-col gap-1.5 p-3 overflow-x-auto lg:overflow-y-auto">
-            <NavButton
-              label={t.steps[0]}
-              status={infosStatus(cv.personalInfo)}
-              active={activeId === "infos"}
-              onClick={() => setActiveId("infos")}
-            />
+          <div className="relative lg:contents">
+            <div className="flex lg:flex-col gap-1.5 p-3 overflow-x-auto lg:overflow-y-auto">
+              <NavButton
+                label={t.steps[0]}
+                status={infosStatus(cv.personalInfo)}
+                active={activeId === "infos"}
+                onClick={() => setActiveId("infos")}
+              />
             {orderedSections.map((section) => (
               <NavButton
                 key={section.id}
@@ -447,6 +449,13 @@ export default function EditorPage() {
               active={activeId === "settings"}
               onClick={() => setActiveId("settings")}
             />
+            </div>
+            {/* Indique qu'on peut faire glisser les onglets vers la gauche
+                sur mobile : dégradé + flèche, masqués sur desktop où la
+                nav est verticale et déjà entièrement visible. */}
+            <div className="lg:hidden pointer-events-none absolute top-0 right-0 h-full w-10 bg-gradient-to-l from-surface to-transparent flex items-center justify-end pr-1">
+              <span className="text-foreground/30 text-xs">›</span>
+            </div>
           </div>
 
           <div className="p-3 border-t border-border">
@@ -480,7 +489,7 @@ export default function EditorPage() {
             plafonnée sur mobile (avec défilement interne) pour que
             l'ajout d'un élément en bas de liste ne fasse pas défiler toute
             la page (nav + aperçu compris) : seul ce panneau bouge. */}
-        <section className="lg:w-[420px] flex-shrink-0 p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-border overflow-y-auto max-h-[65vh] lg:max-h-none">
+        <section className="lg:w-[420px] flex-shrink-0 p-4 pb-20 lg:pb-6 lg:p-6 border-b lg:border-b-0 lg:border-r border-border overflow-y-auto max-h-[65vh] lg:max-h-none">
           {activeId === "infos" && <PersonalInfoForm />}
 
           {activeSection && <SectionPanel section={activeSection} />}
@@ -745,6 +754,18 @@ export default function EditorPage() {
           </div>
         </section>
       </main>
+
+      {!fullscreen && !downloadOpen && (
+        <button
+          onClick={() => setFullscreen(true)}
+          className="lg:hidden fixed bottom-24 right-5 z-40 flex items-center gap-1.5 pl-3 pr-4 py-2.5 rounded-full bg-foreground text-background shadow-lg shadow-black/20 hover:scale-105 active:scale-95 transition-transform print:hidden"
+        >
+          <Eye size={16} />
+          <span className="text-xs font-semibold">
+            {cv.langue === "en" ? "Preview" : "Aperçu"}
+          </span>
+        </button>
+      )}
 
       {fullscreen && (
         <div className="fixed inset-0 z-50 bg-black/70 flex flex-col p-4">
