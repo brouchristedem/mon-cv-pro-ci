@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useAuth, saveGuestDraft } from "@/lib/AuthContext";
-import { useCVStore } from "@/lib/store";
+import { useCVStore, mergeWithDefaults } from "@/lib/store";
 import CVPreviewFit from "@/components/templates/CVPreviewFit";
 import PersonalInfoForm from "@/components/editor/PersonalInfoForm";
 import SectionPanel from "@/components/editor/SectionPanel";
 import TemplatePicker from "@/components/editor/TemplatePicker";
 import ColorPicker from "@/components/editor/ColorPicker";
 import DownloadPanel from "@/components/editor/DownloadPanel";
+import CompletenessScore from "@/components/editor/CompletenessScore";
 import { useTheme } from "@/lib/ThemeContext";
 import { SECTION_LABELS_FR, SECTION_LABELS_EN, Section, SectionType, PersonalInfo } from "@/lib/types";
 import { UI } from "@/lib/i18n";
@@ -26,6 +27,8 @@ import {
   Maximize2,
   X,
   Palette,
+  FileDown,
+  FileUp,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -119,6 +122,7 @@ export default function EditorPage() {
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [fullscreen, setFullscreen] = useState(false);
+  const [importMessage, setImportMessage] = useState("");
 
   // Empêche d'atterrir directement sur l'éditeur (lien externe, favori, URL
   // tapée à la main) sans être d'abord passé par la page d'accueil — ou par
@@ -363,6 +367,9 @@ export default function EditorPage() {
       <main className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden">
         {/* Sidebar : sections + progression, palette rapide intégrée */}
         <nav className="lg:w-60 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-border flex flex-col overflow-hidden">
+          <div className="hidden lg:block">
+            <CompletenessScore />
+          </div>
           <div className="flex lg:flex-col gap-1.5 p-3 overflow-x-auto lg:overflow-y-auto">
             <NavButton
               label={t.steps[0]}
@@ -611,6 +618,72 @@ export default function EditorPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="pt-2 border-t border-border">
+                <h3 className="text-sm font-semibold mb-1 mt-3">{t.dataGroup}</h3>
+                <p className="text-[11px] text-foreground/50 mb-2">{t.dataGroupHint}</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([JSON.stringify(cv, null, 2)], {
+                        type: "application/json",
+                      });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      const fileName = [cv.personalInfo.prenom, cv.personalInfo.nom]
+                        .filter(Boolean)
+                        .join("-")
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-]+/g, "-") || "mon-cv";
+                      a.href = url;
+                      a.download = `${fileName}.json`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2.5 rounded-lg border border-border hover:bg-surface-muted transition"
+                  >
+                    <FileDown size={14} /> {t.exportJson}
+                  </button>
+                  <label className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2.5 rounded-lg border border-border hover:bg-surface-muted transition cursor-pointer">
+                    <FileUp size={14} /> {t.importJson}
+                    <input
+                      type="file"
+                      accept="application/json"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          try {
+                            const parsed = JSON.parse(reader.result as string);
+                            if (!parsed || typeof parsed !== "object" || !parsed.personalInfo) {
+                              throw new Error("format invalide");
+                            }
+                            set(() => mergeWithDefaults(parsed));
+                            setImportMessage(t.importJsonSuccess);
+                          } catch {
+                            setImportMessage(t.importJsonError);
+                          } finally {
+                            window.setTimeout(() => setImportMessage(""), 4000);
+                          }
+                        };
+                        reader.readAsText(file);
+                      }}
+                    />
+                  </label>
+                </div>
+                {importMessage && (
+                  <p
+                    className={`text-[11px] mt-2 ${
+                      importMessage === t.importJsonSuccess ? "text-green-600" : "text-red-500"
+                    }`}
+                  >
+                    {importMessage}
+                  </p>
+                )}
               </div>
 
             </div>

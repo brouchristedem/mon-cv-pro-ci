@@ -7,6 +7,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
+      // L'admin peut consulter (lecture seule) l'ensemble des comptes, pour
+      // le tableau de statistiques de la page /admin (nombre de CV créés,
+      // codes promo les plus utilisés, etc.). Aucune écriture n'est permise
+      // par cette règle : l'admin ne modifie jamais le compte d'un tiers.
+      allow read: if request.auth != null &&
+        request.auth.token.email == "brouchristedem@gmail.com";
+
       // Parrainage : quand un filleul confirme son premier paiement, son
       // compte doit créditer celui de son parrain. On autorise cette seule
       // opération, depuis un compte différent, de façon très restreinte :

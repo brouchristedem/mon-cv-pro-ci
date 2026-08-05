@@ -126,6 +126,24 @@ export const UI = {
     contactGroup: "Coordonnées",
     personalizeLabel: "Personnaliser",
     zoomLabel: "Zoom",
+    // Score de complétude
+    completeness: "Complétude du CV",
+    completenessTip1: "Ajoutez une photo pour un CV plus impactant.",
+    completenessTip2: "Complétez vos informations de contact (email, téléphone).",
+    completenessTip3: "Rédigez un profil pour vous présenter en quelques lignes.",
+    completenessTip4: "Ajoutez au moins une expérience professionnelle.",
+    completenessTip5: "Ajoutez au moins une formation.",
+    completenessTip6: "Ajoutez au moins 3 compétences clés.",
+    completenessTip7: "Choisissez un modèle et une couleur pour votre CV.",
+    completenessDone: "Votre CV est complet, bravo !",
+    // Export / Import JSON
+    dataGroup: "Sauvegarde des données",
+    exportJson: "Exporter mes données (JSON)",
+    importJson: "Importer un fichier JSON",
+    importJsonSuccess: "Données importées avec succès.",
+    importJsonError: "Fichier invalide : impossible d'importer ces données.",
+    dataGroupHint:
+      "Gardez une copie de votre CV sur votre ordinateur, pour la retrouver plus tard ou la transférer sur un autre appareil.",
   },
   en: {
     steps: ["Information", "Sections", "Template & Color", "Layout", "Download"],
@@ -249,6 +267,24 @@ export const UI = {
     contactGroup: "Contact",
     personalizeLabel: "Customize",
     zoomLabel: "Zoom",
+    // Completeness score
+    completeness: "CV completeness",
+    completenessTip1: "Add a photo for a more impactful CV.",
+    completenessTip2: "Complete your contact info (email, phone).",
+    completenessTip3: "Write a profile summary to introduce yourself.",
+    completenessTip4: "Add at least one work experience.",
+    completenessTip5: "Add at least one education entry.",
+    completenessTip6: "Add at least 3 key skills.",
+    completenessTip7: "Choose a template and a color for your CV.",
+    completenessDone: "Your CV is complete, well done!",
+    // JSON export / import
+    dataGroup: "Data backup",
+    exportJson: "Export my data (JSON)",
+    importJson: "Import a JSON file",
+    importJsonSuccess: "Data imported successfully.",
+    importJsonError: "Invalid file: this data couldn't be imported.",
+    dataGroupHint:
+      "Keep a copy of your CV on your computer, to find it again later or move it to another device.",
   },
 } as const;
 

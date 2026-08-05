@@ -3,7 +3,12 @@
 import { useCVStore } from "@/lib/store";
 import { useRef, useState } from "react";
 import { UI } from "@/lib/i18n";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Accepte les formats ivoiriens/internationaux courants : espaces, tirets et
+// indicatif "+" optionnels, au moins 8 chiffres.
+const PHONE_RE = /^\+?[0-9\s-]{8,}$/;
 
 const inputClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/40 transition";
@@ -181,21 +186,31 @@ export default function PersonalInfoForm() {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>{t.email}</label>
-          <input
-            className={inputClass}
-            value={cv.personalInfo.email}
-            onChange={(e) => update("email", e.target.value)}
-            placeholder={t.emailPlaceholder}
-          />
+          <div className="relative">
+            <input
+              className={`${inputClass} ${cv.personalInfo.email && EMAIL_RE.test(cv.personalInfo.email) ? "pr-8" : ""}`}
+              value={cv.personalInfo.email}
+              onChange={(e) => update("email", e.target.value)}
+              placeholder={t.emailPlaceholder}
+            />
+            {cv.personalInfo.email && EMAIL_RE.test(cv.personalInfo.email) && (
+              <Check size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-green-500" />
+            )}
+          </div>
         </div>
         <div>
           <label className={labelClass}>{t.phone}</label>
-          <input
-            className={inputClass}
-            value={cv.personalInfo.telephone}
-            onChange={(e) => update("telephone", e.target.value)}
-            placeholder={t.phonePlaceholder}
-          />
+          <div className="relative">
+            <input
+              className={`${inputClass} ${cv.personalInfo.telephone && PHONE_RE.test(cv.personalInfo.telephone) ? "pr-8" : ""}`}
+              value={cv.personalInfo.telephone}
+              onChange={(e) => update("telephone", e.target.value)}
+              placeholder={t.phonePlaceholder}
+            />
+            {cv.personalInfo.telephone && PHONE_RE.test(cv.personalInfo.telephone) && (
+              <Check size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-green-500" />
+            )}
+          </div>
         </div>
       </div>
 

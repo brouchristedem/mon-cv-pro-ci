@@ -8,6 +8,7 @@ import {
   doc,
   setDoc,
   getDoc,
+  getDocs,
   collection,
   onSnapshot,
   deleteDoc,
@@ -16,7 +17,9 @@ import {
   limit,
 } from "firebase/firestore";
 import { TEMPLATE_LIST } from "@/lib/templateRegistry";
-import { Trash2, Plus, Phone } from "lucide-react";
+import { Trash2, Plus, Phone, Search, Users, Wallet, TicketPercent } from "lucide-react";
+
+const PRICE = Number(process.env.NEXT_PUBLIC_PRICE_NEXT || 1000);
 
 interface PromoCode {
   code: string;
@@ -30,6 +33,13 @@ interface PaymentClaim {
   createdAt?: { seconds: number };
 }
 
+interface AdminStats {
+  totalUsers: number;
+  usersToday: number;
+  topPromoCode: string | null;
+  topPromoCodeCount: number;
+}
+
 export default function AdminPage() {
   const { user, loading, isAdmin } = useAuth();
   const router = useRouter();
@@ -37,6 +47,9 @@ export default function AdminPage() {
   const [newCode, setNewCode] = useState("");
   const [templateStatus, setTemplateStatus] = useState<Record<string, boolean>>({});
   const [claims, setClaims] = useState<PaymentClaim[]>([]);
+  const [claimSearch, setClaimSearch] = useState("");
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) router.replace("/");
@@ -61,6 +74,55 @@ export default function AdminPage() {
       unsubClaims();
     };
   }, [isAdmin]);
+
+  // Statistiques calculées à partir de l'ensemble des comptes utilisateurs.
+  // Chargées une seule fois (pas en temps réel) pour limiter le nombre de
+  // lectures Firestore facturées ; un rechargement de la page suffit pour
+  // les rafraîchir.
+  useEffect(() => {
+    if (!isAdmin) return;
+    getDocs(collection(db, "users"))
+      .then((snap) => {
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const startOfTodaySeconds = startOfToday.getTime() / 1000;
+
+        let usersToday = 0;
+        const promoUsage: Record<string, number> = {};
+
+        snap.forEach((d) => {
+          const data = d.data();
+          const createdAtSeconds: number | undefined = data.createdAt?.seconds;
+          if (createdAtSeconds && createdAtSeconds >= startOfTodaySeconds) usersToday += 1;
+          const used: string[] = Array.isArray(data.usedPromoCodes) ? data.usedPromoCodes : [];
+          used.forEach((code) => {
+            promoUsage[code] = (promoUsage[code] || 0) + 1;
+          });
+        });
+
+        let topPromoCode: string | null = null;
+        let topPromoCodeCount = 0;
+        Object.entries(promoUsage).forEach(([code, count]) => {
+          if (count > topPromoCodeCount) {
+            topPromoCode = code;
+            topPromoCodeCount = count;
+          }
+        });
+
+        setStats({ totalUsers: snap.size, usersToday, topPromoCode, topPromoCodeCount });
+      })
+      .catch((err) => console.error("Erreur de chargement des statistiques admin:", err))
+      .finally(() => setStatsLoading(false));
+  }, [isAdmin]);
+
+  const filteredClaims = claims.filter((c) => {
+    const q = claimSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      c.email?.toLowerCase().includes(q) ||
+      (c.waveReference || "").toLowerCase().includes(q)
+    );
+  });
 
   const addPromo = async () => {
     if (!newCode.trim()) return;
@@ -95,10 +157,62 @@ export default function AdminPage() {
       <h1 className="text-xl font-bold">Administration — MON CV PRO CI</h1>
 
       <section>
+        <h2 className="text-sm font-semibold mb-3">Aperçu rapide</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-xl border border-border p-3">
+            <div className="flex items-center gap-1.5 text-foreground/50 text-[11px] mb-1">
+              <Wallet size={13} /> Revenus estimés (30 derniers paiements)
+            </div>
+            <p className="text-lg font-bold">
+              {statsLoading && claims.length === 0 ? "…" : `${(claims.length * PRICE).toLocaleString("fr-FR")} FCFA`}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border p-3">
+            <div className="flex items-center gap-1.5 text-foreground/50 text-[11px] mb-1">
+              <Users size={13} /> Comptes créés
+            </div>
+            <p className="text-lg font-bold">
+              {statsLoading ? "…" : stats?.totalUsers ?? 0}
+              <span className="text-xs font-normal text-foreground/50 ml-1.5">
+                dont {statsLoading ? "…" : stats?.usersToday ?? 0} aujourd&apos;hui
+              </span>
+            </p>
+          </div>
+          <div className="rounded-xl border border-border p-3">
+            <div className="flex items-center gap-1.5 text-foreground/50 text-[11px] mb-1">
+              <TicketPercent size={13} /> Code promo le plus utilisé
+            </div>
+            <p className="text-lg font-bold font-mono truncate">
+              {statsLoading
+                ? "…"
+                : stats?.topPromoCode
+                  ? `${stats.topPromoCode} (${stats.topPromoCodeCount})`
+                  : "—"}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
         <h2 className="text-sm font-semibold mb-1">Journal des paiements déclarés</h2>
+        <div className="relative mb-2">
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-foreground/40" />
+          <input
+            value={claimSearch}
+            onChange={(e) => setClaimSearch(e.target.value)}
+            placeholder="Rechercher par email ou référence Wave (T_...)"
+            className="w-full rounded-lg border border-border bg-surface pl-8 pr-3 py-2 text-xs"
+          />
+        </div>
         <div className="space-y-1.5 max-h-64 overflow-y-auto">
-          {claims.length === 0 && <p className="text-xs text-foreground/40">Aucune déclaration de paiement pour le moment.</p>}
-          {claims.map((c) => (
+          {filteredClaims.length === 0 && (
+            <p className="text-xs text-foreground/40">
+              {claims.length === 0
+                ? "Aucune déclaration de paiement pour le moment."
+                : "Aucun résultat pour cette recherche."}
+            </p>
+          )}
+          {filteredClaims.map((c) => (
             <div key={c.id} className="flex items-center justify-between rounded-lg border border-border p-2.5 text-xs">
               <div>
                 <p>{c.email}</p>
