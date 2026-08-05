@@ -5,7 +5,7 @@ import { AuthProvider } from "@/lib/AuthContext";
 import { Analytics } from "@vercel/analytics/next";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
-const siteUrl = "https://mon-cv-pro-ci.vercel.app";
+const siteUrl = "https://moncvpro-ci.vercel.app";
 const title = "MON CV PRO CI — Créez un CV professionnel en quelques minutes";
 const description =
   "Créez un CV professionnel et moderne, prisé par les recruteurs internationaux. 15 modèles, personnalisation complète, export PDF. Pensé pour la Côte d'Ivoire.";
