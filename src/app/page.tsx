@@ -3,15 +3,12 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, Palette, Download, CheckCircle2 } from "lucide-react";
-import CVPreviewFit from "@/components/templates/CVPreviewFit";
 import TemplateGallery from "@/components/landing/TemplateGallery";
 import FadeIn from "@/components/landing/FadeIn";
-import { demoCV } from "@/lib/demoCV";
 import { ENTRY_GATE_KEY } from "@/lib/entryGate";
 
 export default function Home() {
   const ctaHref = "/editor";
-  const heroCV = demoCV("template-04");
 
   // Marque que la personne est bien passée par la page d'accueil : la page
   // éditeur exige cette marque (voir src/lib/entryGate.ts) pour empêcher un
@@ -51,8 +48,8 @@ export default function Home() {
           aria-hidden
           className="absolute -top-24 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-blue-600/10 blur-3xl pointer-events-none"
         />
-        <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
-          <div className="text-center lg:text-left">
+        <div className="relative max-w-2xl mx-auto">
+          <div className="text-center">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 bg-blue-600/10 px-3 py-1.5 rounded-full mb-5">
               <Sparkles size={13} /> 15 modèles testés par des recruteurs ivoiriens
             </span>
@@ -65,7 +62,7 @@ export default function Home() {
               requise — créez, ajustez, téléchargez.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start mb-8">
+            <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mb-8">
               <Link
                 href={ctaHref}
                 className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white px-7 py-3.5 text-base font-semibold shadow-lg shadow-blue-600/25 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 transition"
@@ -80,30 +77,13 @@ export default function Home() {
               </a>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center lg:justify-start text-xs sm:text-sm text-foreground/60">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center text-xs sm:text-sm text-foreground/60">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-blue-600" /> Téléchargement à 1000 FCFA
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-blue-600" /> Paiement via Wave
               </span>
-            </div>
-          </div>
-
-          {/* Mockup CV */}
-          <div className="relative mx-auto w-full max-w-[340px] lg:max-w-[380px]">
-            <div
-              aria-hidden
-              className="absolute -inset-6 bg-gradient-to-tr from-blue-600/20 to-transparent rounded-3xl blur-2xl"
-            />
-            <div className="relative rotate-2 hover:rotate-0 transition-transform duration-500">
-              <div className="relative pointer-events-none rounded-lg overflow-hidden ring-1 ring-black/5 aspect-[4/5]">
-                <CVPreviewFit cv={heroCV} />
-                <div
-                  aria-hidden
-                  className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent"
-                />
-              </div>
             </div>
           </div>
         </div>
