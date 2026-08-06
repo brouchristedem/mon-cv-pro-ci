@@ -45,7 +45,7 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="relative px-6 pt-14 pb-20 sm:pt-20 sm:pb-28">
+      <section className="relative px-6 pt-14 pb-8 sm:pt-20 sm:pb-12">
         {/* Décor lumineux en fond */}
         <div
           aria-hidden
