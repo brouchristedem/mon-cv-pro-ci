@@ -222,7 +222,7 @@ export default function DownloadPanel() {
         </p>
         <Link
           href="/login"
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition"
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 transition"
         >
           <LogIn size={18} />
           {cv.langue === "en" ? "Log in to download" : "Se connecter pour télécharger"}
@@ -237,7 +237,7 @@ export default function DownloadPanel() {
   return (
     <div className="space-y-3">
       {statusMessage && (
-        <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-2.5 text-xs text-blue-700">
+        <div className="flex items-start gap-2 rounded-lg border border-brand-200 bg-brand-50 p-2.5 text-xs text-brand-700">
           <Info size={14} className="flex-shrink-0 mt-0.5" />
           <span>{statusMessage}</span>
         </div>
@@ -249,7 +249,7 @@ export default function DownloadPanel() {
           <button
             onClick={proceedDownload}
             disabled={generating}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 transition disabled:opacity-60"
           >
             {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
             {t.downloadCta}
@@ -335,7 +335,7 @@ export default function DownloadPanel() {
       {referralCode && (
         <div className="rounded-xl border border-border p-3 text-xs space-y-2.5">
           <div className="flex items-center gap-1.5 font-medium text-foreground/80">
-            <Gift size={14} className="text-blue-600" />
+            <Gift size={14} className="text-brand-600" />
             Parrainez un ami
           </div>
 
@@ -348,7 +348,7 @@ export default function DownloadPanel() {
               <button
                 onClick={handleRedeemReferral}
                 disabled={referralApplied}
-                className="w-full rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 transition disabled:opacity-60"
+                className="w-full rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 transition disabled:opacity-60"
               >
                 {referralApplied ? "Crédit utilisé ✓" : `Utiliser mes ${PRICE} FCFA de crédit`}
               </button>

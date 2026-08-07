@@ -28,7 +28,7 @@ export default function Home() {
       <header className="sticky top-0 z-30 backdrop-blur bg-background/80 border-b border-border">
         <div className="flex items-center justify-between px-6 py-4 max-w-6xl w-full mx-auto">
           <span className="font-extrabold text-lg sm:text-xl tracking-wide">
-            MON <span className="text-blue-600">CV PRO</span> CI
+            MON <span className="text-brand-600">CV PRO</span> CI
           </span>
           <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-foreground/70">
             <a href="#modeles" className="hover:text-foreground transition">
@@ -46,16 +46,16 @@ export default function Home() {
         {/* Décor lumineux en fond */}
         <div
           aria-hidden
-          className="absolute -top-24 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-blue-600/10 blur-3xl pointer-events-none"
+          className="absolute -top-24 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-brand-600/10 blur-3xl pointer-events-none"
         />
         <div className="relative max-w-2xl mx-auto">
           <div className="text-center">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 bg-blue-600/10 px-3 py-1.5 rounded-full mb-5">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 dark:text-brand-400 bg-brand-600/10 px-3 py-1.5 rounded-full mb-5">
               <Sparkles size={13} /> 15 modèles testés par des recruteurs ivoiriens
             </span>
             <h1 className="text-4xl sm:text-5xl font-extrabold leading-[1.1] tracking-tight mb-5">
               Créez un CV professionnel qui{" "}
-              <span className="text-blue-600">retient l&apos;attention</span> des recruteurs
+              <span className="text-brand-600">retient l&apos;attention</span> des recruteurs
             </h1>
             <p className="text-base sm:text-lg text-foreground/60 mb-6 max-w-md mx-auto lg:mx-0">
               15 modèles élégants, personnalisables en temps réel. Aucune compétence en design
@@ -65,7 +65,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mb-8">
               <Link
                 href={ctaHref}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white px-7 py-3.5 text-base font-semibold shadow-lg shadow-blue-600/25 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 transition"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-brand-600 text-white px-7 py-3.5 text-base font-semibold shadow-lg shadow-brand-600/25 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30 transition"
               >
                 🚀 Je crée mon CV maintenant <ArrowRight size={18} />
               </Link>
@@ -79,10 +79,10 @@ export default function Home() {
 
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center text-xs sm:text-sm text-foreground/60">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-blue-600" /> Téléchargement à 1000 FCFA
+                <CheckCircle2 size={15} className="text-brand-600" /> Téléchargement à 1000 FCFA
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-blue-600" /> Paiement via Wave
+                <CheckCircle2 size={15} className="text-brand-600" /> Paiement via Wave
               </span>
             </div>
           </div>
@@ -109,21 +109,21 @@ export default function Home() {
       <section className="px-6 py-16 sm:py-20">
         <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-8 sm:gap-10 text-center sm:text-left">
           <FadeIn>
-            <Sparkles className="text-blue-600 mb-3 mx-auto sm:mx-0" size={24} />
+            <Sparkles className="text-brand-600 mb-3 mx-auto sm:mx-0" size={24} />
             <h3 className="font-semibold mb-1.5">15 modèles distincts</h3>
             <p className="text-sm text-foreground/60">
               Des designs prisés par les recruteurs internationaux, pour tous les secteurs.
             </p>
           </FadeIn>
           <FadeIn delay={100}>
-            <Palette className="text-blue-600 mb-3 mx-auto sm:mx-0" size={24} />
+            <Palette className="text-brand-600 mb-3 mx-auto sm:mx-0" size={24} />
             <h3 className="font-semibold mb-1.5">Personnalisation totale</h3>
             <p className="text-sm text-foreground/60">
               Couleurs, rubriques, mise en page — tout est ajustable en quelques clics.
             </p>
           </FadeIn>
           <FadeIn delay={200}>
-            <Download className="text-blue-600 mb-3 mx-auto sm:mx-0" size={24} />
+            <Download className="text-brand-600 mb-3 mx-auto sm:mx-0" size={24} />
             <h3 className="font-semibold mb-1.5">Aperçu en temps réel</h3>
             <p className="text-sm text-foreground/60">
               Voyez chaque changement instantanément avant de télécharger votre CV.
@@ -143,7 +143,7 @@ export default function Home() {
           </FadeIn>
           <div className="grid sm:grid-cols-3 gap-8 sm:gap-6">
             <FadeIn className="text-center">
-              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center">
+              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center">
                 1
               </div>
               <h3 className="font-semibold mb-1.5">Remplis ton CV</h3>
@@ -152,7 +152,7 @@ export default function Home() {
               </p>
             </FadeIn>
             <FadeIn delay={100} className="text-center">
-              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center">
+              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center">
                 2
               </div>
               <h3 className="font-semibold mb-1.5">Choisis ton modèle</h3>
@@ -161,7 +161,7 @@ export default function Home() {
               </p>
             </FadeIn>
             <FadeIn delay={200} className="text-center">
-              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center">
+              <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center">
                 3
               </div>
               <h3 className="font-semibold mb-1.5">Paie par Wave et télécharge</h3>
@@ -182,7 +182,7 @@ export default function Home() {
           </p>
           <div className="rounded-2xl border border-border bg-surface p-8">
             <p className="text-sm text-foreground/50 mb-1">Prix unique</p>
-            <p className="text-4xl font-extrabold text-blue-600 mb-6">1000 FCFA</p>
+            <p className="text-4xl font-extrabold text-accent-600 mb-6">1000 FCFA</p>
           </div>
         </FadeIn>
       </section>
@@ -198,7 +198,7 @@ export default function Home() {
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 p-3 bg-background/95 backdrop-blur border-t border-border">
         <Link
           href={ctaHref}
-          className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white px-5 py-3.5 text-sm font-semibold shadow-lg shadow-blue-600/25 hover:bg-blue-700 transition"
+          className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 text-white px-5 py-3.5 text-sm font-semibold shadow-lg shadow-brand-600/25 hover:bg-brand-700 transition"
         >
           Créer mon CV — 1 000 FCFA <ArrowRight size={16} />
         </Link>

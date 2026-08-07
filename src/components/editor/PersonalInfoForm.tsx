@@ -11,7 +11,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^\+?[0-9\s-]{8,}$/;
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/40 transition";
+  "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500/40 transition";
 const labelClass = "text-xs font-medium text-foreground/70 mb-1 block";
 
 // Redimensionne et compresse l'image côté navigateur avant de la stocker,
@@ -107,7 +107,7 @@ export default function PersonalInfoForm() {
           type="button"
           onClick={() => update("showPhoto", !cv.personalInfo.showPhoto)}
           className={`w-10 h-6 rounded-full transition relative ${
-            cv.personalInfo.showPhoto ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-600"
+            cv.personalInfo.showPhoto ? "bg-brand-600" : "bg-slate-300 dark:bg-slate-600"
           }`}
         >
           <span
@@ -129,7 +129,7 @@ export default function PersonalInfoForm() {
                 onClick={() => update("photoShape", shape)}
                 className={`px-3 py-1.5 text-xs rounded-lg border transition capitalize ${
                   cv.personalInfo.photoShape === shape
-                    ? "border-blue-600 bg-blue-600/10 text-blue-600"
+                    ? "border-brand-600 bg-brand-600/10 text-brand-600"
                     : "border-border hover:bg-surface-muted"
                 }`}
               >
@@ -272,7 +272,7 @@ export default function PersonalInfoForm() {
                 },
               }))
             }
-            className="text-xs text-blue-600 hover:underline"
+            className="text-xs text-brand-600 hover:underline"
           >
             + {t.add}
           </button>

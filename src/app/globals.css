@@ -26,6 +26,31 @@
   --color-border: var(--border);
   --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Palette "brand" : vert Côte d'Ivoire, couleur principale de l'interface
+     (remplace l'ancien bleu sur les CTA, liens et accents). */
+  --color-brand-50: #e9f6ef;
+  --color-brand-100: #d2eedf;
+  --color-brand-200: #a6ddc0;
+  --color-brand-300: #78cba0;
+  --color-brand-400: #3fae7c;
+  --color-brand-500: #128f63;
+  --color-brand-600: #0b6e4f;
+  --color-brand-700: #085b41;
+  --color-brand-800: #073c2a;
+  --color-brand-900: #05291d;
+
+  /* Palette "accent" : orange Côte d'Ivoire, réservée aux touches ponctuelles
+     (badges, prix, mises en avant) pour ne pas diluer le vert principal. */
+  --color-accent-50: #fff3ea;
+  --color-accent-100: #ffe9d9;
+  --color-accent-200: #ffd0ad;
+  --color-accent-300: #ffb37d;
+  --color-accent-400: #ff9650;
+  --color-accent-500: #ff8730;
+  --color-accent-600: #ff7a1a;
+  --color-accent-700: #e35f05;
+  --color-accent-800: #b84a03;
 }
 
 * {

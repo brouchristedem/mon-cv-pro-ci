@@ -64,7 +64,7 @@ export default function TemplateGallery() {
           <Link
             key={tpl.id}
             href={`/editor?template=${tpl.id}`}
-            className="group shrink-0 w-[200px] sm:w-[240px] snap-start rounded-xl border border-border bg-surface overflow-hidden hover:border-blue-600 hover:shadow-lg transition"
+            className="group shrink-0 w-[200px] sm:w-[240px] snap-start rounded-xl border border-border bg-surface overflow-hidden hover:border-brand-600 hover:shadow-lg transition"
           >
             <div className="pointer-events-none">
               <TemplateThumbnail cv={demoCV(tpl.id, PREVIEW_COLORS[tpl.id])} />
@@ -72,7 +72,7 @@ export default function TemplateGallery() {
             <div className="p-3 border-t border-border">
               <p className="font-semibold text-sm truncate">{tpl.nom}</p>
               <p className="text-[11px] text-foreground/50 mt-0.5 line-clamp-1">{tpl.style}</p>
-              <span className="inline-block mt-2 text-xs font-medium text-blue-600 group-hover:underline">
+              <span className="inline-block mt-2 text-xs font-medium text-brand-600 group-hover:underline">
                 Utiliser ce modèle →
               </span>
             </div>

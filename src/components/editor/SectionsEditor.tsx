@@ -229,7 +229,7 @@ function SortableSection({ section }: { section: Section }) {
             onChange={(e) => renameSection(e.target.value)}
             onBlur={() => setRenaming(false)}
             onKeyDown={(e) => e.key === "Enter" && setRenaming(false)}
-            className="flex-1 bg-transparent text-sm font-medium outline-none min-w-0 border-b border-blue-500"
+            className="flex-1 bg-transparent text-sm font-medium outline-none min-w-0 border-b border-brand-500"
           />
         ) : (
           <span className="flex-1 text-sm font-medium truncate">{section.titre}</span>
@@ -270,8 +270,8 @@ function SortableSection({ section }: { section: Section }) {
           }}
           className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg transition ${
             open
-              ? "bg-blue-600 text-white"
-              : "bg-blue-600/10 text-blue-600 hover:bg-blue-600/20"
+              ? "bg-brand-600 text-white"
+              : "bg-brand-600/10 text-brand-600 hover:bg-brand-600/20"
           }`}
         >
           {open ? (
@@ -295,7 +295,7 @@ function SortableSection({ section }: { section: Section }) {
                 onClick={() => setAffichage("liste")}
                 className={`text-[11px] px-2 py-1 rounded-lg border transition ${
                   (section.affichage || "liste") === "liste"
-                    ? "border-blue-600 text-blue-600 bg-blue-600/10"
+                    ? "border-brand-600 text-brand-600 bg-brand-600/10"
                     : "border-border"
                 }`}
               >
@@ -305,7 +305,7 @@ function SortableSection({ section }: { section: Section }) {
                 onClick={() => setAffichage("ligne")}
                 className={`text-[11px] px-2 py-1 rounded-lg border transition ${
                   section.affichage === "ligne"
-                    ? "border-blue-600 text-blue-600 bg-blue-600/10"
+                    ? "border-brand-600 text-brand-600 bg-brand-600/10"
                     : "border-border"
                 }`}
               >
@@ -396,7 +396,7 @@ function SortableSection({ section }: { section: Section }) {
           ))}
           <button
             onClick={addItem}
-            className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline"
+            className="flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:underline"
           >
             <Plus size={14} /> {t.addItem}
           </button>
@@ -478,7 +478,7 @@ export default function SectionsEditor() {
                   items: [],
                 })
               }
-              className="text-xs px-2.5 py-1.5 rounded-lg border border-dashed border-blue-400 text-blue-600 hover:bg-blue-500/10 transition"
+              className="text-xs px-2.5 py-1.5 rounded-lg border border-dashed border-brand-400 text-brand-600 hover:bg-brand-500/10 transition"
             >
               {t.customSection}
             </button>

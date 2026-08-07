@@ -117,7 +117,7 @@ function DescriptionField({
           onClick={() => toggle("bold")}
           className={`p-1.5 rounded border transition ${
             boldActive
-              ? "border-blue-600 bg-blue-600/10 text-blue-600"
+              ? "border-brand-600 bg-brand-600/10 text-brand-600"
               : "border-border text-foreground/60 hover:text-foreground hover:bg-surface-muted"
           }`}
         >
@@ -130,7 +130,7 @@ function DescriptionField({
           onClick={() => toggle("underline")}
           className={`p-1.5 rounded border transition ${
             underlineActive
-              ? "border-blue-600 bg-blue-600/10 text-blue-600"
+              ? "border-brand-600 bg-brand-600/10 text-brand-600"
               : "border-border text-foreground/60 hover:text-foreground hover:bg-surface-muted"
           }`}
         >
@@ -265,7 +265,7 @@ export default function SectionPanel({ section }: { section: Section }) {
             onChange={(e) => renameSection(e.target.value)}
             onBlur={() => setRenaming(false)}
             onKeyDown={(e) => e.key === "Enter" && setRenaming(false)}
-            className="flex-1 bg-transparent text-base font-semibold outline-none min-w-0 border-b border-blue-500"
+            className="flex-1 bg-transparent text-base font-semibold outline-none min-w-0 border-b border-brand-500"
           />
         ) : (
           <h3 className="flex-1 text-base font-semibold truncate">{section.titre}</h3>
@@ -300,7 +300,7 @@ export default function SectionPanel({ section }: { section: Section }) {
             onClick={() => setAffichage("liste")}
             className={`text-[11px] px-2 py-1 rounded-lg border transition ${
               (section.affichage || "liste") === "liste"
-                ? "border-blue-600 text-blue-600 bg-blue-600/10"
+                ? "border-brand-600 text-brand-600 bg-brand-600/10"
                 : "border-border"
             }`}
           >
@@ -309,7 +309,7 @@ export default function SectionPanel({ section }: { section: Section }) {
           <button
             onClick={() => setAffichage("ligne")}
             className={`text-[11px] px-2 py-1 rounded-lg border transition ${
-              section.affichage === "ligne" ? "border-blue-600 text-blue-600 bg-blue-600/10" : "border-border"
+              section.affichage === "ligne" ? "border-brand-600 text-brand-600 bg-brand-600/10" : "border-border"
             }`}
           >
             {t.displayInline}
@@ -401,7 +401,7 @@ export default function SectionPanel({ section }: { section: Section }) {
         ))}
         <button
           onClick={addItem}
-          className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline"
+          className="flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:underline"
         >
           <Plus size={14} /> {t.addItem}
         </button>

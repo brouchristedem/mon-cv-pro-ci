@@ -24,20 +24,20 @@ export default function TemplatePicker() {
             key={tpl.id}
             className={`relative text-left p-2.5 rounded-lg border text-xs transition ${
               cv.templateId === tpl.id
-                ? "border-blue-600 bg-blue-600/10"
+                ? "border-brand-600 bg-brand-600/10"
                 : "border-border hover:bg-surface-muted"
             }`}
           >
             <button onClick={() => selectTemplate(tpl.id)} className="w-full text-left">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{tpl.nom}</span>
-                {cv.templateId === tpl.id && <Check size={13} className="text-blue-600" />}
+                {cv.templateId === tpl.id && <Check size={13} className="text-brand-600" />}
               </div>
               <p className="text-[10px] text-foreground/50 mt-0.5 pr-4">{tpl.style}</p>
             </button>
             <button
               onClick={() => setPreviewId(tpl.id)}
-              className="absolute bottom-1.5 right-1.5 text-foreground/40 hover:text-blue-600 p-1"
+              className="absolute bottom-1.5 right-1.5 text-foreground/40 hover:text-brand-600 p-1"
               aria-label={t.preview}
             >
               <Eye size={13} />
@@ -69,7 +69,7 @@ export default function TemplatePicker() {
                 selectTemplate(previewId);
                 setPreviewId(null);
               }}
-              className="w-full mt-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
+              className="w-full mt-3 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition"
             >
               <Check size={14} className="inline mr-1" /> {t.chooseTemplate}
             </button>

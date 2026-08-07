@@ -137,7 +137,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
-          className="rounded-xl border border-border bg-surface px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-xl border border-border bg-surface px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
         <input
           type="password"
@@ -147,12 +147,12 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
-          className="rounded-xl border border-border bg-surface px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-xl border border-border bg-surface px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
         <button
           type="submit"
           disabled={connecting}
-          className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 transition disabled:opacity-60"
+          className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 transition disabled:opacity-60"
         >
           {connecting
             ? "Connexion en cours..."
@@ -180,7 +180,7 @@ export default function LoginPage() {
             setError("");
             setInfo("");
           }}
-          className="text-blue-600 font-medium hover:underline"
+          className="text-brand-600 font-medium hover:underline"
         >
           {mode === "signin" ? "Créer un compte" : "Se connecter"}
         </button>

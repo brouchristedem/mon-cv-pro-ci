@@ -72,7 +72,7 @@ function infosStatus(p: PersonalInfo): Status {
 function StatusDot({ status }: { status: Status }) {
   if (status === "done") return <Check size={13} className="text-green-500 flex-shrink-0" />;
   if (status === "partial")
-    return <span className="w-3 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />;
+    return <span className="w-3 h-1.5 rounded-full bg-brand-400 flex-shrink-0" />;
   return <span className="w-1.5 h-1.5 rounded-full bg-foreground/25 flex-shrink-0" />;
 }
 
@@ -92,7 +92,7 @@ function NavButton({
       onClick={onClick}
       className={`flex items-center gap-2 flex-shrink-0 lg:w-full text-left px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition ${
         active
-          ? "bg-blue-600 text-white"
+          ? "bg-brand-600 text-white"
           : "bg-surface-muted lg:bg-transparent text-foreground/70 hover:bg-surface-muted"
       }`}
     >
@@ -316,7 +316,7 @@ export default function EditorPage() {
           )}
           <button
             onClick={() => setDownloadOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition"
           >
             <Download size={14} /> {t.steps[4]}
           </button>
@@ -346,7 +346,7 @@ export default function EditorPage() {
           </span>
           <div className="flex-1 h-1.5 rounded-full bg-surface-muted overflow-hidden">
             <div
-              className="h-full bg-blue-600 rounded-full transition-all duration-300"
+              className="h-full bg-brand-600 rounded-full transition-all duration-300"
               style={{ width: `${((currentStepIndex + 1) / panelSteps.length) * 100}%` }}
             />
           </div>
@@ -391,7 +391,7 @@ export default function EditorPage() {
             <div className="relative flex-shrink-0 lg:w-full">
               <button
                 onClick={() => setAddMenuOpen((o) => !o)}
-                className="flex items-center gap-1.5 flex-shrink-0 lg:w-full text-left px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap text-blue-600 border border-dashed border-blue-400 hover:bg-blue-500/10 transition"
+                className="flex items-center gap-1.5 flex-shrink-0 lg:w-full text-left px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap text-brand-600 border border-dashed border-brand-400 hover:bg-brand-500/10 transition"
               >
                 <Plus size={13} /> {cv.langue === "en" ? "Add a section" : "Ajouter une rubrique"}
               </button>
@@ -432,7 +432,7 @@ export default function EditorPage() {
                       setActiveId(id);
                       setAddMenuOpen(false);
                     }}
-                    className="text-[11px] px-2 py-1.5 rounded-lg border border-dashed border-blue-400 text-blue-600 hover:bg-blue-500/10 transition"
+                    className="text-[11px] px-2 py-1.5 rounded-lg border border-dashed border-brand-400 text-brand-600 hover:bg-brand-500/10 transition"
                   >
                     {t.customSection}
                   </button>
@@ -542,7 +542,7 @@ export default function EditorPage() {
                   onClick={() => set((c) => ({ ...c, modeCompact: !c.modeCompact }))}
                   className={`w-full flex items-center justify-between px-3 py-2.5 text-xs rounded-lg border transition ${
                     cv.modeCompact
-                      ? "border-blue-600 bg-blue-600/10 text-blue-600"
+                      ? "border-brand-600 bg-brand-600/10 text-brand-600"
                       : "border-border hover:bg-surface-muted"
                   }`}
                 >
@@ -553,7 +553,7 @@ export default function EditorPage() {
                   </span>
                   <span
                     className={`w-9 h-5 rounded-full relative transition flex-shrink-0 ${
-                      cv.modeCompact ? "bg-blue-600" : "bg-foreground/20"
+                      cv.modeCompact ? "bg-brand-600" : "bg-foreground/20"
                     }`}
                   >
                     <span
@@ -574,7 +574,7 @@ export default function EditorPage() {
                       onClick={() => set((c) => ({ ...c, dateFormat: f }))}
                       className={`px-3 py-2 text-xs rounded-lg border transition ${
                         cv.dateFormat === f
-                          ? "border-blue-600 bg-blue-600/10 text-blue-600"
+                          ? "border-brand-600 bg-brand-600/10 text-brand-600"
                           : "border-border hover:bg-surface-muted"
                       }`}
                     >
@@ -597,7 +597,7 @@ export default function EditorPage() {
                       onClick={() => set((c) => ({ ...c, iconStyle: val }))}
                       className={`px-3 py-2 text-xs rounded-lg border transition ${
                         cv.iconStyle === val
-                          ? "border-blue-600 bg-blue-600/10 text-blue-600"
+                          ? "border-brand-600 bg-brand-600/10 text-brand-600"
                           : "border-border hover:bg-surface-muted"
                       }`}
                     >
@@ -619,7 +619,7 @@ export default function EditorPage() {
                       onClick={() => set((c) => ({ ...c, ordreNom: val }))}
                       className={`px-3 py-2 text-xs rounded-lg border transition ${
                         cv.ordreNom === val
-                          ? "border-blue-600 bg-blue-600/10 text-blue-600"
+                          ? "border-brand-600 bg-brand-600/10 text-brand-600"
                           : "border-border hover:bg-surface-muted"
                       }`}
                     >
@@ -711,7 +711,7 @@ export default function EditorPage() {
             <button
               onClick={() => nextStep && setActiveId(nextStep.id)}
               disabled={!nextStep}
-              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-30 disabled:hover:bg-blue-600"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2.5 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition disabled:opacity-30 disabled:hover:bg-brand-600"
             >
               {t.next} →
             </button>

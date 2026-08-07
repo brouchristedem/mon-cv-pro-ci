@@ -13,7 +13,7 @@ export default function CompletenessScore() {
   const { percent, tipKeys } = useMemo(() => computeCompleteness(cv), [cv]);
 
   const barColor =
-    percent >= 80 ? "bg-green-500" : percent >= 40 ? "bg-blue-600" : "bg-amber-500";
+    percent >= 80 ? "bg-green-500" : percent >= 40 ? "bg-brand-600" : "bg-amber-500";
 
   return (
     <div className="px-3 pt-3">

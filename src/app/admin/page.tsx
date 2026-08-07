@@ -269,7 +269,7 @@ export default function AdminPage() {
           />
           <button
             onClick={addPromo}
-            className="flex items-center gap-1 text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+            className="flex items-center gap-1 text-sm px-3 py-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition"
           >
             <Plus size={14} /> Ajouter
           </button>
